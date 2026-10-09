@@ -1,0 +1,376 @@
+# Documentation Index
+
+Welcome to Stellar PurplePay documentation. This index helps you find what you need.
+
+---
+
+## 🚀 Getting Started
+
+**New to Stellar PurplePay?** Start here:
+
+- **[Getting Started](./getting-started.md)** - Initial setup and installation
+- **[README](../README.md)** - Project overview and features
+
+---
+
+## 📚 Core Documentation
+
+### Security
+
+- **[Security Header Policy](./security.md)** - HTTP security headers, verification, and CI checks
+
+### Architecture & Design
+
+- **[Architecture Overview](./architecture.md)** - System design and components
+- **[Deployment Guide](./deployment.md)** - How to deploy Stellar PurplePay
+- **[Data Archiving Strategy](./data-archiving.md)** - Archiving old completed jobs for database performance
+- **[Database Data Model & ER Diagram](./data-model.md)** - Complete PostgreSQL entity relationship diagram and data dictionary
+- **[Database Schema & ERD](./database-schema.md)** - Detailed PostgreSQL table definitions and index tuning
+- **[Authentication Flow (SEP-10)](./auth-flow.md)** - Complete SEP-10 auth flow with sequence diagrams
+- **[Freelancer Onboarding Flow](./onboarding-flow.md)** - Multi-step freelancer onboarding walkthrough and UX architecture
+- **[Soroban Contract Deployment](./contract-deployment.md)** - Build, deploy, and configure the escrow contract
+- **[Smart Contract API Reference](./contract-api-reference.md)** - Complete function reference for the PurplePay Soroban contract
+- **[Environment Variables](./environment-variables.md)** - Single source of truth for runtime config
+
+### API Documentation
+
+- **[API Reference](./api.md)** - Detailed API reference
+- **[Smart Contract API Reference](./contract-api-reference.md)** - Every public function, event, and error in the Soroban contract
+- **[Scope WebSocket Protocol](./websocket-scope-protocol.md)** - Realtime session protocol and client schema
+
+---
+
+## 🏗️ Architecture Decision Records (ADRs)
+
+Decisions that shaped Stellar PurplePay's architecture:
+
+### ADR-001: Soroban Smart Contract for Escrow Management
+
+**File**: [ADR-001-soroban-escrow-design.md](./adr/adr-001-soroban-escrow-design.md)
+
+**Decision**: Use Soroban smart contracts for trustless escrow management
+
+**Key Points**:
+
+- Why Soroban was chosen over alternatives
+- Contract design and state machine
+- Key features (atomic operations, access control, timeouts)
+- Implementation details
+
+**Status**: ✅ Accepted
+
+---
+
+### ADR-002: Horizon API for Transaction Indexing
+
+**File**: [ADR-002-horizon-api-indexing.md](./adr/adr-002-horizon-api-indexing.md)
+
+**Decision**: Use Horizon REST API as primary transaction data source
+
+**Key Points**:
+
+- Why Horizon API was chosen
+- Architecture (Frontend → Backend → Horizon → Stellar)
+- Implementation approach
+- Caching strategy
+- Error handling
+
+**Status**: ✅ Accepted
+
+---
+
+### ADR-003: Database Schema for Escrow State Management
+
+**File**: [ADR-003-database-schema-escrow.md](./adr/adr-003-database-schema-escrow.md)
+
+**Decision**: Maintain off-chain escrow state in PostgreSQL
+
+**Key Points**:
+
+- PostgreSQL schema design
+- Tables: escrows, escrow_events, escrow_disputes
+- State transitions and lifecycle
+- Sync strategy with smart contracts
+- Timeout handling
+
+**Status**: ✅ Accepted
+
+---
+
+## ❓ FAQ & Help
+
+### Frequently Asked Questions
+
+**File**: [FAQ.md](./FAQ.md)
+
+**Coverage**: 50+ questions across 10 categories
+
+**Categories**:
+
+1. General Questions - What is PurplePay, how is it different?
+2. Getting Started - Sign up, fund account, install Freighter
+3. For Clients - Post jobs, manage funds, approve work
+4. For Freelancers - Find jobs, submit proposals, get paid
+5. Transactions & Payments - View history, understand fees
+6. Disputes & Refunds - Open disputes, provide evidence
+7. Technical Questions - Smart contracts, IPFS, wallets
+8. Troubleshooting - Common issues and solutions
+9. Support & Community - Contact support, contribute
+10. Legal & Compliance - Regulations, taxes, privacy
+
+**Quick Links**:
+
+- [How do I post a job?](./FAQ.md#how-do-i-post-a-job)
+- [When do I get paid?](./FAQ.md#when-do-i-get-paid)
+- [Is it safe?](./FAQ.md#is-stellar-purplepay-safe)
+- [What are transaction fees?](./FAQ.md#what-are-transaction-fees)
+
+---
+
+## 📦 Setup Guides
+
+---
+
+### Private Message Encryption
+
+**File**: [messaging-encryption.md](./messaging-encryption.md)
+
+**Purpose**: Documents the client-side encryption contract for private job messages and the nonce uniqueness requirement.
+
+---
+
+## 🎯 Feature Documentation
+
+### Transaction History Page
+
+**Location**: `/dashboard/transactions`
+
+**Features**:
+
+- Real-time transaction fetching from Stellar Horizon API
+- Advanced filtering (all, sent, received, escrow)
+- Cursor-based pagination
+- Transaction type detection with icons
+- Direct links to Stellar Expert explorer
+- Responsive design with loading states
+
+**Code**:
+
+- `frontend/lib/stellar.ts` - Transaction functions
+- `frontend/pages/dashboard/transactions.tsx` - Page component
+
+**Related**:
+
+- [ADR-002: Horizon API Indexing](./adr/adr-002-horizon-api-indexing.md)
+- [FAQ: Transaction History](./FAQ.md#how-do-i-view-my-transaction-history)
+
+---
+
+### Multi-Step Freelancer Onboarding Flow
+
+**Location**: `/dashboard` & Modal Wizard
+
+**Features**:
+
+- 5-step guided setup: Profile → Skills → Portfolio → Verification → Wallet
+- Resilient client-side checkpoint caching and database synchronization
+- Dynamic profile completeness score calculation (0–100%)
+- Interactive dashboard checklist and collapsible completeness widget with snooze support
+
+**Code**:
+
+- `frontend/components/Onboarding/OnboardingWizard.tsx` - Step wizard modal
+- `frontend/hooks/useOnboarding.tsx` - State management hook
+- `frontend/components/Onboarding/ProfileChecklist.tsx` - Dashboard checklist
+- `frontend/components/ProfileCompletenessWidget.tsx` - Completeness widget
+
+**Related**:
+
+- [Freelancer Onboarding Walkthrough](./onboarding-flow.md)
+- [Onboarding Components README](../frontend/components/Onboarding/README.md)
+
+---
+
+## 📋 Implementation Guides
+
+### Implementation Summary
+
+**File**: ../IMPLEMENTATION_SUMMARY.md
+
+**Contents**:
+
+- Overview of all 4 features
+- Detailed implementation for each feature
+- Integration checklist
+- File structure
+- Next steps and roadmap
+- References and support
+
+---
+
+## 🔗 Related Documentation
+
+### Project Documentation
+
+- **[README](../README.md)** - Project overview
+- **[ROADMAP](../ROADMAP.md)** - Feature roadmap
+- **[CONTRIBUTING](../CONTRIBUTING.md)** - Contribution guidelines
+
+### External Resources
+
+- **[Stellar Documentation](https://developers.stellar.org)** - Official Stellar docs
+- **[Soroban Smart Contracts](https://soroban.stellar.org)** - Soroban documentation
+- **[Horizon API](https://developers.stellar.org/api)** - Horizon API reference
+- **[Pinata Documentation](https://docs.pinata.cloud)** - Pinata docs
+- **[IPFS Documentation](https://docs.ipfs.io)** - IPFS docs
+
+---
+
+## 📁 Documentation Structure
+
+```
+stellar-purplepay/
+├── docs/
+│   ├── INDEX.md (this file)
+│   ├── ADR-001-soroban-escrow-design.md
+│   ├── ADR-002-horizon-api-indexing.md
+│   ├── ADR-003-database-schema-escrow.md
+│   ├── FAQ.md
+│   ├── architecture.md
+│   ├── api.md
+│   ├── deployment.md
+│   └── getting-started.md
+├── README.md
+├── ROADMAP.md
+├── CONTRIBUTING.md
+```
+
+---
+
+## 🎓 Learning Paths
+
+### For Clients
+
+1. [Getting Started](./getting-started.md)
+2. [FAQ: For Clients](./FAQ.md#for-clients)
+3. [FAQ: Transactions & Payments](./FAQ.md#transactions--payments)
+4. [FAQ: Disputes & Refunds](./FAQ.md#disputes--refunds)
+
+### For Freelancers
+
+1. [Getting Started](./getting-started.md)
+2. [FAQ: For Freelancers](./FAQ.md#for-freelancers)
+3. [FAQ: Transactions & Payments](./FAQ.md#transactions--payments)
+4. [FAQ: Disputes & Refunds](./FAQ.md#disputes--refunds)
+
+### For Developers
+
+1. [Architecture Overview](./architecture.md)
+2. [Contributing Guide](../CONTRIBUTING.md)
+3. [Database Schema & ERD](./database-schema.md)
+4. [ADR-001: Escrow Design](./adr/adr-001-soroban-escrow-design.md)
+5. [ADR-002: Horizon API](./adr/adr-002-horizon-api-indexing.md)
+6. [ADR-003: Database Schema](./adr/adr-003-database-schema-escrow.md)
+9. [Deployment Guide](./deployment.md)
+
+### For DevOps/Infrastructure
+
+1. [Deployment Guide](./deployment.md)
+2. [Architecture Overview](./architecture.md)
+3. [ADR-002: Horizon API](./adr/adr-002-horizon-api-indexing.md)
+4. [ADR-003: Database Schema](./adr/adr-003-database-schema-escrow.md)
+
+---
+
+## 🔍 Quick Search
+
+### By Topic
+
+**Blockchain & Stellar**
+
+- [ADR-001: Soroban Escrow](./adr/adr-001-soroban-escrow-design.md)
+- [ADR-002: Horizon API](./adr/adr-002-horizon-api-indexing.md)
+- [FAQ: Technical Questions](./FAQ.md#technical-questions)
+
+**Database & Backend**
+
+- [Database Schema & ERD](./database-schema.md)
+- [ADR-003: Database Schema](./adr/adr-003-database-schema-escrow.md)
+- [Deployment Guide](./deployment.md)
+
+**Frontend & UI**
+
+- [Transaction History](./FAQ.md#how-do-i-view-my-transaction-history)
+- [Architecture Overview](./architecture.md)
+
+**User Guides**
+
+- [FAQ](./FAQ.md)
+- [Getting Started](./getting-started.md)
+
+**Disputes & Evidence**
+
+- [Dispute Resolution](./dispute-resolution.md)
+- [Pinata IPFS Setup](./ipfs-setup.md)
+- [FAQ: Disputes & Refunds](./FAQ.md#disputes--refunds)
+- [ADR-003: Database Schema](./adr/adr-003-database-schema-escrow.md)
+
+---
+
+## 📞 Support & Contact
+
+### Getting Help
+
+- **GitHub Issues**: [stellar-purplepay/issues](https://github.com/stellar-purplepay/issues)
+- **Discord**: [Stellar PurplePay Community](https://discord.gg/stellar-purplepay)
+- **Email**: support@stellar-purplepay.com
+- **Twitter**: [@StellarPurplePay](https://twitter.com/StellarPurplePay)
+
+### Contributing
+
+- See [CONTRIBUTING.md](../CONTRIBUTING.md) for guidelines
+- Review [ROADMAP.md](../ROADMAP.md) for planned features
+
+---
+
+## 📝 Document Maintenance
+
+### Last Updated
+
+- **Date**: May 28, 2026
+- **Version**: 1.0
+- **Status**: ✅ Complete
+
+### Recent Additions
+
+- ✅ ADR-001: Soroban Escrow Design
+- ✅ ADR-002: Horizon API Indexing
+- ✅ ADR-003: Database Schema
+- ✅ FAQ: 50+ Questions
+- ✅ Pinata IPFS Setup Guide
+- ✅ Implementation Summary
+
+### Planned Updates
+
+- [ ] Video tutorials
+- [ ] Interactive examples
+- [ ] Multi-language translations
+- [ ] Community contributions guide
+- [ ] Advanced topics section
+
+---
+
+## 🎯 Next Steps
+
+1. **Choose your role**: Client, Freelancer, or Developer
+2. **Follow the learning path** for your role
+3. **Read the FAQ** for common questions
+4. **Check the guides** for specific tasks
+5. **Contact support** if you need help
+
+---
+
+**Happy learning! 🚀**
+
+For the latest updates, visit [stellar-purplepay.com](https://stellar-purplepay.com)
+

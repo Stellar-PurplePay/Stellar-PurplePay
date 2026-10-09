@@ -1,0 +1,280 @@
+/**
+ * src/routes/messageRoutes.js
+ * Private messaging endpoints for job participants.
+ *
+ * @swagger
+ * tags:
+ *   name: Messages
+ *   description: In-app messaging between users
+ */
+
+"use strict";
+const express = require("express");
+const multer  = require("multer");
+const rateLimit = require("express-rate-limit");
+const router  = express.Router();
+const { verifyJWT } = require("../middleware/auth");
+
+const messageService = require("../services/messageService");
+const { uploadFile, MAX_FILE_SIZE, ALLOWED_MIME_TYPES } = require("../services/ipfsService");
+
+const generalRateLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60 * (Number(process.env.RATE_LIMIT_SCALE) || 1),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req, res) => {
+    res.set("Retry-After", 60);
+    return res.status(429).json({
+      message: "Too many requests — please wait before trying again",
+    });
+  },
+});
+
+router.use(generalRateLimiter);
+
+// Issue #1392: Set JSON body size limit to 50KB as a safeguard against
+// oversized payloads causing slow DB writes and potential OOM
+router.use(express.json({ limit: '50kb' }));
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: (_req, file, cb) => {
+    // Accept encrypted blobs (octet-stream) and known MIME types
+    cb(null, file.mimetype === "application/octet-stream" || ALLOWED_MIME_TYPES.includes(file.mimetype));
+  },
+});
+
+/**
+ * @swagger
+ * /api/messages/job/{jobId}:
+ *   post:
+ *     summary: Send a message in a job thread
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - content
+ *             properties:
+ *               content:
+ *                 type: string
+ *                 description: Message content (encrypted)
+ *               contractTxHash:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Message sent
+ *   get:
+ *     summary: Get messages for a job thread with cursor-based pagination
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *         description: Number of messages to return (1-100)
+ *       - in: query
+ *         name: before
+ *         schema:
+ *           type: string
+ *         description: Cursor timestamp to fetch messages older than
+ *     responses:
+ *       200:
+ *         description: Message list with next cursor (marks as read)
+ */
+router.post("/job/:jobId", generalRateLimiter, verifyJWT, async (req, res, next) => {
+  try {
+    const { jobId } = req.params;
+    const { content, contractTxHash } = req.body;
+    const senderAddress = req.user.publicKey;
+
+    if (!content || typeof content !== "string") {
+      return res.status(400).json({ error: "Message content is required" });
+    }
+
+    // Issue #1392: Cap message content at 10,000 characters to prevent
+    // oversized payloads causing slow DB writes and potential OOM in
+    // notification email service
+    const MAX_MESSAGE_LENGTH = 10_000;
+    if (content.length > MAX_MESSAGE_LENGTH) {
+      return res.status(400).json({ 
+        error: `Message too long — max ${MAX_MESSAGE_LENGTH.toLocaleString()} characters` 
+      });
+    }
+
+    const message = await messageService.createMessage({
+      jobId,
+      senderAddress,
+      content: content.trim(),
+      contractTxHash: contractTxHash || null,
+    });
+
+    res.status(201).json({ success: true, data: message });
+  } catch (e) {
+    next(e);
+  }
+});
+
+const getMessagesHandler = async (req, res, next) => {
+  try {
+    const { jobId, threadId } = req.params;
+    const targetId = jobId || threadId;
+    const userAddress = req.user.publicKey;
+    const { limit, before } = req.query;
+
+    const result = await messageService.getMessagesByJob(targetId, userAddress, { limit, before });
+    res.json({ success: true, data: result });
+  } catch (e) {
+    next(e);
+  }
+};
+
+router.get("/job/:jobId", generalRateLimiter, verifyJWT, getMessagesHandler);
+router.get("/thread/:threadId", generalRateLimiter, verifyJWT, getMessagesHandler);
+
+/**
+ * @swagger
+ * /api/messages/unread-count:
+ *   get:
+ *     summary: Get total unread message count
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Unread count
+ */
+router.get("/unread-count", generalRateLimiter, verifyJWT, async (req, res, next) => {
+  try {
+    const userAddress = req.user.publicKey;
+    const count = await messageService.getUnreadCount(userAddress);
+    res.json({ success: true, data: { unreadCount: count } });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/**
+ * @swagger
+ * /api/messages/{messageId}/tx-hash:
+ *   patch:
+ *     summary: Attach on-chain tx hash to a message
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: messageId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - txHash
+ *             properties:
+ *               txHash:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Tx hash attached
+ */
+router.patch("/:messageId/tx-hash", generalRateLimiter, verifyJWT, async (req, res, next) => {
+  try {
+    const { messageId } = req.params;
+    const { txHash } = req.body;
+
+    if (!txHash || typeof txHash !== "string") {
+      return res.status(400).json({ error: "txHash is required" });
+    }
+
+    const message = await messageService.attachTxHash(messageId, txHash);
+    res.json({ success: true, data: message });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/**
+ * @swagger
+ * /api/messages/job/{jobId}/attachments:
+ *   post:
+ *     summary: Upload an encrypted file attachment
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - file
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *               senderNaclPub:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Attachment uploaded to IPFS
+ */
+router.post("/job/:jobId/attachments", generalRateLimiter, verifyJWT, upload.single("file"), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "File is required" });
+    const { jobId } = req.params;
+    const senderAddress = req.user.publicKey;
+    const senderNaclPub = req.body.senderNaclPub || null;
+
+    const uploaded = await uploadFile(req.file.buffer, req.file.originalname, req.file.mimetype);
+    const message = await messageService.createFileAttachment({
+      jobId,
+      senderAddress,
+      cid:          uploaded.cid,
+      fileName:     req.file.originalname,
+      fileSize:     uploaded.size,
+      fileMime:     req.file.mimetype,
+      senderNaclPub,
+    });
+    res.status(201).json({ success: true, data: message });
+  } catch (e) {
+    next(e);
+  }
+});
+
+module.exports = router;

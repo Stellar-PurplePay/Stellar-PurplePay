@@ -1,0 +1,83 @@
+replicaCount: 1
+
+blueGreen:
+  activeColor: blue
+  rollbackColor: green
+
+frontend:
+  image:
+    repository: purplepay-frontend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+backend:
+  image:
+    repository: purplepay-backend
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 4000
+  env:
+    STELLAR_NETWORK: testnet
+    HORIZON_URL: https://horizon-testnet.stellar.org
+  healthCheck:
+    # Readiness probe targets the detailed /health endpoint, which actively
+    # runs SELECT 1 against the database pool so the kubelet can know whether
+    # the app is ready to serve traffic.
+    path: /health
+    port: 4000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+    # Liveness probe targets the lightweight /ping endpoint (no DB I/O) to
+    # avoid flooding the database with repeated health checks and to detect
+    # only process-level death.
+    livenessPath: /ping
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+redis:
+  image:
+    repository: redis
+    tag: "7-alpine"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 6379
+
+postgres:
+  image:
+    repository: postgres
+    tag: "16-alpine"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 5432
+  auth:
+    username: stellarwork
+    password: stellarwork_dev
+    database: stellarwork
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi

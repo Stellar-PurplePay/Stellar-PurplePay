@@ -1,0 +1,584 @@
+/**
+ * components/ApplicationForm.tsx
+ * Freelancer applies to a job with a proposal and bid amount.
+ */
+import { useState, useEffect, useRef } from "react";
+import { submitApplication, fetchProposalTemplates, scoreProposal, createScopeSession, finalizeScopeSession } from "@/lib/api";
+import type { ProposalScore } from "@/lib/api";
+import type { Job } from "@/utils/types";
+import { formatXLM } from "@/utils/format";
+import { useToast } from "./Toast";
+import clsx from "clsx";
+
+// Issue #1548 — score the proposal once the writer pauses for this long.
+const SCORE_DEBOUNCE_MS = 2000;
+// Don't bother the AI with very short drafts.
+const MIN_SCORE_CHARS = 20;
+// Issue #1416 — proposal character limit; surface it in the UI with a live
+// counter so writers never hit it blind.
+export const MAX_PROPOSAL_CHARS = 2000;
+// Turn the counter red when the writer is this close to the limit.
+const CHAR_WARNING_THRESHOLD = 100;
+
+interface ApplicationFormProps {
+  job: Job;
+  publicKey: string;
+  biddingPhase?: "commitment" | "reveal";
+  prefillData?: {
+    bidAmount?: string;
+    message?: string;
+  };
+  onOptimisticSubmit?: () => void;
+  onRevert?: () => void;
+  onSuccess?: () => void;
+  submitButtonText?: string;
+}
+
+function randomNonceHex(bytes = 16): string {
+  const arr = new Uint8Array(bytes);
+  if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
+    window.crypto.getRandomValues(arr);
+  } else if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    crypto.getRandomValues(arr);
+  } else {
+    for (let i = 0; i < arr.length; i += 1) arr[i] = Math.floor(Math.random() * 256);
+  }
+  return Array.from(arr).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function sha256Hex(value: string): Promise<string> {
+  const data = new TextEncoder().encode(value);
+  const digest = await window.crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export default function ApplicationForm({ job, publicKey, biddingPhase = "commitment", prefillData, onOptimisticSubmit, onRevert, onSuccess, submitButtonText }: ApplicationFormProps) {
+  const [proposal, setProposal] = useState(prefillData?.message || "");
+  const toast = useToast();
+  const [bidAmount, setBidAmount] = useState(prefillData?.bidAmount || job.budget);
+  const [revealNonce, setRevealNonce] = useState(randomNonceHex());
+  const [revealLater, setRevealLater] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "success">("idle");
+  const [error, setError] = useState<string | null>(null);
+  const submittingRef = useRef(false);
+  const isMountedRef = useRef(true);
+  const [screeningAnswers, setScreeningAnswers] = useState<Record<string, string>>({});
+  const [templates, setTemplates] = useState<{ id: string; name: string; content: string }[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
+  const [creatingScope, setCreatingScope] = useState(false);
+  const [scopeShareUrl, setScopeShareUrl] = useState<string | null>(null);
+  const [scopeSessionId, setScopeSessionId] = useState<string | null>(null);
+  const [scopeCopied, setScopeCopied] = useState(false);
+  const [scopeError, setScopeError] = useState<string | null>(null);
+
+  const isSubmitting = submitStatus === "submitting";
+  const isSubmitted = submitStatus === "success";
+  const isPending = isSubmitting || isSubmitted;
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Issue #1548 — real-time Relevance / Clarity / Completeness scores.
+  const [proposalScore, setProposalScore] = useState<ProposalScore | null>(null);
+  const [scoreWarning, setScoreWarning] = useState<string | null>(null);
+  const [scoring, setScoring] = useState(false);
+  const [creatingScope, setCreatingScope] = useState(false);
+  const [scopeShareUrl, setScopeShareUrl] = useState("");
+  const [scopeSessionId, setScopeSessionId] = useState("");
+  const [scopeError, setScopeError] = useState<string | null>(null);
+  const [scopeCopied, setScopeCopied] = useState(false);
+  const handleInviteCollaborator = async () => {
+    if (scopeShareUrl) return;
+    setCreatingScope(true);
+    try {
+      const { sessionId, sharePath } = await createScopeSession({
+        jobId: job.id,
+        createdBy: publicKey,
+        initialContent: proposal,
+      });
+      setScopeSessionId(sessionId);
+      setScopeShareUrl(window.location.origin + sharePath);
+    } catch (e) {
+      toast.error("Failed to create collaboration session");
+    } finally {
+      setCreatingScope(false);
+    }
+  };
+
+  // Issue #152 — enforce 50-word minimum on the proposal.
+  const wordCount = proposal.trim() === "" ? 0 : proposal.trim().split(/\s+/).length;
+  const MIN_WORDS = 50;
+  const wordsRemaining = Math.max(0, MIN_WORDS - wordCount);
+  const meetsWordMinimum = wordCount >= MIN_WORDS;
+
+  // Issue #1416 — character counter: turns red once fewer than
+  // CHAR_WARNING_THRESHOLD characters remain.
+  const charsRemaining = MAX_PROPOSAL_CHARS - proposal.length;
+  const nearCharLimit = charsRemaining < CHAR_WARNING_THRESHOLD;
+
+  const isValid = meetsWordMinimum && parseFloat(bidAmount) > 0;
+
+  // Initialize screening answers when job changes
+  useEffect(() => {
+    if (job.screeningQuestions && job.screeningQuestions.length > 0) {
+      const initialAnswers: Record<string, string> = {};
+      job.screeningQuestions.forEach(q => {
+        initialAnswers[q] = "";
+      });
+      setScreeningAnswers(initialAnswers);
+    }
+  }, [job.screeningQuestions]);
+
+  useEffect(() => {
+    fetchProposalTemplates().then(setTemplates).catch(() => {});
+  }, []);
+
+  // Issue #1548 — debounce scoring by 2s after the proposal stops changing.
+  // A failed AI call is a warning only: submission is never blocked by it.
+  const jobSkillsKey = (job.skills || []).join(",");
+  useEffect(() => {
+    const trimmed = proposal.trim();
+    const timer = setTimeout(async () => {
+      if (trimmed.length < MIN_SCORE_CHARS) {
+        setProposalScore(null);
+        setScoreWarning(null);
+        setScoring(false);
+        return;
+      }
+
+      setScoring(true);
+      try {
+        const { data, warning } = await scoreProposal({
+          proposal: trimmed,
+          jobTitle: job.title,
+          jobDescription: job.description,
+          skills: jobSkillsKey ? jobSkillsKey.split(",") : undefined,
+        });
+        setProposalScore(data);
+        setScoreWarning(
+          warning ??
+            (data
+              ? null
+              : "Proposal scoring is unavailable right now. You can still submit."),
+        );
+      } catch {
+        setProposalScore(null);
+        setScoreWarning(
+          "Proposal scoring is unavailable right now. You can still submit.",
+        );
+      } finally {
+        setScoring(false);
+      }
+    }, SCORE_DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [proposal, job.title, job.description, jobSkillsKey]);
+
+  const allScreeningQuestionsAnswered = job.screeningQuestions && job.screeningQuestions.length > 0
+    ? job.screeningQuestions.every(q => screeningAnswers[q] && screeningAnswers[q].trim().length > 0)
+    : true;
+
+  const isFormValid = isValid && allScreeningQuestionsAnswered;
+
+  const handleSubmit = async () => {
+    if (!isFormValid || submittingRef.current || isPending) return;
+
+    submittingRef.current = true;
+    setSubmitStatus("submitting");
+    setError(null);
+
+    onOptimisticSubmit?.();
+
+    try {
+      const referredBy = typeof window !== "undefined" ? localStorage.getItem(`referral_${job.id}`) : null;
+      const commitmentInput = `${parseFloat(bidAmount).toFixed(7)}:${revealNonce}`;
+      const bidCommitment = await sha256Hex(commitmentInput);
+      if (scopeSessionId) { await finalizeScopeSession(scopeSessionId, { content: proposal, payload: { jobId: job.id } }); }
+      await submitApplication({
+        jobId: job.id,
+        freelancerAddress: publicKey,
+        proposal: proposal.trim(),
+        bidAmount: parseFloat(bidAmount).toFixed(7),
+        currency: job.currency || "XLM",
+        bidCommitment,
+        bidNonce: revealNonce,
+        screeningAnswers: job.screeningQuestions && job.screeningQuestions.length > 0 ? screeningAnswers : undefined,
+        referredBy: referredBy || undefined,
+      });
+
+      if (isMountedRef.current) {
+        setSubmitStatus("success");
+        setRevealLater(true);
+      }
+      if (scopeSessionId) {
+        try {
+          await finalizeScopeSession(scopeSessionId, {
+            content: proposal.trim(),
+            payload: { jobId: String(job.id) },
+          });
+        } catch {
+          // Locking the co-writing session is best-effort; never block submission.
+        }
+      }
+      toast.success("Sealed bid commitment submitted.");
+      onSuccess?.();
+    } catch {
+      if (isMountedRef.current) {
+        setSubmitStatus("idle");
+      }
+      onRevert?.();
+      setSubmitted(false);
+      toast.error("Failed to submit application. Please try again.");
+    } finally {
+      submittingRef.current = false;
+    }
+  };
+
+  const handleInviteCollaborator = async () => {
+    if (scopeShareUrl) {
+      try {
+        await navigator.clipboard?.writeText(scopeShareUrl);
+        setScopeCopied(true);
+      } catch {
+        // Clipboard access can be denied; the link stays visible for manual copy.
+      }
+      return;
+    }
+
+    setCreatingScope(true);
+    setScopeError(null);
+    try {
+      const session = await createScopeSession({
+        jobId: String(job.id),
+        createdBy: publicKey,
+        content: proposal,
+      });
+      const url = `${window.location.origin}${session.sharePath}`;
+      setScopeSessionId(session.sessionId);
+      setScopeShareUrl(url);
+      try {
+        await navigator.clipboard?.writeText(url);
+        setScopeCopied(true);
+      } catch {
+        // Clipboard access can be denied; the link stays visible for manual copy.
+      }
+    } catch {
+      setScopeError("Failed to create a co-writing session. Please try again.");
+    } finally {
+      setCreatingScope(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="card animate-slide-up">
+        <h3 className="font-display text-lg font-bold text-amber-100 mb-1">Submit Proposal</h3>
+        <p className="text-amber-800 text-sm mb-6">
+          Client budget: <span className="text-market-400 font-mono font-medium">{formatXLM(job.budget)}</span>
+        </p>
+          <div className="mb-4 rounded-xl border border-market-500/20 bg-ink-900/40 p-3 text-xs text-amber-700">
+            {biddingPhase === "commitment"
+              ? "Sealed-bid commitment phase: your amount stays hidden until reveal."
+              : "Reveal phase: client has closed bidding and is waiting for reveals."}
+          </div>
+
+        <div className="space-y-5">
+          <div>
+            <label htmlFor="use-template" className="label">Use Template</label>
+            <select id="use-template"
+              value={selectedTemplateId}
+              disabled={isPending}
+              onChange={(e) => {
+                const templateId = e.target.value;
+                setSelectedTemplateId(templateId);
+                const template = templates.find((item) => item.id === templateId);
+                if (template) setProposal(template.content);
+              }}
+              className="input-field appearance-none cursor-pointer"
+            >
+              <option value="">Select a template...</option>
+              {(templates ?? []).map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Co-write proposal — invite a teammate (#1552) */}
+          <div className="rounded-xl border border-market-500/20 bg-market-900/30 p-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium text-amber-100">Co-write this proposal</p>
+                <p className="text-xs text-amber-700 mt-0.5">
+                  Invite a teammate to edit and review together in real time. The
+                  session locks automatically when you submit.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleInviteCollaborator}
+                disabled={creatingScope}
+                className="btn-secondary px-3 py-2 text-sm whitespace-nowrap"
+                data-testid="invite-collaborator"
+              >
+                {creatingScope
+                  ? "Creating..."
+                  : scopeShareUrl
+                    ? "Copy invite link"
+                    : "Invite collaborator"}
+              </button>
+            </div>
+            {scopeShareUrl && (
+              <div className="mt-3 flex gap-2">
+                <input
+                  className="input-field flex-1 text-xs"
+                  value={scopeShareUrl}
+                  readOnly
+                  aria-label="Co-writing invite link"
+                />
+                <button
+                  type="button"
+                  className="btn-secondary px-3 py-2 text-xs"
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard?.writeText(scopeShareUrl);
+                      setScopeCopied(true);
+                    } catch {
+                      /* noop */
+                    }
+                  }}
+                >
+                  {scopeCopied ? "Copied" : "Copy"}
+                </button>
+              </div>
+            )}
+            {scopeError && <p className="mt-2 text-xs text-red-400">{scopeError}</p>}
+          </div>
+
+          {/* Cover letter */}
+          <div>
+            <label className="label" htmlFor="cover-letter">Cover Letter</label>
+            <textarea
+              id="cover-letter"
+              value={proposal} onChange={(e) => setProposal(e.target.value)}
+              disabled={isPending}
+              rows={6}
+              maxLength={MAX_PROPOSAL_CHARS}
+              placeholder="Describe your relevant experience, your approach to this project, and why you're the best fit..."
+              className={clsx(
+                "textarea-field",
+                proposal.length > 0 && !meetsWordMinimum && "border-red-500/40"
+              )}
+              aria-invalid={proposal.length > 0 && !meetsWordMinimum}
+              aria-describedby="proposal-word-count proposal-char-count"
+            />
+            <p
+              id="proposal-word-count"
+              className={clsx(
+                "mt-1 text-xs font-medium",
+                meetsWordMinimum ? "text-green-400" : "text-red-400"
+              )}
+            >
+              {wordCount} {wordCount === 1 ? "word" : "words"} (minimum {MIN_WORDS})
+              {!meetsWordMinimum && (
+                <span className="ml-1 text-amber-800/80 font-normal">
+                  — {wordsRemaining} more {wordsRemaining === 1 ? "word" : "words"} needed
+                </span>
+              )}
+            </p>
+            <p
+              id="proposal-char-count"
+              data-testid="proposal-char-count"
+              className={clsx(
+                "mt-0.5 text-xs font-medium tabular-nums",
+                nearCharLimit ? "text-red-400" : "text-amber-700"
+              )}
+            >
+              {proposal.length} / {MAX_PROPOSAL_CHARS}
+            </p>
+
+            <ProposalScores
+              scoring={scoring}
+              score={proposalScore}
+              warning={scoreWarning}
+              ready={proposal.trim().length >= MIN_SCORE_CHARS}
+            />
+          </div>
+
+          {/* Bid amount */}
+          <div>
+            <label htmlFor="your-bid-xlm" className="label">Your Bid (XLM)</label>
+            <input id="your-bid-xlm"
+              type="number" value={bidAmount} onChange={(e) => setBidAmount(e.target.value)}
+              disabled={isPending}
+              min="1" step="1" className="input-field"
+              placeholder="Enter your bid amount"
+            />
+            <p className="mt-1 text-xs text-amber-600">
+              This value is committed as a hash and hidden until reveal phase.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="reveal-nonce-keep-safe" className="label">Reveal Nonce (keep safe)</label>
+            <input id="reveal-nonce-keep-safe"
+              type="text"
+              value={revealNonce}
+              disabled={isPending}
+              onChange={(e) => setRevealNonce(e.target.value)}
+              className="input-field font-mono text-xs"
+              placeholder="Random nonce for reveal"
+            />
+            <p className="mt-1 text-xs text-amber-600">
+              You must keep this nonce to reveal your bid later.
+            </p>
+          </div>
+
+          {/* Screening Questions */}
+          {job.screeningQuestions && job.screeningQuestions.length > 0 && (
+            <div>
+              <span id="screening-questions" className="label">Screening Questions <span className="text-red-400">*</span></span>
+              <p className="text-xs text-amber-600 mb-3">Please answer all questions to submit your application.</p>
+              <div className="space-y-4" role="group" aria-labelledby="screening-questions">
+                {job.screeningQuestions.map((question, index) => (
+                  <div key={index}>
+                    <label className="text-sm text-amber-200 mb-1.5 block">
+                      {index + 1}. {question}
+                    </label>
+                    <textarea
+                      value={screeningAnswers[question] || ""}
+                      disabled={isPending}
+                      onChange={(e) => setScreeningAnswers({ ...screeningAnswers, [question]: e.target.value })}
+                      rows={3}
+                      placeholder="Your answer..."
+                      className="textarea-field"
+                    />
+                  </div>
+                ))}
+              </div>
+              {!allScreeningQuestionsAnswered && (
+                <p className="mt-2 text-xs text-red-400">All screening questions must be answered</p>
+              )}
+            </div>
+          )}
+
+          {error && (
+            <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
+          )}
+
+          <button
+            onClick={handleSubmit}
+            disabled={!isFormValid || isPending}
+            className={clsx(
+              "btn-primary w-full flex items-center justify-center gap-2",
+              isPending && "opacity-90 cursor-not-allowed"
+            )}
+          >
+            {isPending ? "Application submitted!" : (submitButtonText || "Submit Proposal")}
+          </button>
+        </div>
+      </div>
+
+      {revealLater && (
+        <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-300">
+          Save your reveal nonce securely: <span className="font-mono break-all">{revealNonce}</span>
+        </div>
+      )}
+    </>
+  );
+}
+
+interface ProposalScoresProps {
+  scoring: boolean;
+  score: ProposalScore | null;
+  warning: string | null;
+  ready: boolean;
+}
+
+/**
+ * Issue #1548 — live Relevance / Clarity / Completeness readout. A scoring
+ * failure is shown as a warning and never affects whether the form can submit.
+ */
+function ProposalScores({ scoring, score, warning, ready }: ProposalScoresProps) {
+  if (!ready) return null;
+
+  return (
+    <div
+      className="mt-3 rounded-xl border border-market-500/20 bg-ink-900/40 p-4"
+      aria-live="polite"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-amber-600">
+          Proposal quality
+        </p>
+        {scoring ? (
+          <span className="text-xs text-amber-600 animate-pulse">Scoring…</span>
+        ) : (
+          score && (
+            <span className="text-xs font-mono text-market-300">
+              Overall {score.overall}/100
+            </span>
+          )
+        )}
+      </div>
+
+      {score && (
+        <div className="space-y-2">
+          <ScoreBar label="Relevance" value={score.relevance} />
+          <ScoreBar label="Clarity" value={score.clarity} />
+          <ScoreBar label="Completeness" value={score.completeness} />
+        </div>
+      )}
+
+      {warning && (
+        <p className="mt-3 text-xs text-amber-400" role="status">
+          ⚠ {warning}
+        </p>
+      )}
+
+      {score && score.suggestions.length > 0 && (
+        <ul className="mt-3 space-y-1 text-xs text-amber-700 list-disc list-inside">
+          {score.suggestions.map((suggestion, i) => (
+            <li key={i}>{suggestion}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function ScoreBar({ label, value }: { label: string; value: number }) {
+  const clamped = Math.max(0, Math.min(100, Math.round(value)));
+  const tone =
+    clamped >= 75 ? "bg-green-400" : clamped >= 50 ? "bg-market-400" : "bg-red-400";
+
+  return (
+    <div>
+      <div className="flex items-center justify-between text-xs mb-1">
+        <span className="text-amber-200">{label}</span>
+        <span className="font-mono text-amber-100">{clamped}</span>
+      </div>
+      <div
+        className="h-1.5 w-full rounded-full bg-market-500/10 overflow-hidden"
+        role="progressbar"
+        aria-label={label}
+        aria-valuenow={clamped}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
+        <div className={`h-full rounded-full ${tone}`} style={{ width: `${clamped}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function Spinner() {
+  return <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>;
+}

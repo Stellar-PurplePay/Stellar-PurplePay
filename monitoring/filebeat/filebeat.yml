@@ -1,0 +1,27 @@
+filebeat.inputs:
+- type: container
+  paths:
+    - '/var/lib/docker/containers/*/*.log'
+  # Docker json-file driver writes rotated logs alongside the active log file.
+  # The glob above captures both the active file and any rotated files
+  # (e.g. *-json.log.1, *-json.log.2) produced by the json-file driver.
+  processors:
+    - add_docker_metadata:
+        host: "unix:///var/run/docker.sock"
+
+setup.kibana:
+  host: "kibana:5601"
+
+setup.dashboards.enabled: true
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  indices:
+    - index: "filebeat-%{[agent.version]}-%{+yyyy.MM.dd}"
+
+setup.template.name: "filebeat"
+setup.template.pattern: "filebeat-*"
+setup.ilm.enabled: true
+setup.ilm.rollover_alias: "filebeat"
+setup.ilm.pattern: "{now/d}-000001"
+setup.ilm.policy_name: "filebeat-retention"

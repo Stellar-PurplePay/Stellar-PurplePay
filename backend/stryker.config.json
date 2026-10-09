@@ -1,0 +1,36 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "jest",
+  "coverageAnalysis": "perTest",
+  "plugins": ["@stryker-mutator/jest-runner"],
+  "mutate": [
+    "src/services/escrowService.js",
+    "src/services/disputeService.js"
+  ],
+  "jest": {
+    "projectType": "custom",
+    "configFile": "jest.stryker.config.js",
+    "enableFindRelatedTests": true
+  },
+  "reporters": ["clear-text", "progress", "html"],
+  "dashboard": {
+    "project": "github.com/KingTaiwoDev/Stellar-PurplePay",
+    "version": "${BRANCH_NAME}",
+    "module": "backend",
+    "baseUrl": "https://dashboard.stryker-mutator.io/api/reports",
+    "reportType": "full"
+  },
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 80
+  },
+  "cleanTempDir": true,
+  "tempDir": "stryker-tmp",
+  "htmlReporter": {
+    "fileName": "reports/mutation/mutation-report.html"
+  },
+  "since": {
+    "target": "main"
+  }
+}

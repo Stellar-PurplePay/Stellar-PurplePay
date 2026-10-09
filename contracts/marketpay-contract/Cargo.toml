@@ -1,0 +1,31 @@
+[package]
+name = "marketpay-contract"
+version = "0.1.0"
+edition = "2021"
+description = "Stellar PurplePay — Soroban escrow smart contract for freelance payments"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+soroban-sdk = "27.0.6"
+
+[dev-dependencies]
+soroban-sdk = { version = "27.0.6", features = ["testutils"] }
+proptest = "1"
+
+[features]
+testutils = ["soroban-sdk/testutils"]
+# Enables the property-based test suites (proptest itself is a dev-dependency).
+proptest = []
+
+[profile.release]
+opt-level = "z"
+overflow-checks = true
+debug = 0
+strip = "symbols"
+debug-assertions = false
+panic = "abort"
+codegen-units = 1
+lto = true
