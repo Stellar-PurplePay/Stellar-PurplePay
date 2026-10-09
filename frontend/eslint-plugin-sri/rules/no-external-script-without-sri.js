@@ -10,7 +10,7 @@ module.exports = {
       description:
         'Require integrity and crossOrigin attributes on external <script> tags loaded via next/script or <script src="...">',
       recommended: true,
-      url: "https://github.com/KingTaiwoDev/Stellar-PurplePay/issues/531",
+      url: "https://github.com/Stellar-PurplePay/Stellar-PurplePay/issues/531",
     },
     messages: {
       missingIntegrity:

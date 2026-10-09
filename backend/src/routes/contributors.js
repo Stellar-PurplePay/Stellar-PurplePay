@@ -52,7 +52,7 @@ async function fetchGitHubContributors() {
   }
 
     const contributorsRepo =
-      process.env.GITHUB_REPO || "KingTaiwoDev/Stellar-PurplePay";
+      process.env.GITHUB_REPO || "Stellar-PurplePay/Stellar-PurplePay";
     const response = await axios.get(
       `https://api.github.com/repos/${contributorsRepo}/contributors`,
       {

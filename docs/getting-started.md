@@ -37,7 +37,7 @@ Freighter is required to interact with the Stellar blockchain.
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/KingTaiwoDev/Stellar-PurplePay.git
+git clone https://github.com/Stellar-PurplePay/Stellar-PurplePay.git
 cd Stellar-PurplePay
 ```
 

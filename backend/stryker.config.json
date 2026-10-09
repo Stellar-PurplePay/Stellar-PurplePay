@@ -14,7 +14,7 @@
   },
   "reporters": ["clear-text", "progress", "html"],
   "dashboard": {
-    "project": "github.com/KingTaiwoDev/Stellar-PurplePay",
+    "project": "github.com/Stellar-PurplePay/Stellar-PurplePay",
     "version": "${BRANCH_NAME}",
     "module": "backend",
     "baseUrl": "https://dashboard.stryker-mutator.io/api/reports",

@@ -808,7 +808,7 @@ databases:
 services:
   - name: backend
     github:
-      repo: your-org/stellar-purplepay
+      repo: Stellar-PurplePay/Stellar-PurplePay
       branch: main
       deploy_on_push: true
     source_dir: /backend
@@ -835,7 +835,7 @@ services:
 
   - name: frontend
     github:
-      repo: your-org/stellar-purplepay
+      repo: Stellar-PurplePay/Stellar-PurplePay
       branch: main
       deploy_on_push: true
     source_dir: /frontend

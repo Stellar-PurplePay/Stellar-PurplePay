@@ -8,7 +8,7 @@ Stellar PurplePay handles financial transactions on-chain. We take security seri
 
 Use **GitHub Private Vulnerability Reporting** at:
 
-https://github.com/KingTaiwoDev/Stellar-PurplePay/security/advisories
+https://github.com/Stellar-PurplePay/Stellar-PurplePay/security/advisories
 
 If you cannot use GitHub's private reporting, email **security@stellarpurplepay.dev** (or the maintainer's contact listed in the commit history).
 

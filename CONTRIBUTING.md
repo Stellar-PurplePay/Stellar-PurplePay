@@ -71,7 +71,7 @@ git clone https://github.com/YOUR_USERNAME/Stellar-PurplePay.git
 cd Stellar-PurplePay
 
 # Track upstream
-git remote add upstream https://github.com/your-org/Stellar-PurplePay.git
+git remote add upstream https://github.com/Stellar-PurplePay/Stellar-PurplePay.git
 ```
 
 ### 2. Run the automated setup script
@@ -298,9 +298,9 @@ one maps to a piece of the request lifecycle, so nothing gets silently dropped.
 
 > **Worked examples from the project history**
 >
-> - [#391 — feat: faucet rate limit, skill endorsements, certificates, job expiry extension](https://github.com/KingTaiwoDev/Stellar-PurplePay/pull/391) — adds `backend/src/routes/certificates.js`, registers it in `backend/src/server.js`, and documents it with `@swagger`.
-> - [#908 — refactor(validation): extract route validation into shared Zod validators](https://github.com/KingTaiwoDev/Stellar-PurplePay/pull/908) — the canonical validator pattern (Steps 1–2).
-> - [#1311 — test: certificates route tests](https://github.com/KingTaiwoDev/Stellar-PurplePay/pull/1311) — the canonical route-test pattern (Step 5).
+> - [#391 — feat: faucet rate limit, skill endorsements, certificates, job expiry extension](https://github.com/Stellar-PurplePay/Stellar-PurplePay/pull/391) — adds `backend/src/routes/certificates.js`, registers it in `backend/src/server.js`, and documents it with `@swagger`.
+> - [#908 — refactor(validation): extract route validation into shared Zod validators](https://github.com/Stellar-PurplePay/Stellar-PurplePay/pull/908) — the canonical validator pattern (Steps 1–2).
+> - [#1311 — test: certificates route tests](https://github.com/Stellar-PurplePay/Stellar-PurplePay/pull/1311) — the canonical route-test pattern (Step 5).
 
 ### Step 1 — Create the route file
 
@@ -643,6 +643,6 @@ For full deploy instructions including testnet deployment and registering the co
 
 ## Getting Help
 
-- Open a [GitHub Discussion](https://github.com/your-org/Stellar-PurplePay/discussions) for questions
+- Open a [GitHub Discussion](https://github.com/Stellar-PurplePay/Stellar-PurplePay/discussions) for questions
 - Check [docs/FAQ.md](docs/FAQ.md) for common issues
 - See [docs/troubleshooting.md](docs/troubleshooting.md) for environment problems

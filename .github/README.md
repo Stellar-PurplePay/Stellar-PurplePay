@@ -4,50 +4,17 @@ This directory contains CI/CD workflows for the Stellar PurplePay project.
 
 ## Workflow Reference
 
-### Testing & Validation (No Secrets Required)
+### Continuous Integration (`ci.yml`)
 
-#### `ci.yml` — Continuous Integration
-Runs on every push to `main`/`develop` and pull requests.
+Runs on every push to `main`/`develop` and pull requests. Contains the **5 Essential CI Checks**:
 
-**What it does:**
-- Lint and test backend (Node.js)
-- Lint and type-check frontend (React)
-- Build frontend for production
-- Run Soroban contract tests (Rust)
-- Scan for secrets using Gitleaks
+1. **Backend API (`backend`)**: Node.js 20 environment with PostgreSQL services, runs code quality linting, unit tests, and integration test suite.
+2. **Frontend Application (`frontend`)**: Code quality checks, TypeScript type checking, unit/component tests, and production Next.js build.
+3. **Soroban Smart Contracts (`contracts`)**: Rust toolchain with `wasm32v1-none` target, runs `cargo fmt`, `cargo clippy`, contract tests, and release WASM compilation.
+4. **End-to-End Tests (`e2e`)**: Automated Playwright test suite validating full freelancer onboarding, job posting, bidding, and marketplace flow.
+5. **Security & Audit (`security`)**: Dependency vulnerability audit for backend and frontend packages, alongside security configuration hygiene.
 
-**No secrets required.** Uses mock configurations for testing.
-
-**Status:** ✅ Runs by default
-
----
-
-#### `e2e.yml` — End-to-End & Accessibility Tests
-Runs on pushes to `main`/`develop` and pull requests.
-
-**What it does:**
-- Run Playwright E2E tests (Chromium)
-- Run dark mode E2E tests
-- Run accessibility scans (WCAG compliance)
-
-**No secrets required.** Uses mock contract and API.
-
-**Status:** ✅ Runs by default
-
----
-
-#### `security.yml` — Security Scanning
-Runs on `main` pushes, PRs, and weekly schedule.
-
-**What it does:**
-- CodeQL analysis (JavaScript/TypeScript)
-- npm audit (production dependencies)
-- cargo audit (Rust dependencies)
-- Trivy filesystem scan (container/OS vulnerabilities)
-
-**No secrets required.** Uses GitHub-provided scanning tools.
-
-**Status:** ✅ Runs by default
+**Status:** ✅ Automated & Runs on Every Push / PR
 
 ---
 

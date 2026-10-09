@@ -53,7 +53,7 @@ to install the binary.
 
 ```bash
 # From the repository root
-git clone https://github.com/KingTaiwoDev/Stellar-PurplePay.git
+git clone https://github.com/Stellar-PurplePay/Stellar-PurplePay.git
 cd Stellar-PurplePay
 
 # Root tooling (installs husky + lint-staged pre-commit hooks)

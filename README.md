@@ -2,17 +2,16 @@
 
 > A decentralised freelance marketplace powered by Stellar blockchain and Soroban smart contracts.
 
+[![CI](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/workflows/ci.yml/badge.svg)](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Stellar](https://img.shields.io/badge/Stellar-Testnet-blue)](https://stellar.org)
 [![Soroban](https://img.shields.io/badge/Soroban-Smart%20Contracts-purple)](https://soroban.stellar.org)
 [![Backend Coverage](https://img.shields.io/badge/backend%20coverage-80%25%2B-brightgreen)](#testing)
 
-Stellar PurplePay is an open-source decentralised freelance marketplace where clients post jobs, freelancers apply, and payments are secured in **Soroban smart contract escrow** — released automatically when work is approved. No middlemen. No payment delays. No platform fees eating your earnings..
+Stellar PurplePay is an open-source decentralised freelance marketplace where clients post jobs, freelancers apply, and payments are secured in **Soroban smart contract escrow** — released automatically when work is approved. No middlemen. No payment delays. No platform fees eating your earnings.
 
 ---
-
-## ✨ Features (v1)
 
 ## ✨ Features
 
@@ -71,9 +70,11 @@ Stellar-PurplePay/
 ├── docs/                  # Architecture & API documentation
 ├── scripts/               # Development & utility scripts
 ├── .github/               # CI/CD workflows & issue templates
-├── CONTRIBUTING.md
-├── ROADMAP.md
-└── LICENSE
+├── CODE_OF_CONDUCT.md     # Community standards
+├── CONTRIBUTING.md        # Contribution guide
+├── LICENSE                # MIT license
+├── ROADMAP.md             # Development roadmap
+└── SECURITY.md            # Security policy & reporting
 ```
 
 ---
@@ -92,7 +93,7 @@ Stellar-PurplePay/
 ### 1. Clone
 
 ```bash
-git clone https://github.com/KingTaiwoDev/Stellar-PurplePay.git
+git clone https://github.com/Stellar-PurplePay/Stellar-PurplePay.git
 cd Stellar-PurplePay
 ```
 
@@ -155,7 +156,7 @@ NEXT_PUBLIC_USE_CONTRACT_MOCK=false
 
 ```env
 PORT=4000
-DATABASE_URL=postgresql://stellarwork:stellarwork_dev@localhost:5432/stellarwork
+DATABASE_URL=postgresql://purplepay:purplepay_dev@localhost:5432/purplepay
 JWT_SECRET=replace-with-a-long-random-secret
 STELLAR_NETWORK=testnet
 HORIZON_URL=https://horizon-testnet.stellar.org
@@ -232,15 +233,17 @@ Deploy or upgrade the Soroban escrow contract using [docs/contract-deployment.md
 - **[Contract Deployment](docs/contract-deployment.md)** — Deploy Soroban smart contracts
 - **[Prometheus Metrics](backend/docs/METRICS.md)** — Metrics reference, PromQL queries, cardinality bounds, and observability setup
 
-## 🤝 Contributing
+## 🤝 Contributing & Community
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) to get started. All skill levels welcome!
+- **[Contributing Guide](CONTRIBUTING.md)** — Getting started, branch conventions, and testing
+- **[Code of Conduct](CODE_OF_CONDUCT.md)** — Community standards and pledge
+- **[Security Policy](SECURITY.md)** — Vulnerability reporting and scope
 
 ## 🗺 Roadmap
 
-See [ROADMAP.md](ROADMAP.md) for planned features.
+See [ROADMAP.md](ROADMAP.md) for planned features and milestone timelines.
 
 ## 📄 License
 
-MIT — see [LICENSE](LICENSE)
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
 

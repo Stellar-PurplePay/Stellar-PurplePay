@@ -826,7 +826,7 @@ exports[`pages/index.tsx snapshots renders authenticated (wallet connected): Hom
          
         <a
           class="hover:text-market-400 transition-colors"
-          href="https://github.com/KingTaiwoDev/Stellar-PurplePay"
+          href="https://github.com/Stellar-PurplePay/Stellar-PurplePay"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -1245,7 +1245,7 @@ exports[`pages/index.tsx snapshots renders unauthenticated landing page (no wall
          
         <a
           class="hover:text-market-400 transition-colors"
-          href="https://github.com/KingTaiwoDev/Stellar-PurplePay"
+          href="https://github.com/Stellar-PurplePay/Stellar-PurplePay"
           rel="noopener noreferrer"
           target="_blank"
         >
@@ -1701,7 +1701,7 @@ exports[`pages/index.tsx snapshots renders unauthenticated with completed jobs l
          
         <a
           class="hover:text-market-400 transition-colors"
-          href="https://github.com/KingTaiwoDev/Stellar-PurplePay"
+          href="https://github.com/Stellar-PurplePay/Stellar-PurplePay"
           rel="noopener noreferrer"
           target="_blank"
         >

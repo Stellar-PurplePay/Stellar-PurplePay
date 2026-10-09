@@ -7,7 +7,7 @@ Get Stellar PurplePay up and running in under 5 minutes. This guide is designed 
 ### 1️⃣ Clone the Repository (< 1 min)
 Get the code onto your local machine.
 ```bash
-git clone https://github.com/KingTaiwoDev/Stellar-PurplePay.git
+git clone https://github.com/Stellar-PurplePay/Stellar-PurplePay.git
 cd Stellar-PurplePay
 ```
 

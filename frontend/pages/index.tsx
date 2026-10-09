@@ -228,7 +228,7 @@ export default function Home({ publicKey, onConnect, completedJobs }: HomeProps)
         <div className="text-center pb-12 border-t border-market-500/8 pt-8">
           <p className="text-amber-900 text-sm font-body">
             Open source · MIT License ·{" "}
-            <a href="https://github.com/KingTaiwoDev/Stellar-PurplePay" target="_blank" rel="noopener noreferrer"
+            <a href="https://github.com/Stellar-PurplePay/Stellar-PurplePay" target="_blank" rel="noopener noreferrer"
               className="hover:text-market-400 transition-colors">Contribute on GitHub →</a>
           </p>
         </div>

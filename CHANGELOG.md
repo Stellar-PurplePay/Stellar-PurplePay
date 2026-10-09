@@ -107,5 +107,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/KingTaiwoDev/Stellar-PurplePay/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/KingTaiwoDev/Stellar-PurplePay/releases/tag/v1.0.0
+[Unreleased]: https://github.com/Stellar-PurplePay/Stellar-PurplePay/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/Stellar-PurplePay/Stellar-PurplePay/releases/tag/v1.0.0

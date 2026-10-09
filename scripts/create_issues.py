@@ -20,7 +20,7 @@ import subprocess
 import sys
 import time
 
-REPO = "KingTaiwoDev/Stellar-PurplePay"
+REPO = "Stellar-PurplePay/Stellar-PurplePay"
 
 # Labels that already exist on the repo — we never invent new ones.
 BE, FE, SC = "backend", "frontend", "smart contract"
