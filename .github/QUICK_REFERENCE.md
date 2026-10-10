@@ -120,7 +120,7 @@ psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "SELECT 1;"
 |---|---|
 | [docs/ci-secrets.md](../docs/ci-secrets.md) | Need detailed info on any secret |
 | [.github/SETUP_SECRETS.md](./SETUP_SECRETS.md) | Setting up for first time |
-| [.github/README.md](./README.md) | Understanding all workflows |
+| [.github/workflows/README.md](./workflows/README.md) | Understanding all workflows |
 
 ## Ultra Quick Setup (Staging)
 
@@ -165,7 +165,7 @@ If deployment fails:
 1. **Quick answer?** → Check "Common Error Messages" above
 2. **How do I set up secrets?** → [.github/SETUP_SECRETS.md](./SETUP_SECRETS.md)
 3. **What does this secret do?** → [docs/ci-secrets.md](../docs/ci-secrets.md)
-4. **Which workflows need what?** → [.github/README.md](./README.md)
+4. **Which workflows need what?** → [.github/workflows/README.md](./workflows/README.md)
 
 ---
 

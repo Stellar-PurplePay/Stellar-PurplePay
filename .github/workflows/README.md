@@ -44,7 +44,7 @@ DISCORD_WEBHOOK_URL  # Discord notifications
 
 **Status:** ❌ Example only (`.yml.example`). Copy to `.yml` and configure secrets to enable.
 
-**Setup:** See [SETUP_SECRETS.md](./SETUP_SECRETS.md)
+**Setup:** See [SETUP_SECRETS.md](../SETUP_SECRETS.md)
 
 ---
 
@@ -87,7 +87,7 @@ DISCORD_WEBHOOK_URL   # Deployment notifications
 
 **Status:** ❌ Example only (`.yml.example`). Copy to `.yml` and configure secrets to enable.
 
-**Setup:** See [SETUP_SECRETS.md](./SETUP_SECRETS.md)
+**Setup:** See [SETUP_SECRETS.md](../SETUP_SECRETS.md)
 
 ---
 
@@ -116,8 +116,8 @@ DISCORD_WEBHOOK_URL   # Deployment notifications
 No setup needed. The main workflows (CI, E2E, security) run automatically.
 
 ### For Deployment
-1. **Read** [docs/ci-secrets.md](../docs/ci-secrets.md) for detailed secret reference
-2. **Follow** [SETUP_SECRETS.md](./SETUP_SECRETS.md) for quick setup
+1. **Read** [docs/ci-secrets.md](../../docs/ci-secrets.md) for detailed secret reference
+2. **Follow** [SETUP_SECRETS.md](../SETUP_SECRETS.md) for quick setup
 3. **Copy** example workflows and customize for your environment:
    ```bash
    cp .github/workflows/deploy-staging.yml.example .github/workflows/deploy-staging.yml
@@ -127,7 +127,7 @@ No setup needed. The main workflows (CI, E2E, security) run automatically.
 
 ## Secrets Documentation
 
-**Complete reference:** [docs/ci-secrets.md](../docs/ci-secrets.md)
+**Complete reference:** [docs/ci-secrets.md](../../docs/ci-secrets.md)
 
 Covers:
 - All secrets used by each workflow
@@ -136,7 +136,7 @@ Covers:
 - Troubleshooting common issues
 - Security best practices
 
-**Quick setup:** [SETUP_SECRETS.md](./SETUP_SECRETS.md)
+**Quick setup:** [SETUP_SECRETS.md](../SETUP_SECRETS.md)
 
 Checklist for:
 - Staging deployment secrets
@@ -147,18 +147,18 @@ Checklist for:
 
 ### Add a New Workflow
 1. Create `workflows/my-workflow.yml`
-2. Document required secrets in [docs/ci-secrets.md](../docs/ci-secrets.md)
+2. Document required secrets in [docs/ci-secrets.md](../../docs/ci-secrets.md)
 3. Update this README
 
 ### Debug a Failing Workflow
 1. Check workflow logs in GitHub Actions
-2. Look for secrets validation errors (see [ci-secrets.md](../docs/ci-secrets.md) troubleshooting)
+2. Look for secrets validation errors (see [ci-secrets.md](../../docs/ci-secrets.md) troubleshooting)
 3. Verify secrets are configured: Settings → Secrets and variables → Actions
 
 ### Add a New Secret
-1. Document it in [docs/ci-secrets.md](../docs/ci-secrets.md)
+1. Document it in [docs/ci-secrets.md](../../docs/ci-secrets.md)
 2. Add validation step to workflow (see deploy examples)
-3. Add setup instructions to [SETUP_SECRETS.md](./SETUP_SECRETS.md)
+3. Add setup instructions to [SETUP_SECRETS.md](../SETUP_SECRETS.md)
 4. Notify team
 
 ### Enable Discord Notifications
@@ -171,7 +171,7 @@ Checklist for:
 - ✅ **Keep secrets minimal** — Only request what's needed
 - ✅ **Use service accounts** — Don't use admin/root credentials
 - ✅ **Rotate regularly** — Update SSH keys and passwords every 90 days
-- ✅ **Document everything** — Update [docs/ci-secrets.md](../docs/ci-secrets.md) when adding secrets
+- ✅ **Document everything** — Update [docs/ci-secrets.md](../../docs/ci-secrets.md) when adding secrets
 - ✅ **Test locally first** — Verify SSH/AWS/DB access before committing workflows
 - ✅ **Use environment protection** — Require approval for production deployments
 - ✅ **Validate fast** — Check secrets early so failures are quick and clear
@@ -215,12 +215,12 @@ psql -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -c "SELECT 1;"
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [GitHub Actions Secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions)
 - [GitHub Actions Environments](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment)
-- [Project Documentation](../docs/README.md)
+- [Project Documentation](../../docs/README.md)
 
 ## Support
 
 Questions? Check:
-1. [docs/ci-secrets.md](../docs/ci-secrets.md) — Secret reference and troubleshooting
-2. [SETUP_SECRETS.md](./SETUP_SECRETS.md) — Quick setup guide
+1. [docs/ci-secrets.md](../../docs/ci-secrets.md) — Secret reference and troubleshooting
+2. [SETUP_SECRETS.md](../SETUP_SECRETS.md) — Quick setup guide
 3. GitHub Actions logs for your specific run
 4. Open an issue with workflow run link and error logs
