@@ -74,7 +74,8 @@ export default function Home({ publicKey, onConnect, completedJobs }: HomeProps)
   return (
     <div className="relative overflow-hidden">
       {/* Ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-market-500/4 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[850px] h-[550px] bg-gradient-to-b from-purple-600/20 via-fuchsia-600/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-40 right-10 w-[400px] h-[400px] bg-purple-700/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
 

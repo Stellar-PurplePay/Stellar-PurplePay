@@ -36,14 +36,14 @@ const OG_HEIGHT = 630;
 // ink:     deep brown black (900 = #0c0a06, 800 = #151208, 700 = #1f1a0d)
 
 const COLORS = {
-  bgDark: "#0c0a06",
-  bgPanel: "#151208",
-  border: "rgba(245, 158, 11, 0.35)",
-  gold: "#fbbf24",
-  goldSoft: "#fde68a",
-  amber100: "#fef3c7",
-  amber700: "#b45309",
-  amber800: "#92400e",
+  bgDark: "#090414",
+  bgPanel: "#120824",
+  border: "rgba(168, 85, 247, 0.35)",
+  gold: "#c084fc",
+  goldSoft: "#e9d5ff",
+  amber100: "#f5f0ff",
+  amber700: "#c084fc",
+  amber800: "#a855f7",
   emerald: "#34d399",
 };
 

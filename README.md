@@ -7,7 +7,7 @@
 ---
 
 [![CI](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/workflows/ci.yml/badge.svg)](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/workflows/ci.yml)
-[![Vercel Deployment](https://img.shields.io/badge/Deployment-Live%20on%20Vercel-black?logo=vercel)](https://frontend-zeta-sable-22.vercel.app)
+[![Vercel Deployment](https://img.shields.io/badge/Deployment-stellarpurplepay.vercel.app-9333ea?logo=vercel)](https://stellarpurplepay.vercel.app)
 [![Stellar Network](https://img.shields.io/badge/Stellar-Testnet-08B5E5.svg?logo=stellar)](https://stellar.org)
 [![Soroban Smart Contract](https://img.shields.io/badge/Soroban-CDFNNWMA...XCR-9B59B6.svg)](https://stellar.expert/explorer/testnet/contract/CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -22,7 +22,7 @@ Stellar PurplePay is an open-source decentralized freelance commerce platform th
 
 | Component | Target / Environment | Live URL / Explorer Link |
 | :--- | :--- | :--- |
-| **Production Frontend** | Vercel Edge Network | [frontend-zeta-sable-22.vercel.app](https://frontend-zeta-sable-22.vercel.app) |
+| **Production Frontend** | Vercel Edge Network | [stellarpurplepay.vercel.app](https://stellarpurplepay.vercel.app) |
 | **Soroban Smart Contract** | Stellar Testnet | [`CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR`](https://stellar.expert/explorer/testnet/contract/CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR) |
 | **Stellar Lab Contract** | Stellar Testnet | [View in Stellar Lab](https://lab.stellar.org/r/testnet/contract/CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR) |
 | **Deploy Transaction** | Stellar Testnet | [`ed31467a83467539cf...`](https://stellar.expert/explorer/testnet/tx/ed31467a83467539cfd38c1e3ebbbc959cbd02501d7b31a39dc47ec0a17bc1b2) |

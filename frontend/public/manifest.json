@@ -1,13 +1,13 @@
 {
     "name":  "Stellar PurplePay",
     "short_name":  "PurplePay",
-    "description":  "Decentralized freelance marketplace powered by Stellar",
+    "description":  "Decentralized freelance marketplace powered by Stellar and Soroban escrow",
     "start_url":  "/",
     "scope":  "/",
     "display":  "standalone",
     "orientation":  "portrait-primary",
-    "theme_color":  "#f59e0b",
-    "background_color":  "#0c0a06",
+    "theme_color":  "#a855f7",
+    "background_color":  "#090414",
     "categories":  [
                        "business",
                        "productivity"

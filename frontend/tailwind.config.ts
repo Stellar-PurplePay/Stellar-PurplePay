@@ -10,24 +10,41 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // PurplePay signature brand purples
         market: {
-          50:  "#fffbeb",
-          100: "#fef3c7",
-          200: "#fde68a",
-          300: "#fcd34d",
-          400: "#fbbf24",
-          500: "#f59e0b",
-          600: "#d97706",
-          700: "#b45309",
-          800: "#92400e",
-          900: "#78350f",
+          50:  "#faf5ff",
+          100: "#f3e8ff",
+          200: "#e9d5ff",
+          300: "#d8b4fe",
+          400: "#c084fc",
+          500: "#a855f7",
+          600: "#9333ea",
+          700: "#7e22ce",
+          800: "#6b21a8",
+          900: "#581c87",
         },
+        // Midnight obsidian-purple surfaces
         ink: {
-          900: "#0c0a06",
-          800: "#151208",
-          700: "#1f1a0d",
-          600: "#2a2212",
-          500: "#3d3218",
+          950: "#06030c",
+          900: "#090414",
+          800: "#120824",
+          700: "#1a0d33",
+          600: "#251347",
+          500: "#381d68",
+        },
+        // Map amber tokens to vibrant lavender/purple so all UI classes shine in PurplePay purple
+        amber: {
+          50:  "#faf5ff",
+          100: "#f5f0ff",
+          200: "#ede4fe",
+          300: "#ddd0fe",
+          400: "#c4b5fd",
+          500: "#a78bfa",
+          600: "#8b5cf6",
+          700: "#c084fc",
+          800: "#d8b4fe",
+          900: "#e9d5ff",
+          950: "#1a0d33",
         },
       },
       fontFamily: {
