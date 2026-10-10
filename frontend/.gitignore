@@ -8,3 +8,4 @@ public/workbox-*.js
 
 # Dependencies
 node_modules/
+.vercel

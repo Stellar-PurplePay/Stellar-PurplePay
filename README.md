@@ -6,7 +6,7 @@
 
 [![CI](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/workflows/ci.yml/badge.svg)](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/workflows/ci.yml)
 [![Stellar Network](https://img.shields.io/badge/Stellar-Testnet-08B5E5.svg)](https://stellar.org)
-[![Soroban Smart Contract](https://img.shields.io/badge/Soroban-CBFJNX67...LOGG-9B59B6.svg)](https://stellar.expert/explorer/testnet/contract/CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG)
+[![Soroban Smart Contract](https://img.shields.io/badge/Soroban-CDFNNWMA...XCR-9B59B6.svg)](https://stellar.expert/explorer/testnet/contract/CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -18,9 +18,9 @@ Stellar PurplePay is an open-source decentralised freelance marketplace where cl
 
 | Resource | Details |
 | :--- | :--- |
-| **Soroban Contract ID** | [`CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG`](https://stellar.expert/explorer/testnet/contract/CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG) |
-| **Stellar Expert Explorer** | [View Contract on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG) |
-| **Stellar Lab Explorer** | [View Contract in Stellar Lab](https://lab.stellar.org/r/testnet/contract/CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG) |
+| **Soroban Contract ID** | [`CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR`](https://stellar.expert/explorer/testnet/contract/CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR) |
+| **Stellar Expert Explorer** | [View Contract on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR) |
+| **Stellar Lab Explorer** | [View Contract in Stellar Lab](https://lab.stellar.org/r/testnet/contract/CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR) |
 | **Network** | `Stellar Testnet` (Passphrase: `Test SDF Network ; September 2015`) |
 | **Horizon RPC** | `https://horizon-testnet.stellar.org` |
 | **Soroban RPC** | `https://soroban-testnet.stellar.org` |

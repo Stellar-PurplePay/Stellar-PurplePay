@@ -36,28 +36,16 @@ import {
   fetchUserCertificates,
   fetchRatings,
   fetchFreelancerEarnings,
-  type CertificateData,
-  type EarningPayment,
-} from "@/lib/api";
-import StateMessage from "@/components/StateMessage";
-import { useToast } from "@/components/Toast";
-import { useApi } from "@/hooks/useApi";
-import {
-  endorseSkill,
-  fetchEscrow,
-  fetchFreelancerEarnings,
   fetchFreelancerNftCertificates,
   fetchProfiles,
-  fetchPublicProfile,
-  fetchRatings,
-  fetchSkillBadges,
-  fetchSkillEndorsements,
-  fetchUserCertificates,
-  verifyIdentity,
+  fetchEscrow,
   type CertificateData,
   type EarningPayment,
   type NftCertificateData,
 } from "@/lib/api";
+import StateMessage from "@/components/StateMessage";
+import { useToast } from "@/components/Toast";
+import { useApi } from "@/hooks/useApi";
 import { accountUrl, explorerUrl, isValidStellarAddress } from "@/lib/stellar";
 import {
   availabilityBadgeClass,

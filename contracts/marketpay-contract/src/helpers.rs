@@ -1,13 +1,13 @@
 use soroban_sdk::Env;
 
-pub(crate) fn check_not_frozen<T: core::fmt::Display>(env: &Env, context: T) {
+pub(crate) fn check_not_frozen<T>(env: &Env, _context: T) {
     let frozen: bool = env
         .storage()
         .instance()
         .get(&crate::types::DataKey::Frozen)
         .unwrap_or(false);
     if frozen {
-        panic!("contract is frozen for job ID: {}", context);
+        panic!("contract is frozen");
     }
 }
 
@@ -18,7 +18,7 @@ mod tests {
     use soroban_sdk::{Env, String};
 
     #[test]
-    #[should_panic(expected = "contract is frozen for job ID: job-42")]
+    #[should_panic(expected = "contract is frozen")]
     fn frozen_check_includes_job_context() {
         let env = Env::default();
         env.as_contract(&env.register(crate::MarketPayContract, ()), || {

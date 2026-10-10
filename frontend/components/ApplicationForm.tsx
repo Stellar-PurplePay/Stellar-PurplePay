@@ -67,11 +67,6 @@ export default function ApplicationForm({ job, publicKey, biddingPhase = "commit
   const [screeningAnswers, setScreeningAnswers] = useState<Record<string, string>>({});
   const [templates, setTemplates] = useState<{ id: string; name: string; content: string }[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
-  const [creatingScope, setCreatingScope] = useState(false);
-  const [scopeShareUrl, setScopeShareUrl] = useState<string | null>(null);
-  const [scopeSessionId, setScopeSessionId] = useState<string | null>(null);
-  const [scopeCopied, setScopeCopied] = useState(false);
-  const [scopeError, setScopeError] = useState<string | null>(null);
 
   const isSubmitting = submitStatus === "submitting";
   const isSubmitted = submitStatus === "success";
@@ -93,23 +88,6 @@ export default function ApplicationForm({ job, publicKey, biddingPhase = "commit
   const [scopeSessionId, setScopeSessionId] = useState("");
   const [scopeError, setScopeError] = useState<string | null>(null);
   const [scopeCopied, setScopeCopied] = useState(false);
-  const handleInviteCollaborator = async () => {
-    if (scopeShareUrl) return;
-    setCreatingScope(true);
-    try {
-      const { sessionId, sharePath } = await createScopeSession({
-        jobId: job.id,
-        createdBy: publicKey,
-        initialContent: proposal,
-      });
-      setScopeSessionId(sessionId);
-      setScopeShareUrl(window.location.origin + sharePath);
-    } catch (e) {
-      toast.error("Failed to create collaboration session");
-    } finally {
-      setCreatingScope(false);
-    }
-  };
 
   // Issue #152 — enforce 50-word minimum on the proposal.
   const wordCount = proposal.trim() === "" ? 0 : proposal.trim().split(/\s+/).length;
