@@ -48,6 +48,7 @@ function createCorsOptions({ env = process.env, logger = console } = {}) {
       CSRF_HEADER_PUBLIC,
       "X-XSRF-Token", // legacy alias — see note at top of file
       "Idempotency-Key",
+      "X-Request-ID",
     ],
     credentials: true,
   };

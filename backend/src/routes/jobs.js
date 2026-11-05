@@ -510,14 +510,23 @@ router.post("/", jobCreationRateLimiter, verifyJWT, validateJsonb({ milestones: 
 // PATCH /api/jobs/:id — update job status or details
 router.patch("/:id", verifyJWT, generalJobRateLimiter, async (req, res, next) => {
   try {
+    const { getJob, updateJobStatus } = jobService.default || jobService;
+    const existingJob = await getJob(req.params.id);
+    if (!existingJob) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    const caller = req.user?.publicKey;
+    const isParticipant = caller && (existingJob.clientAddress === caller || existingJob.freelancerAddress === caller);
+    if (!isParticipant && !isAdmin(req)) {
+      return res.status(403).json({ error: "Forbidden: You do not have permission to modify this job" });
+    }
+
     const { status } = req.body;
     let job;
     if (status) {
-      const { updateJobStatus } = jobService.default || jobService;
       job = await updateJobStatus(req.params.id, status);
     } else {
-      const { getJob } = jobService.default || jobService;
-      job = await getJob(req.params.id);
+      job = existingJob;
     }
     await cache.invalidateJobListCache();
     res.json({ success: true, data: job });
@@ -723,6 +732,17 @@ router.delete(
   generalJobRateLimiter,
   async (req, res, next) => {
     try {
+      const { getJob } = jobService.default || jobService;
+      const existingJob = await getJob(req.params.id);
+      if (!existingJob) {
+        return res.status(404).json({ error: "Job not found" });
+      }
+      const caller = req.user?.publicKey;
+      const isOwner = caller && existingJob.clientAddress === caller;
+      if (!isOwner && !isAdmin(req)) {
+        return res.status(403).json({ error: "Forbidden: You do not have permission to delete this job" });
+      }
+
       await deleteJob(req.params.id);
       res.json({ success: true });
     } catch (e) {

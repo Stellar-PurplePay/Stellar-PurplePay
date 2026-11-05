@@ -617,15 +617,20 @@ pub(crate) fn timeout_refund(env: Env, job_id: String, client: Address) {
     if escrow.client != client {
         panic!("Only the client can request a timeout refund");
     }
-    if escrow.status != EscrowStatus::Locked {
-        panic!("Escrow is not in Locked state");
-    }
 
     let current_timestamp = env.ledger().timestamp() as u32;
     let timeout_timestamp: Option<u32> = env
         .storage()
         .instance()
         .get(&DataKey::TimeoutTimestamp(job_id.clone()));
+
+    let is_locked = escrow.status == EscrowStatus::Locked;
+    let is_disputed_deadlock = escrow.status == EscrowStatus::Disputed
+        && timeout_timestamp.map_or(false, |t| current_timestamp >= t + 2_592_000);
+
+    if !is_locked && !is_disputed_deadlock {
+        panic!("Escrow is not in a refundable state");
+    }
     let expired = if let Some(timeout_timestamp) = timeout_timestamp {
         current_timestamp >= timeout_timestamp
     } else {
@@ -881,7 +886,7 @@ pub(crate) fn resolve_timeout(env: Env, job_id: String) {
             );
         },
         EscrowStatus::InProgress => {
-            crate::escrow::release_escrow_core(env, job_id, escrow);
+            panic!("Cannot resolve timeout while in progress: raise a dispute or wait for client approval");
         },
         _ => panic!("Cannot resolve timeout in current status"),
     }

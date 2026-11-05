@@ -321,6 +321,10 @@ function dispatchLinkVerification(publicKey, portfolioItems) {
 router.post("/", profileUpdateRateLimiter, validateJsonb({ portfolio_items: portfolioItemsSchema }), async (req, res, next) => {
   try {
     const body = validate(upsertProfileSchema, req.body);
+    const caller = req.user?.publicKey;
+    if (caller && body.publicKey && caller !== body.publicKey && req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden: You can only update your own profile" });
+    }
     const data = await upsertProfile(body);
     if (body.publicKey) {
       const key = cache.profileKey(body.publicKey);
@@ -730,14 +734,35 @@ router.get("/:publicKey/earnings", generalProfileRateLimiter, async (req, res, n
 });
 
 
+const ALLOWED_PROFILE_FILE_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "application/pdf",
+]);
+
+function profileFileFilter(req, file, cb) {
+  if (ALLOWED_PROFILE_FILE_TYPES.has(file.mimetype)) {
+    cb(null, true);
+  } else {
+    const err = new Error("File type not allowed. Allowed types: JPEG, PNG, WEBP, GIF, PDF");
+    err.code = "FILE_TYPE_NOT_ALLOWED";
+    err.status = 400;
+    cb(err, false);
+  }
+}
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE },
+  fileFilter: profileFileFilter,
 });
 
 const uploadMultiple = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: MAX_FILE_SIZE, files: 10 },
+  fileFilter: profileFileFilter,
 });
 
 router.post("/:publicKey/portfolio", verifyJWT, upload.single("file"), async (req, res, next) => {

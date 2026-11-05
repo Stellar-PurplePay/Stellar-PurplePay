@@ -175,6 +175,10 @@ router.get("/freelancer/:publicKey", generalApplicationRateLimiter, async (req, 
 router.post("/", applicationRateLimiter, validateJsonb({ screeningAnswers: screeningAnswersSchema }), async (req, res, next) => {
   try {
     const body = validate(createApplicationSchema, req.body);
+    const caller = req.user?.publicKey;
+    if (caller && body.freelancerAddress && caller !== body.freelancerAddress && req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden: You can only submit applications for your own wallet" });
+    }
     const job = await getJob(body.jobId);
     if (job && req.user) {
       const clientId = job.client_id ?? job.clientAddress ?? job.clientId;
@@ -214,6 +218,10 @@ router.post("/", applicationRateLimiter, validateJsonb({ screeningAnswers: scree
 router.post("/job/:jobId/close-bidding", applicationRateLimiter, async (req, res, next) => {
   try {
     const { clientAddress } = validate(closeBiddingSchema, req.body);
+    const caller = req.user?.publicKey;
+    if (caller && caller !== clientAddress && req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden: Only the job client can close bidding" });
+    }
     const result = await closeBiddingForJob(req.params.jobId, clientAddress);
     res.json({ success: true, data: result });
   } catch (e) {
@@ -225,6 +233,10 @@ router.post("/job/:jobId/close-bidding", applicationRateLimiter, async (req, res
 router.post("/:id/reveal", applicationRateLimiter, async (req, res, next) => {
   try {
     const { freelancerAddress, bidAmount, nonce } = validate(revealBidSchema, req.body);
+    const caller = req.user?.publicKey;
+    if (caller && caller !== freelancerAddress && req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden: Only the bidder can reveal this bid" });
+    }
     const app = await revealApplicationBid(
       req.params.id,
       freelancerAddress,
@@ -241,6 +253,10 @@ router.post("/:id/reveal", applicationRateLimiter, async (req, res, next) => {
 router.post("/:id/accept", applicationRateLimiter, async (req, res, next) => {
   try {
     const { clientAddress, contractTxHash } = validate(acceptApplicationSchema, req.body);
+    const caller = req.user?.publicKey;
+    if (caller && caller !== clientAddress && req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden: Only the job client can accept an application" });
+    }
     const app = await acceptApplication(req.params.id, clientAddress);
     logContractInteraction({
       functionName: "start_work",
@@ -286,6 +302,10 @@ router.get("/:id/history", generalApplicationRateLimiter, async (req, res, next)
 router.delete("/:id", applicationRateLimiter, async (req, res, next) => {
   try {
     const { freelancerAddress } = validate(withdrawApplicationSchema, req.body);
+    const caller = req.user?.publicKey;
+    if (caller && caller !== freelancerAddress && req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden: Only the applicant can withdraw this application" });
+    }
     const app = await withdrawApplication(req.params.id, freelancerAddress);
 
     // Broadcast withdrawal so all connected clients remove the card

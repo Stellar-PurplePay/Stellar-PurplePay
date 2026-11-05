@@ -19,6 +19,9 @@ const rateLimit = require("express-rate-limit");
 const { WebSocketServer } = require("ws");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const { createCorsOptions } = require("./config/cors");
+const { doubleCsrfProtection } = require("./middleware/csrf");
  
 const jobRoutes = require("./routes/jobs");
 const applicationRoutes = require("./routes/applications");
@@ -78,6 +81,12 @@ const scopeSessionClients = new Map();
  
 function subscribeRealtime(ws, roomId) {
   if (typeof roomId !== "string" || !/^(job|user):[^\s:]+$/.test(roomId)) return;
+  if (roomId.startsWith("user:")) {
+    const targetUser = roomId.slice(5);
+    if (!ws.userAddress || ws.userAddress !== targetUser) {
+      return; // Unauthorized: unauthenticated socket or address mismatch
+    }
+  }
   if (!realtimeRooms.has(roomId)) realtimeRooms.set(roomId, new Set());
   realtimeRooms.get(roomId).add(ws);
   ws.realtimeRooms.add(roomId);
@@ -174,14 +183,9 @@ app.locals.broadcastRealtime = broadcastRealtime;
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json({ limit: "20kb" }));
- 
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:3000").split(",").map(o => o.trim());
-app.use(cors({
-  origin: (origin, cb) => (!origin || allowedOrigins.includes(origin)) ? cb(null, true) : cb(new Error("CORS blocked")),
-  methods: ["GET", "POST", "PATCH", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-}));
+app.use(cookieParser());
+app.use(cors(createCorsOptions()));
+app.use(doubleCsrfProtection);
  
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 150, standardHeaders: true, legacyHeaders: true }));
  
@@ -283,6 +287,7 @@ wsServer.on("connection", async (ws, request) => {
         // Anonymous realtime subscriptions remain supported.
       }
     }
+    ws.userAddress = userAddress;
     ws.realtimeRooms = new Set();
     realtimeClients.add(ws);
     if (userAddress) {
