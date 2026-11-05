@@ -31,7 +31,9 @@ let cachedServerKeypair = null;
 function getServerKeypair() {
   if (!cachedServerKeypair) {
     if (!process.env.SERVER_PRIVATE_KEY && process.env.NODE_ENV === "production") {
-      console.warn("[SECURITY] SERVER_PRIVATE_KEY is unset in production. Ephemeral keypairs will cause SEP-10 validation discrepancies across workers.");
+      throw new Error(
+        "[SECURITY] SERVER_PRIVATE_KEY environment variable is required in production to ensure SEP-10 validation consistency across cluster workers",
+      );
     }
     const serverPrivateKey =
       process.env.SERVER_PRIVATE_KEY || Keypair.random().secret();

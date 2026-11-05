@@ -130,7 +130,7 @@
       }
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(isomorphic-dompurify|dompurify|@exodus|@stellar|@noble|uuid|sanitize-html|htmlparser2|domhandler|domutils|entities|dom-serializer|domelementtype|uint8array-extras)/)"
+      "node_modules/(?!(isomorphic-dompurify|dompurify|@exodus|@stellar|@noble|uuid|sanitize-html|htmlparser2|domhandler|domutils|entities|dom-serializer|domelementtype|uint8array-extras|date-fns)/)"
     ],
     "moduleNameMapper": {
       "^(\\.{1,2}/.*)\\.js$": "$1"
@@ -147,7 +147,7 @@
           "src/tests/integration"
         ],
         "transformIgnorePatterns": [
-          "node_modules/(?!(isomorphic-dompurify|dompurify|@exodus|@stellar|@noble|uuid|sanitize-html|htmlparser2|domhandler|domutils|entities|dom-serializer|domelementtype|uint8array-extras)/)"
+          "node_modules/(?!(isomorphic-dompurify|dompurify|@exodus|@stellar|@noble|uuid|sanitize-html|htmlparser2|domhandler|domutils|entities|dom-serializer|domelementtype|uint8array-extras|date-fns)/)"
         ],
         "moduleNameMapper": {
           "^(\\.{1,2}/.*)\\.js$": "$1"
@@ -167,7 +167,7 @@
         ],
         "testTimeout": 30000,
         "transformIgnorePatterns": [
-          "/node_modules/(?!(sanitize-html|@stellar|@noble|htmlparser2|domhandler|domutils|entities|domelementtype|dom-serializer)/)"
+          "node_modules/(?!(isomorphic-dompurify|dompurify|@exodus|@stellar|@noble|uuid|sanitize-html|htmlparser2|domhandler|domutils|entities|dom-serializer|domelementtype|uint8array-extras|date-fns)/)"
         ],
         "moduleNameMapper": {
           "^(\\.{1,2}/.*)\\.js$": "$1"
