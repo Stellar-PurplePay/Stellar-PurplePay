@@ -103,13 +103,13 @@ Stellar-PurplePay/
 │   ├── migrations/            # Versioned SQL database migrations (V1–V49)
 │   └── tests/                 # Unit, integration, and security regression test suites
 ├── contracts/                 # Soroban Smart Contracts (Rust / WASM)
-│   ├── marketpay-contract/    # Primary non-custodial escrow & milestone settlement contract
-│   ├── arbitrator-registry/   # DAO arbitrator pool, voting, and dispute governance contract
-│   ├── marketpay/             # Sep-41 token interactions & auction extensions
-│   └── certora/               # Formal verification invariant specifications
-├── infra/                     # Infrastructure configuration (Nginx, Cloudflare, Docker)
-├── monitoring/                # Prometheus metrics collection and Grafana observability
-├── k6/                        # High-load performance benchmarks and stress tests
+│   ├── purplepay-contract/    # Primary non-custodial escrow & milestone settlement contract
+│   └── arbitrator-registry/   # DAO arbitrator pool, voting, and dispute governance contract
+
+
+
+
+
 ├── docs/                      # Technical specifications, ADRs, and API documentation
 └── .github/                   # GitHub Actions CI/CD workflows and issue templates
 ```
@@ -178,7 +178,7 @@ npm run dev
 ### Step 4: Build Smart Contracts (Optional for Contract Devs)
 
 ```bash
-cd ../contracts/marketpay-contract
+cd ../contracts/purplepay-contract
 cargo check --target wasm32v1-none
 cargo build --target wasm32v1-none --release
 
@@ -245,7 +245,7 @@ cd ../frontend
 npm run test:e2e
 
 # Smart Contract Rust Unit Tests & Simulation
-cd ../contracts/marketpay-contract
+cd ../contracts/purplepay-contract
 cargo test
 ```
 

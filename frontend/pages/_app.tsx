@@ -25,7 +25,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useTranslation } from "@/lib/i18n";
 
 const LOCALE_STORAGE_KEY = "stellar-purplepay:locale";
-const LEGACY_LOCALE_STORAGE_KEY = "stellar-marketpay:locale";
+const LEGACY_LOCALE_STORAGE_KEY = "stellar-purplepay:locale";
 const SUPPORTED_LOCALES = new Set(["en", "es", "fr", "pt"]);
 
 function getInitialLocale(): string {

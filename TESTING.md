@@ -229,10 +229,10 @@ npx playwright show-report
 Soroban smart-contract tests are Rust unit tests that run against the Soroban
 test host — no testnet needed.
 
-### Escrow contract (`contracts/marketpay-contract`)
+### Escrow contract (`contracts/purplepay-contract`)
 
 ```bash
-cd contracts/marketpay-contract
+cd contracts/purplepay-contract
 
 # All contract tests
 cargo test
@@ -256,7 +256,7 @@ cargo clippy --all-targets -- -D warnings
 Optional release build (verifies the WASM artifact compiles):
 
 ```bash
-cd contracts/marketpay-contract
+cd contracts/purplepay-contract
 cargo build --target wasm32v1-none --release
 ```
 
@@ -358,7 +358,7 @@ npm test
 npm run test:e2e                # needs Playwright browsers (see §5)
 
 # ── Contracts ───────────────────────────────────────────────────────────────
-cd ../contracts/marketpay-contract
+cd ../contracts/purplepay-contract
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test
@@ -371,7 +371,7 @@ cargo test --features proptest milestone_pct_proptests
 | Backend unit | `backend/src/**/*.test.js` | `cd backend && npx jest --selectProjects unit` |
 | Backend integration | `backend/src/tests/integration/` | `cd backend && npm run test:integration` |
 | Frontend e2e | `frontend/tests/e2e/` | `cd frontend && npm run test:e2e` |
-| Contracts | `contracts/*` | `cd contracts/marketpay-contract && cargo test` |
+| Contracts | `contracts/*` | `cd contracts/purplepay-contract && cargo test` |
 | Mutation | `backend/src/services/` | `cd backend && npx stryker run` |
 | Load | `k6/` | `docker compose -f docker-compose.loadtest.yml run --rm k6 run scripts/jobs-listing.js` |
 

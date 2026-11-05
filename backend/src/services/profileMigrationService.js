@@ -16,7 +16,7 @@ const pool = require("../db/pool");
 const cache = require("./cacheService");
 
 const CHALLENGE_PREFIX = "PURPLEPAY-ACCOUNT-MERGE";
-const LEGACY_CHALLENGE_PREFIX = "MARKETPAY-ACCOUNT-MERGE";
+const LEGACY_CHALLENGE_PREFIX = "PURPLEPAY-ACCOUNT-MERGE-LEGACY";
 const CHALLENGE_TTL_MS = 10 * 60 * 1000; // signature must be issued within 10 min
 
 /** Build the canonical string both parties must sign. */

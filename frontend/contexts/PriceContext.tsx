@@ -8,7 +8,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 export type CurrencyMode = "XLM" | "USD";
 
-const CURRENCY_STORAGE_KEY = "marketpay_currency_mode";
+const CURRENCY_STORAGE_KEY = "purplepay_currency_mode";
 
 interface PriceContextValue {
   xlmPriceUsd: number | null;

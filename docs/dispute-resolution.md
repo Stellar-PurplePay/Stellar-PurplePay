@@ -141,7 +141,7 @@ a higher dispute rate) lower reliability scores and can affect account standing.
 | Arbitrator registry client | `backend/src/services/sorobanArbitratorRegistry.js` | Read on-chain arbitrators, merge DB metadata |
 | DAO service | `backend/src/services/daoService.js` | Off-chain arbitrator registry, voting, top panel |
 | IPFS / Pinata | `backend/src/services/ipfsService.js` | Pin evidence files, verify pins (`pin ls`), gateways, signed URL tokens |
-| PurplePay contract | `contracts/marketpay-contract/src/disputes.rs` | `raise_dispute`, `resolve_dispute`, bond handling |
+| PurplePay contract | `contracts/purplepay-contract/src/disputes.rs` | `raise_dispute`, `resolve_dispute`, bond handling |
 | Arbitrator-registry contract | `contracts/arbitrator-registry/src/lib.rs` | Staked registration, DAO add/remove, reads |
 | Event indexer | `backend/src/services/indexerService.js` | Mirrors on-chain events into PostgreSQL |
 
@@ -280,7 +280,7 @@ sequenceDiagram
 
 ### On-chain enforcement (contract → payout)
 
-`resolve_dispute` (`contracts/marketpay-contract/src/disputes.rs:124`):
+`resolve_dispute` (`contracts/purplepay-contract/src/disputes.rs:124`):
 
 1. Auth: only the designated arbitrator (matches `DataKey::ArbitratorAddress`)
    may call (`7003`); escrow must be `Disputed` (`7004`).

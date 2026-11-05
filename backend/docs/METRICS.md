@@ -15,17 +15,17 @@ The table below lists all custom application metrics exported by the backend API
 | `active_websocket_connections`                       | Gauge     | `channel`                        | Currently open WebSocket connections per channel                                |
 | `pool_queries_total`                                 | Counter   | `operation`, `status`            | Total PostgreSQL queries executed through the shared pool                       |
 | `pool_query_duration_ms`                             | Histogram | `operation`, `status`            | PostgreSQL pool query latency in **milliseconds**                               |
-| `marketpay_db_connections`                           | Gauge     | `state`                          | Current PostgreSQL pool connection counts by state (`total`, `idle`, `waiting`) |
+| `purplepay_db_connections`                           | Gauge     | `state`                          | Current PostgreSQL pool connection counts by state (`total`, `idle`, `waiting`) |
 | `pg_pool_total`                                      | Gauge     | _None_                           | Total PostgreSQL connections allocated in the pool                              |
 | `pg_pool_idle`                                       | Gauge     | _None_                           | Idle PostgreSQL connections available in the pool                               |
 | `pg_pool_waiting`                                    | Gauge     | _None_                           | Client requests waiting for an available database connection                    |
 | `notification_queue_pending`                         | Gauge     | _None_                           | Pending outbound notifications queued for processing                            |
 | `ipfs_pin_verification_failures_total`               | Counter   | `reason`                         | IPFS uploads whose pin could not be verified after retries (`not_pinned`, `api_error`, `invalid_cid`) |
-| `stellar_marketpay_horizon_request_duration_seconds` | Histogram | `method`, `status`               | Outbound Horizon API request duration in **seconds**                            |
-| `marketpay_http_requests_total`                      | Counter   | `method`, `route`, `status_code` | _(Legacy alias)_ Total HTTP requests handled                                    |
-| `marketpay_http_request_duration_seconds`            | Histogram | `method`, `route`, `status_code` | _(Legacy alias)_ HTTP request latency in **seconds**                            |
+| `stellar_purplepay_horizon_request_duration_seconds` | Histogram | `method`, `status`               | Outbound Horizon API request duration in **seconds**                            |
+| `purplepay_http_requests_total`                      | Counter   | `method`, `route`, `status_code` | _(Legacy alias)_ Total HTTP requests handled                                    |
+| `purplepay_http_request_duration_seconds`            | Histogram | `method`, `route`, `status_code` | _(Legacy alias)_ HTTP request latency in **seconds**                            |
 | `ws_connections_active`                              | Gauge     | _None_                           | _(Legacy alias)_ Active WebSocket connections on `realtime` channel             |
-| `marketpay_*`                                        | Various   | Various                          | Node.js process and runtime default metrics                                     |
+| `purplepay_*`                                        | Various   | Various                          | Node.js process and runtime default metrics                                     |
 
 ---
 
@@ -44,19 +44,19 @@ The table below lists all custom application metrics exported by the backend API
 - **Example PromQL Queries**:
   - **Overall request rate (req/s) over 5m window**:
     ```promql
-    sum(rate(http_requests_total{job="marketpay-backend"}[5m]))
+    sum(rate(http_requests_total{job="purplepay-backend"}[5m]))
     ```
   - **Top 10 highest-traffic routes**:
     ```promql
-    topk(10, sum by (route, method) (rate(http_requests_total{job="marketpay-backend"}[5m])))
+    topk(10, sum by (route, method) (rate(http_requests_total{job="purplepay-backend"}[5m])))
     ```
   - **5xx Server Error Rate (%)**:
     ```promql
-    100 * sum(rate(http_requests_total{job="marketpay-backend",status_code=~"5.."}[5m])) / clamp_min(sum(rate(http_requests_total{job="marketpay-backend"}[5m])), 0.001)
+    100 * sum(rate(http_requests_total{job="purplepay-backend",status_code=~"5.."}[5m])) / clamp_min(sum(rate(http_requests_total{job="purplepay-backend"}[5m])), 0.001)
     ```
   - **Request throughput broken down by status code**:
     ```promql
-    sum by (status_code) (rate(http_requests_total{job="marketpay-backend"}[5m]))
+    sum by (status_code) (rate(http_requests_total{job="purplepay-backend"}[5m]))
     ```
 
 #### `http_request_duration_ms`
@@ -68,18 +68,18 @@ The table below lists all custom application metrics exported by the backend API
 - **Example PromQL Queries**:
   - **p95 and p99 request latency**:
     ```promql
-    histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{job="marketpay-backend"}[5m])) by (le))
+    histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket{job="purplepay-backend"}[5m])) by (le))
     ```
     ```promql
-    histogram_quantile(0.99, sum(rate(http_request_duration_ms_bucket{job="marketpay-backend"}[5m])) by (le))
+    histogram_quantile(0.99, sum(rate(http_request_duration_ms_bucket{job="purplepay-backend"}[5m])) by (le))
     ```
   - **p95 latency grouped by route**:
     ```promql
-    topk(10, histogram_quantile(0.95, sum by (route, le) (rate(http_request_duration_ms_bucket{job="marketpay-backend"}[5m]))))
+    topk(10, histogram_quantile(0.95, sum by (route, le) (rate(http_request_duration_ms_bucket{job="purplepay-backend"}[5m]))))
     ```
   - **Average request duration (ms)**:
     ```promql
-    sum(rate(http_request_duration_ms_sum{job="marketpay-backend"}[5m])) / sum(rate(http_request_duration_ms_count{job="marketpay-backend"}[5m]))
+    sum(rate(http_request_duration_ms_sum{job="purplepay-backend"}[5m])) / sum(rate(http_request_duration_ms_count{job="purplepay-backend"}[5m]))
     ```
 
 ---
@@ -95,15 +95,15 @@ The table below lists all custom application metrics exported by the backend API
 - **Example PromQL Queries**:
   - **Active connections per channel**:
     ```promql
-    active_websocket_connections{job="marketpay-backend"}
+    active_websocket_connections{job="purplepay-backend"}
     ```
   - **Total active WebSocket connections across all channels**:
     ```promql
-    sum(active_websocket_connections{job="marketpay-backend"})
+    sum(active_websocket_connections{job="purplepay-backend"})
     ```
   - **Connection rate of change (derivative over 5m)**:
     ```promql
-    sum(deriv(active_websocket_connections{job="marketpay-backend"}[5m]))
+    sum(deriv(active_websocket_connections{job="purplepay-backend"}[5m]))
     ```
 
 ---
@@ -122,15 +122,15 @@ Database metrics are instrumented through the shared PostgreSQL connection pool 
 - **Example PromQL Queries**:
   - **Query throughput (queries/s) by operation**:
     ```promql
-    sum by (operation) (rate(pool_queries_total{job="marketpay-backend"}[5m]))
+    sum by (operation) (rate(pool_queries_total{job="purplepay-backend"}[5m]))
     ```
   - **Failed queries per second**:
     ```promql
-    sum by (operation) (rate(pool_queries_total{job="marketpay-backend",status="error"}[5m]))
+    sum by (operation) (rate(pool_queries_total{job="purplepay-backend",status="error"}[5m]))
     ```
   - **Database error percentage**:
     ```promql
-    100 * sum(rate(pool_queries_total{job="marketpay-backend",status="error"}[5m])) / clamp_min(sum(rate(pool_queries_total{job="marketpay-backend"}[5m])), 0.001)
+    100 * sum(rate(pool_queries_total{job="purplepay-backend",status="error"}[5m])) / clamp_min(sum(rate(pool_queries_total{job="purplepay-backend"}[5m])), 0.001)
     ```
 
 #### `pool_query_duration_ms`
@@ -144,18 +144,18 @@ Database metrics are instrumented through the shared PostgreSQL connection pool 
 - **Example PromQL Queries**:
   - **p95 query execution latency**:
     ```promql
-    histogram_quantile(0.95, sum(rate(pool_query_duration_ms_bucket{job="marketpay-backend"}[5m])) by (le))
+    histogram_quantile(0.95, sum(rate(pool_query_duration_ms_bucket{job="purplepay-backend"}[5m])) by (le))
     ```
   - **p99 query latency by operation**:
     ```promql
-    histogram_quantile(0.99, sum by (operation, le) (rate(pool_query_duration_ms_bucket{job="marketpay-backend"}[5m])))
+    histogram_quantile(0.99, sum by (operation, le) (rate(pool_query_duration_ms_bucket{job="purplepay-backend"}[5m])))
     ```
   - **Average query duration (ms) for SELECT queries**:
     ```promql
-    sum(rate(pool_query_duration_ms_sum{job="marketpay-backend",operation="select"}[5m])) / sum(rate(pool_query_duration_ms_count{job="marketpay-backend",operation="select"}[5m]))
+    sum(rate(pool_query_duration_ms_sum{job="purplepay-backend",operation="select"}[5m])) / sum(rate(pool_query_duration_ms_count{job="purplepay-backend",operation="select"}[5m]))
     ```
 
-#### `marketpay_db_connections`
+#### `purplepay_db_connections`
 
 - **Type**: `Gauge`
 - **Description**: Current connection count in the shared PostgreSQL pool, partitioned by connection state.
@@ -167,15 +167,15 @@ Database metrics are instrumented through the shared PostgreSQL connection pool 
 - **Example PromQL Queries**:
   - **Connection pool breakdown by state**:
     ```promql
-    marketpay_db_connections{job="marketpay-backend"}
+    purplepay_db_connections{job="purplepay-backend"}
     ```
   - **Active connections currently in use**:
     ```promql
-    marketpay_db_connections{job="marketpay-backend",state="total"} - marketpay_db_connections{job="marketpay-backend",state="idle"}
+    purplepay_db_connections{job="purplepay-backend",state="total"} - purplepay_db_connections{job="purplepay-backend",state="idle"}
     ```
   - **Connection pool utilization percentage**:
     ```promql
-    100 * (marketpay_db_connections{job="marketpay-backend",state="total"} - marketpay_db_connections{job="marketpay-backend",state="idle"}) / clamp_min(marketpay_db_connections{job="marketpay-backend",state="total"}, 1)
+    100 * (purplepay_db_connections{job="purplepay-backend",state="total"} - purplepay_db_connections{job="purplepay-backend",state="idle"}) / clamp_min(purplepay_db_connections{job="purplepay-backend",state="total"}, 1)
     ```
 
 #### `pg_pool_total`
@@ -185,7 +185,7 @@ Database metrics are instrumented through the shared PostgreSQL connection pool 
 - **Labels**: _None_
 - **Example PromQL Query**:
   ```promql
-  pg_pool_total{job="marketpay-backend"}
+  pg_pool_total{job="purplepay-backend"}
   ```
 
 #### `pg_pool_idle`
@@ -195,7 +195,7 @@ Database metrics are instrumented through the shared PostgreSQL connection pool 
 - **Labels**: _None_
 - **Example PromQL Query**:
   ```promql
-  pg_pool_idle{job="marketpay-backend"}
+  pg_pool_idle{job="purplepay-backend"}
   ```
 
 #### `pg_pool_waiting`
@@ -205,11 +205,11 @@ Database metrics are instrumented through the shared PostgreSQL connection pool 
 - **Labels**: _None_
 - **Example PromQL Query**:
   ```promql
-  pg_pool_waiting{job="marketpay-backend"}
+  pg_pool_waiting{job="purplepay-backend"}
   ```
   - **Pool exhaustion alert condition**:
     ```promql
-    pg_pool_waiting{job="marketpay-backend"} > 0
+    pg_pool_waiting{job="purplepay-backend"} > 0
     ```
 
 ---
@@ -224,11 +224,11 @@ Database metrics are instrumented through the shared PostgreSQL connection pool 
 - **Example PromQL Queries**:
   - **Current pending notification backlog**:
     ```promql
-    notification_queue_pending{job="marketpay-backend"}
+    notification_queue_pending{job="purplepay-backend"}
     ```
   - **Backlog growth rate (derivative over 5m)**:
     ```promql
-    deriv(notification_queue_pending{job="marketpay-backend"}[5m])
+    deriv(notification_queue_pending{job="purplepay-backend"}[5m])
     ```
 
 ---
@@ -244,11 +244,11 @@ Database metrics are instrumented through the shared PostgreSQL connection pool 
 - **Example PromQL Queries**:
   - **Pin failures in the last 15 minutes**:
     ```promql
-    increase(ipfs_pin_verification_failures_total{job="marketpay-backend"}[15m])
+    increase(ipfs_pin_verification_failures_total{job="purplepay-backend"}[15m])
     ```
   - **Failures broken down by reason**:
     ```promql
-    sum by (reason) (rate(ipfs_pin_verification_failures_total{job="marketpay-backend"}[1h]))
+    sum by (reason) (rate(ipfs_pin_verification_failures_total{job="purplepay-backend"}[1h]))
     ```
 
 ---
@@ -257,7 +257,7 @@ Database metrics are instrumented through the shared PostgreSQL connection pool 
 
 Outbound Horizon RPC calls (`backend/src/utils/horizonClient.js`) are instrumented with latency tracking, concurrency limiting (max 5), and automatic exponential retry on HTTP 429.
 
-#### `stellar_marketpay_horizon_request_duration_seconds`
+#### `stellar_purplepay_horizon_request_duration_seconds`
 
 - **Type**: `Histogram`
 - **Description**: Latency of outbound Stellar Horizon API calls in **seconds**.
@@ -268,15 +268,15 @@ Outbound Horizon RPC calls (`backend/src/utils/horizonClient.js`) are instrument
 - **Example PromQL Queries**:
   - **p95 Horizon request latency**:
     ```promql
-    histogram_quantile(0.95, sum(rate(stellar_marketpay_horizon_request_duration_seconds_bucket[5m])) by (le))
+    histogram_quantile(0.95, sum(rate(stellar_purplepay_horizon_request_duration_seconds_bucket[5m])) by (le))
     ```
   - **Horizon request throughput by status**:
     ```promql
-    sum by (status) (rate(stellar_marketpay_horizon_request_duration_seconds_count[5m]))
+    sum by (status) (rate(stellar_purplepay_horizon_request_duration_seconds_count[5m]))
     ```
   - **Horizon call failure rate (%)**:
     ```promql
-    100 * sum(rate(stellar_marketpay_horizon_request_duration_seconds_count{status="error"}[5m])) / clamp_min(sum(rate(stellar_marketpay_horizon_request_duration_seconds_count[5m])), 0.001)
+    100 * sum(rate(stellar_purplepay_horizon_request_duration_seconds_count{status="error"}[5m])) / clamp_min(sum(rate(stellar_purplepay_horizon_request_duration_seconds_count[5m])), 0.001)
     ```
 
 ---
@@ -285,17 +285,17 @@ Outbound Horizon RPC calls (`backend/src/utils/horizonClient.js`) are instrument
 
 These legacy series are emitted alongside canonical series to prevent breaking pre-existing dashboards or alerting rules:
 
-#### `marketpay_http_requests_total`
+#### `purplepay_http_requests_total`
 
 - **Type**: `Counter`
 - **Labels**: `method`, `route`, `status_code`
 - **Description**: Legacy alias for `http_requests_total`.
 - **Example PromQL**:
   ```promql
-  sum(rate(marketpay_http_requests_total[5m]))
+  sum(rate(purplepay_http_requests_total[5m]))
   ```
 
-#### `marketpay_http_request_duration_seconds`
+#### `purplepay_http_request_duration_seconds`
 
 - **Type**: `Histogram` (seconds)
 - **Labels**: `method`, `route`, `status_code`
@@ -303,7 +303,7 @@ These legacy series are emitted alongside canonical series to prevent breaking p
 - **Description**: Legacy alias for HTTP request duration, exposed in seconds.
 - **Example PromQL**:
   ```promql
-  histogram_quantile(0.99, sum(rate(marketpay_http_request_duration_seconds_bucket[5m])) by (le))
+  histogram_quantile(0.99, sum(rate(purplepay_http_request_duration_seconds_bucket[5m])) by (le))
   ```
 
 #### `ws_connections_active`
@@ -320,31 +320,31 @@ These legacy series are emitted alongside canonical series to prevent breaking p
 
 ### 7. Node.js & Process Default Metrics
 
-Default metrics from `promClient.collectDefaultMetrics` are registered under the prefix `marketpay_`.
+Default metrics from `promClient.collectDefaultMetrics` are registered under the prefix `purplepay_`.
 
 | Metric Name                                  | Type    | Description                               |
 | -------------------------------------------- | ------- | ----------------------------------------- |
-| `marketpay_process_cpu_user_seconds_total`   | Counter | Total user CPU time spent in seconds      |
-| `marketpay_process_cpu_system_seconds_total` | Counter | Total system CPU time spent in seconds    |
-| `marketpay_process_resident_memory_bytes`    | Gauge   | Resident set size (RSS) in bytes          |
-| `marketpay_nodejs_heap_size_total_bytes`     | Gauge   | Total V8 heap size in bytes               |
-| `marketpay_nodejs_heap_size_used_bytes`      | Gauge   | Used V8 heap size in bytes                |
-| `marketpay_nodejs_eventloop_lag_p99_seconds` | Gauge   | 99th percentile event loop lag in seconds |
-| `marketpay_nodejs_active_handles_total`      | Gauge   | Total number of active libuv handles      |
+| `purplepay_process_cpu_user_seconds_total`   | Counter | Total user CPU time spent in seconds      |
+| `purplepay_process_cpu_system_seconds_total` | Counter | Total system CPU time spent in seconds    |
+| `purplepay_process_resident_memory_bytes`    | Gauge   | Resident set size (RSS) in bytes          |
+| `purplepay_nodejs_heap_size_total_bytes`     | Gauge   | Total V8 heap size in bytes               |
+| `purplepay_nodejs_heap_size_used_bytes`      | Gauge   | Used V8 heap size in bytes                |
+| `purplepay_nodejs_eventloop_lag_p99_seconds` | Gauge   | 99th percentile event loop lag in seconds |
+| `purplepay_nodejs_active_handles_total`      | Gauge   | Total number of active libuv handles      |
 
 **Example PromQL Queries**:
 
 - **Process CPU utilization (%)**:
   ```promql
-  rate(marketpay_process_cpu_user_seconds_total{job="marketpay-backend"}[5m]) * 100
+  rate(purplepay_process_cpu_user_seconds_total{job="purplepay-backend"}[5m]) * 100
   ```
 - **Heap memory utilization (%)**:
   ```promql
-  100 * marketpay_nodejs_heap_size_used_bytes{job="marketpay-backend"} / marketpay_nodejs_heap_size_total_bytes{job="marketpay-backend"}
+  100 * purplepay_nodejs_heap_size_used_bytes{job="purplepay-backend"} / purplepay_nodejs_heap_size_total_bytes{job="purplepay-backend"}
   ```
 - **Event loop lag p99**:
   ```promql
-  marketpay_nodejs_eventloop_lag_p99_seconds{job="marketpay-backend"}
+  purplepay_nodejs_eventloop_lag_p99_seconds{job="purplepay-backend"}
   ```
 
 ---
@@ -401,8 +401,8 @@ The repository includes ready-to-use Prometheus scrape jobs, alerting rules, and
 | -------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `monitoring/prometheus/prometheus.yml`                         | Scrape job configuration targeting `backend:4000/metrics` every 15s                    |
 | `monitoring/prometheus/rules/alerts.yml`                       | Prometheus alert definitions (p99 latency, 5xx error rate, pool exhaustion, WS spikes) |
-| `monitoring/grafana/dashboards/marketpay-backend-metrics.json` | Comprehensive Grafana dashboard (uid `marketpay-backend-metrics`)                      |
-| `monitoring/grafana/dashboards/marketpay-overview.json`        | High-level system overview dashboard                                                   |
+| `monitoring/grafana/dashboards/purplepay-backend-metrics.json` | Comprehensive Grafana dashboard (uid `purplepay-backend-metrics`)                      |
+| `monitoring/grafana/dashboards/purplepay-overview.json`        | High-level system overview dashboard                                                   |
 
 Grafana automatically provisions dashboards placed in `monitoring/grafana/dashboards`.
 

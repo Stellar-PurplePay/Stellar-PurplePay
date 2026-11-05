@@ -81,12 +81,12 @@ The onboarding lifecycle uses a multi-tier storage pattern combining client stor
 
 | Storage Key                                     | Type                    | Description                                                                   |
 | ----------------------------------------------- | ----------------------- | ----------------------------------------------------------------------------- |
-| `marketpay_onboarding_wizard`                   | JSON Object             | Stores active step index, completed step array, and wizard completion flags.  |
-| `marketpay_onboarding_completed`                | JSON Object             | Stores welcome modal view status, checklist dismissal, and cached percentage. |
-| `marketpay_tooltips_dismissed`                  | JSON Array (`string[]`) | List of dismissed contextual tooltip identifiers.                             |
-| `marketpay_completeness_widget_dismissed_until` | ISO Date String         | Expiration timestamp for the "Remind me later" 3-day snooze period.           |
+| `purplepay_onboarding_wizard`                   | JSON Object             | Stores active step index, completed step array, and wizard completion flags.  |
+| `purplepay_onboarding_completed`                | JSON Object             | Stores welcome modal view status, checklist dismissal, and cached percentage. |
+| `purplepay_tooltips_dismissed`                  | JSON Array (`string[]`) | List of dismissed contextual tooltip identifiers.                             |
+| `purplepay_completeness_widget_dismissed_until` | ISO Date String         | Expiration timestamp for the "Remind me later" 3-day snooze period.           |
 
-#### `marketpay_onboarding_wizard` Schema
+#### `purplepay_onboarding_wizard` Schema
 
 ```json
 {
@@ -98,7 +98,7 @@ The onboarding lifecycle uses a multi-tier storage pattern combining client stor
 }
 ```
 
-#### `marketpay_onboarding_completed` Schema
+#### `purplepay_onboarding_completed` Schema
 
 ```json
 {

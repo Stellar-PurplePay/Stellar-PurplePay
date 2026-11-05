@@ -156,8 +156,8 @@ function Dashboard({ publicKey }: { publicKey: string | null }) {
 
 The onboarding system uses localStorage to persist state:
 
-- `marketpay_onboarding_completed` - Stores welcome modal and checklist dismissal state
-- `marketpay_tooltips_dismissed` - Array of dismissed tooltip IDs
+- `purplepay_onboarding_completed` - Stores welcome modal and checklist dismissal state
+- `purplepay_tooltips_dismissed` - Array of dismissed tooltip IDs
 
 ## Profile Completion Criteria
 

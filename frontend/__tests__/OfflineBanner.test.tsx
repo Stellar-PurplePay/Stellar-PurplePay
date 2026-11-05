@@ -93,7 +93,7 @@ describe("OfflineBanner", () => {
 
   it("shows cached job count link when jobs are stored in localStorage", async () => {
     localStorage.setItem(
-      "marketpay_last_viewed_jobs",
+      "purplepay_last_viewed_jobs",
       JSON.stringify([{ id: "1" }, { id: "2" }])
     );
     setNavigatorOnline(false);

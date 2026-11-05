@@ -2,15 +2,15 @@
 
 PurplePay is powered by two Soroban smart contracts deployed on Stellar:
 
-- **`MarketPayContract`** (`contracts/marketpay-contract/src/lib.rs`) — escrow, milestones, sealed-bid auctions, disputes/bonds, arbitration, governance, certificates, ratings, messaging.
+- **`PurplePayContract`** (`contracts/purplepay-contract/src/lib.rs`) — escrow, milestones, sealed-bid auctions, disputes/bonds, arbitration, governance, certificates, ratings, messaging.
 - **`ArbitratorRegistry`** (`contracts/arbitrator-registry/src/lib.rs`) — staking-gated arbitrator registration used to source arbitrators for disputes.
 
 This is the authoritative reference for every public entrypoint, data type, storage key, and event **currently implemented** in those two contracts.
 
-> **Source:** `contracts/marketpay-contract/src/lib.rs`, `contracts/arbitrator-registry/src/lib.rs`
+> **Source:** `contracts/purplepay-contract/src/lib.rs`, `contracts/arbitrator-registry/src/lib.rs`
 > **Soroban SDK:** 22.0.0
 > **Build target:** `wasm32-unknown-unknown` (release)
-> **Function count:** `MarketPayContract` exposes **71** public entrypoints; `ArbitratorRegistry` exposes **13**.
+> **Function count:** `PurplePayContract` exposes **71** public entrypoints; `ArbitratorRegistry` exposes **13**.
 
 ---
 
@@ -278,7 +278,7 @@ Proof-of-work record minted to the freelancer once the escrow is released.
 
 ## Storage Keys
 
-`DataKey` enum variants used as instance-storage keys in `MarketPayContract`:
+`DataKey` enum variants used as instance-storage keys in `PurplePayContract`:
 
 | Key                                 | Value Type              | Description                                                                                 |
 | ----------------------------------- | ----------------------- | ------------------------------------------------------------------------------------------- |
@@ -921,7 +921,7 @@ Hash-based verification that client and freelancer agree the delivered work matc
 
 ## Error Reference
 
-`ContractError` (`contracts/marketpay-contract/src/errors.rs`), `#[repr(u32)]`, grouped by numeric prefix.
+`ContractError` (`contracts/purplepay-contract/src/errors.rs`), `#[repr(u32)]`, grouped by numeric prefix.
 
 ### 1xxx — Initialization & Admin
 
@@ -1077,7 +1077,7 @@ Hash-based verification that client and freelancer agree the delivered work matc
 
 ## Arbitrator Registry Contract
 
-`contracts/arbitrator-registry/src/lib.rs` — `ArbitratorRegistry`. A **separate, independently deployed** contract that manages a staking-gated pool of arbitrators. It is not currently invoked by `MarketPayContract`'s dispute/arbitration flow (see the [Arbitration Cases](#arbitration-cases) caveat above) — as of this writing the two contracts are not linked on-chain; any connection between "is a registered arbitrator here" and "is allowed to call `resolve_dispute` on the escrow contract" is enforced off-chain/administratively via `set_arbitrator`.
+`contracts/arbitrator-registry/src/lib.rs` — `ArbitratorRegistry`. A **separate, independently deployed** contract that manages a staking-gated pool of arbitrators. It is not currently invoked by `PurplePayContract`'s dispute/arbitration flow (see the [Arbitration Cases](#arbitration-cases) caveat above) — as of this writing the two contracts are not linked on-chain; any connection between "is a registered arbitrator here" and "is allowed to call `resolve_dispute` on the escrow contract" is enforced off-chain/administratively via `set_arbitrator`.
 
 | Function                  | Signature                                                          | Returns          | Auth                 | Description                                                                                                                                                                        |
 | ------------------------- | ------------------------------------------------------------------ | ---------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

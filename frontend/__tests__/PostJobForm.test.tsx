@@ -96,7 +96,7 @@ describe("PostJobForm reset behavior", () => {
     });
 
     // Verify localStorage draft is cleared
-    expect(localStorage.getItem("marketpay_post_job_draft")).toBeNull();
+    expect(localStorage.getItem("purplepay_post_job_draft")).toBeNull();
 
     // Now let's click "Post Another Job" to go back to the form and verify that everything was cleared/reset
     const postAnotherBtn = screen.getByRole("button", { name: "Post Another Job" });

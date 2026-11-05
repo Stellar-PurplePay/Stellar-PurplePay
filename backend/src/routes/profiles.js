@@ -1003,7 +1003,7 @@ router.put("/:publicKey/encryption-key", verifyJWT, profileUpdateRateLimiter, as
  *     description: |
  *       Proves ownership of BOTH accounts via ed25519 signatures over the
  *       canonical challenge string `PURPLEPAY-ACCOUNT-MERGE\\n<old>\\n<new>\\n<issuedAt>`
- *       (or legacy `MARKETPAY-ACCOUNT-MERGE\\n<old>\\n<new>\\n<issuedAt>`)
+ *       (one signature per key, hex or base64).
  *       (one signature per key, hex or base64). On success, in one transaction:
  *       profile identity/reputation is carried to the new address, all history
  *       tables (jobs, applications, ratings, referrals, payouts, messages,

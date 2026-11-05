@@ -25,7 +25,7 @@ export interface MockEscrow {
 // NEXT_PUBLIC_USE_CONTRACT_MOCK local development and are never read by real
 // contract code. Each escrow is keyed by job ID so individual jobs survive
 // page reloads while remaining easy to inspect or clear in DevTools.
-const MOCK_STORAGE_KEY_PREFIX = "marketpay_contract_mock_escrow:";
+const MOCK_STORAGE_KEY_PREFIX = "purplepay_contract_mock_escrow:";
 
 // In-memory escrow storage, hydrated from localStorage in the browser.
 const escrows = new Map<string, MockEscrow>();

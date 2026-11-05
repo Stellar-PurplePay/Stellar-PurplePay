@@ -40,7 +40,7 @@ export type WithdrawHistoryEntry = {
   externalTxId?: string;
 };
 
-const HISTORY_KEY = "marketpay_withdraw_history";
+const HISTORY_KEY = "purplepay_withdraw_history";
 const FIAT_CURRENCIES = ["USD", "EUR", "NGN"] as const;
 type FiatCurrency = (typeof FIAT_CURRENCIES)[number];
 

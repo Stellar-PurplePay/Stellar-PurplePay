@@ -60,7 +60,7 @@ type OutboundMessage = {
   updatedAt?: string;
 };
 
-const PREFILL_KEY = "marketpay_scope_prefill";
+const PREFILL_KEY = "purplepay_scope_prefill";
 const MAX_RECONNECT_ATTEMPTS = 5;
 const CONFLICT_TOAST_MESSAGE =
   "Conflict detected — your changes may have been overwritten";

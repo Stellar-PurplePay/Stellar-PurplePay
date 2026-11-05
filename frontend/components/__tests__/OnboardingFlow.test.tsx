@@ -13,7 +13,7 @@ describe('OnboardingFlow Checkpoint (#1415)', () => {
       step: 2,
       formData: { fullName: 'Bob Builder', skills: 'Smart Contracts', payoutAddress: '' },
     };
-    sessionStorage.setItem('stellar_marketpay_onboarding_checkpoint', JSON.stringify(savedState));
+    sessionStorage.setItem('stellar_purplepay_onboarding_checkpoint', JSON.stringify(savedState));
 
     render(<OnboardingFlow onComplete={() => {}} />);
 
@@ -35,7 +35,7 @@ describe('OnboardingFlow Checkpoint (#1415)', () => {
     fireEvent.click(screen.getByText('Complete'));
 
     expect(handleComplete).toHaveBeenCalled();
-    expect(sessionStorage.getItem('stellar_marketpay_onboarding_checkpoint')).toBeNull();
+    expect(sessionStorage.getItem('stellar_purplepay_onboarding_checkpoint')).toBeNull();
   });
 
   it('triggers onResumeLater when "Resume later" button is clicked', () => {

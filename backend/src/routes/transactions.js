@@ -45,7 +45,7 @@ const PAGE_LIMIT = 200; // max Horizon allows
  */
 function resolveType(record, accountAddress) {
   const memo = (record.memo || "").toLowerCase();
-  if (memo.includes("escrow") || memo.includes("purplepay") || memo.includes("marketpay")) return "escrow";
+  if (memo.includes("escrow") || memo.includes("purplepay")) return "escrow";
 
   // Walk the operations embedded in the record if present
   const ops = record._embedded?.operations || [];

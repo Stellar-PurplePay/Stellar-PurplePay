@@ -108,7 +108,7 @@ Response:
         "asset": "XLM",
         "memo": "job-123",
         "successful": true,
-        "marketPayType": "payment"
+        "purplePayType": "payment"
       }
     ],
     "hasMore": true

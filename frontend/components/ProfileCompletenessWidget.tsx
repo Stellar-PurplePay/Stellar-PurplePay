@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 import clsx from "clsx";
 import type { ChecklistItem } from "@/components/Onboarding/ProfileChecklist";
 
-const WIDGET_DISMISSED_KEY = "marketpay_completeness_widget_dismissed_until";
+const WIDGET_DISMISSED_KEY = "purplepay_completeness_widget_dismissed_until";
 
 interface ProfileCompletenessWidgetProps {
   completionPercentage: number;

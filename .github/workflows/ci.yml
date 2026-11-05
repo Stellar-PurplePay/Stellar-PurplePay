@@ -111,7 +111,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: contracts/marketpay-contract
+        working-directory: contracts/purplepay-contract
 
     steps:
       - uses: actions/checkout@v4
@@ -126,7 +126,7 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            contracts/marketpay-contract/target
+            contracts/purplepay-contract/target
           key: ${{ runner.os }}-cargo-${{ hashFiles('contracts/**/Cargo.toml') }}
           restore-keys: ${{ runner.os }}-cargo-
 

@@ -13,8 +13,8 @@ set -euo pipefail
 
 NETWORK=${1:-testnet}
 IDENTITY=${2:-alice}
-CONTRACT_DIR="$(dirname "$0")/../contracts/marketpay-contract"
-WASM="$CONTRACT_DIR/target/wasm32v1-none/release/marketpay_contract.wasm"
+CONTRACT_DIR="$(dirname "$0")/../contracts/purplepay-contract"
+WASM="$CONTRACT_DIR/target/wasm32v1-none/release/purplepay_contract.wasm"
 VERSION=${3:-$(sed -n 's/^version = "\(.*\)"/\1/p' "$CONTRACT_DIR/Cargo.toml" | head -1)}
 
 echo "🏪 Stellar PurplePay — Contract Deploy"

@@ -132,6 +132,6 @@ describe("pool query instrumentation (pool_query_duration_ms)", () => {
     const output = await metrics.renderMetrics();
     expect(output).toContain("pg_pool_total 3");
     expect(output).toContain("pg_pool_idle 2");
-    expect(output).toContain('marketpay_db_connections{state="total"} 3');
+    expect(output).toContain('purplepay_db_connections{state="total"} 3');
   });
 });

@@ -16,7 +16,7 @@ describe("JWT secret configuration", () => {
     const authModule = path.join(__dirname, "auth.js");
     const env = {
       ...process.env,
-      DATABASE_URL: process.env.DATABASE_URL || "postgresql://test:test@localhost:5432/marketpay_test",
+      DATABASE_URL: process.env.DATABASE_URL || "postgresql://test:test@localhost:5432/purplepay_test",
       NODE_ENV: "production",
     };
     delete env.JWT_SECRET;

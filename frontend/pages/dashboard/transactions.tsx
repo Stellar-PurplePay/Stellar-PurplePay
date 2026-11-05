@@ -7,12 +7,12 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import WalletConnect from "@/components/WalletConnect";
 import WalletAddressDisplay from "@/components/WalletAddressDisplay";
-import { server, explorerUrl, accountUrl, fetchMarketPayTransactions, type MarketPayTransaction } from "@/lib/stellar";
+import { server, explorerUrl, accountUrl, fetchPurplePayTransactions, type PurplePayTransaction } from "@/lib/stellar";
 import { formatXLM, shortenAddress, timeAgo } from "@/utils/format";
 import clsx from "clsx";
 import { optionalClientEnv } from "@/lib/env";
 
-// Using MarketPayTransaction from stellar.ts
+// Using PurplePayTransaction from stellar.ts
 
 type TransactionFilter = "all" | "sent" | "received" | "escrow";
 
@@ -78,7 +78,7 @@ function downloadCsv(
 
 export default function TransactionHistory({ publicKey, onConnect }: DashboardProps) {
   const router = useRouter();
-  const [transactions, setTransactions] = useState<MarketPayTransaction[]>([]);
+  const [transactions, setTransactions] = useState<PurplePayTransaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<TransactionFilter>("all");
   const [page, setPage] = useState(1);
@@ -132,8 +132,8 @@ export default function TransactionHistory({ publicKey, onConnect }: DashboardPr
       const currentPage = reset ? 1 : page;
       const limit = ITEMS_PER_PAGE;
       
-      // Use enhanced MarketPay transaction fetching
-      const response = await fetchMarketPayTransactions(
+      // Use enhanced PurplePay transaction fetching
+      const response = await fetchPurplePayTransactions(
         publicKey,
         limit,
         reset ? undefined : transactions[transactions.length - 1]?.id
@@ -166,10 +166,10 @@ export default function TransactionHistory({ publicKey, onConnect }: DashboardPr
     fetchTransactions(false);
   };
 
-  const getTransactionType = (tx: MarketPayTransaction): string => {
+  const getTransactionType = (tx: PurplePayTransaction): string => {
     if (tx.from === publicKey && tx.to !== publicKey) return "sent";
     if (tx.to === publicKey && tx.from !== publicKey) return "received";
-    if (tx.marketPayType === "escrow") return "escrow";
+    if (tx.purplePayType === "escrow") return "escrow";
     return "other";
   };
 
@@ -178,7 +178,7 @@ export default function TransactionHistory({ publicKey, onConnect }: DashboardPr
     return getTransactionType(tx) === filter;
   });
 
-  const getTransactionIcon = (tx: MarketPayTransaction) => {
+  const getTransactionIcon = (tx: PurplePayTransaction) => {
     const type = getTransactionType(tx);
     switch (type) {
       case "sent":

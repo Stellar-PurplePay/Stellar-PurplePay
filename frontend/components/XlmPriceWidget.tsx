@@ -15,7 +15,7 @@ import PriceAlertModal from "./PriceAlertModal";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
 
-const COLLAPSE_KEY = "marketpay_dashboard_xlm_widget_collapsed";
+const COLLAPSE_KEY = "purplepay_dashboard_xlm_widget_collapsed";
 
 const gradientPlugin = {
   id: "xlmGradient",

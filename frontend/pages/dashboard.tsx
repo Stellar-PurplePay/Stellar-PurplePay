@@ -72,7 +72,7 @@ interface DashboardProps {
 }
 
 type Tab = "posted" | "applied" | "proposals" | "invitations" | "analytics" | "earnings" | "swap" | "spending" | "send" | "edit_profile" | "templates" | "price_alerts" | "withdrawals" | "saved_searches" | "referrals" | "talent_pool";
-const REPOST_JOB_PREFILL_STORAGE_KEY = "marketpay_repost_job_prefill";
+const REPOST_JOB_PREFILL_STORAGE_KEY = "purplepay_repost_job_prefill";
 
 async function fetchBalances(
   publicKey: string,
@@ -172,7 +172,7 @@ export default function Dashboard({ publicKey, onConnect }: DashboardProps) {
   // ── Missing local helpers ─────────────────────────────────────────────────
   function loadWithdrawHistory(): Array<{ id: string; amount: string; asset: string; fiatCurrency: string }> {
     try {
-      const raw = typeof window !== "undefined" ? localStorage.getItem("marketpay_withdraw_history") : null;
+      const raw = typeof window !== "undefined" ? localStorage.getItem("purplepay_withdraw_history") : null;
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];

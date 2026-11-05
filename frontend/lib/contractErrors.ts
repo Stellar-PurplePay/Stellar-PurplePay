@@ -4,7 +4,7 @@
  * Maps Soroban contract error codes to human-readable, translated messages.
  * Used by the frontend error handler to display localized contract errors.
  *
- * Error codes mirror the canonical list in contracts/marketpay-contract/src/errors.rs
+ * Error codes mirror the canonical list in contracts/purplepay-contract/src/errors.rs
  * and are documented in docs/contract-errors.md.
  */
 

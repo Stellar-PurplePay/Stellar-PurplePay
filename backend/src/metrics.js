@@ -11,7 +11,7 @@
  *   • active_websocket_connections     (gauge)
  *   • pool_query_duration_ms           (histogram, milliseconds)
  *
- * Legacy `marketpay_*` series are kept alongside the canonical names so the
+ * Legacy `purplepay_*` series are kept alongside the canonical names so the
  * pre-existing Grafana dashboard and Prometheus alert rules keep working.
  *
  * This module intentionally has NO internal dependencies other than
@@ -27,7 +27,7 @@ const registry = new promClient.Registry();
 
 promClient.collectDefaultMetrics({
   register: registry,
-  prefix: "marketpay_",
+  prefix: "purplepay_",
 });
 
 /**
@@ -68,13 +68,13 @@ const httpRequestDurationMs = createMetric(promClient.Histogram, {
 
 // Legacy series (kept for existing dashboards / alert rules).
 const legacyHttpRequestsTotal = createMetric(promClient.Counter, {
-  name: "marketpay_http_requests_total",
+  name: "purplepay_http_requests_total",
   help: "Total HTTP requests handled by the API (legacy name)",
   labelNames: HTTP_LABELS,
 });
 
 const legacyHttpRequestDurationSeconds = createMetric(promClient.Histogram, {
-  name: "marketpay_http_request_duration_seconds",
+  name: "purplepay_http_request_duration_seconds",
   help: "HTTP request duration in seconds (legacy name)",
   labelNames: HTTP_LABELS,
   buckets: [0.05, 0.1, 0.25, 0.5, 1, 2, 5],
@@ -111,7 +111,7 @@ const poolQueriesTotal = createMetric(promClient.Counter, {
 });
 
 const dbConnections = createMetric(promClient.Gauge, {
-  name: "marketpay_db_connections",
+  name: "purplepay_db_connections",
   help: "Current PostgreSQL pool connection counts",
   labelNames: ["state"],
 });
@@ -149,12 +149,12 @@ const xlmPriceUsd = createMetric(promClient.Gauge, {
 });
 
 const escrowReleasesTotal = createMetric(promClient.Counter, {
-  name: "marketpay_escrow_releases_total",
+  name: "purplepay_escrow_releases_total",
   help: "Total escrow release attempts",
   labelNames: ["result"],
 });
 const escrowReleaseErrorsTotal = createMetric(promClient.Counter, {
-  name: "marketpay_escrow_release_errors_total",
+  name: "purplepay_escrow_release_errors_total",
   help: "Total failed escrow release attempts by bounded reason",
   labelNames: ["reason"],
 });
@@ -162,14 +162,14 @@ const escrowReleaseErrorsTotal = createMetric(promClient.Counter, {
 // ─── Cache metrics (Issue #1512) ─────────────────────────────────────────────
 /** Cache hit counter for Redis-backed caches, labeled by cache name. */
 const cacheHitsTotal = createMetric(promClient.Counter, {
-  name: "marketpay_cache_hits_total",
+  name: "purplepay_cache_hits_total",
   help: "Total cache hits, labeled by cache name",
   labelNames: ["cache"],
 });
 
 /** Cache miss counter for Redis-backed caches, labeled by cache name. */
 const cacheMissesTotal = createMetric(promClient.Counter, {
-  name: "marketpay_cache_misses_total",
+  name: "purplepay_cache_misses_total",
   help: "Total cache misses, labeled by cache name",
   labelNames: ["cache"],
 });

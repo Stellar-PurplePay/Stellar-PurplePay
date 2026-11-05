@@ -45,7 +45,7 @@ interface PostJobFormProps {
   initialTemplateId?: string;
 }
 
-const DRAFT_STORAGE_KEY = "marketpay_post_job_draft";
+const DRAFT_STORAGE_KEY = "purplepay_post_job_draft";
 type DraftPayload = Omit<Parameters<typeof updateDraft>[0], "id"> & { id?: string };
 
 // ---------------------------------------------------------------------------

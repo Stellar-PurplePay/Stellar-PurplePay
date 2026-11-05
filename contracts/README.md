@@ -123,7 +123,7 @@ We have integrated automated formal verification via GitHub Actions in [certora.
 
 ### Trigger Conditions
 Verification automatically runs on pulls/pushes targeting `main` or `dev` branches when:
-- Smart contract Rust files change under `contracts/marketpay-contract/src/**`
+- Smart contract Rust files change under `contracts/purplepay-contract/src/**`
 - Specification files change under `contracts/certora/**`
 - The workflow file itself changes.
 
