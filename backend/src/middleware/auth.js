@@ -84,8 +84,16 @@ async function requireAdmin2FA(req, res, next) {
     );
     const { totp_enabled } = rows[0] || {};
 
-    // 2FA not configured for this admin — let them through
-    if (!totp_enabled) return next();
+    // Enforce mandatory 2FA enrollment for administrators in production (Finding PP-09)
+    if (!totp_enabled) {
+      if (process.env.NODE_ENV === "production" || process.env.ENFORCE_MANDATORY_ADMIN_2FA === "true") {
+        return res.status(403).json({
+          error: "Administrator 2FA/MFA enrollment is mandatory. Please enroll a TOTP authenticator to access administrative routes.",
+          requires2FAEnrollment: true,
+        });
+      }
+      return next();
+    }
 
     // Option 1: JWT already carries a verified 2FA claim (session-based)
     if (req.user["2fa_verified"]) return next();

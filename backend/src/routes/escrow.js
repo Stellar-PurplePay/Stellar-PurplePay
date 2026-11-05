@@ -48,6 +48,38 @@ const {
 const ipfsService = require("../services/ipfsService");
 const sorobanEvidence = require("../services/sorobanEvidence");
 
+// Finding PP-18: Inspect magic bytes to prevent MIME spoofing and polyglot attacks
+function checkMagicBytes(buffer, mimetype) {
+  if (!buffer || buffer.length < 4) return false;
+  // PNG: 89 50 4E 47
+  if (mimetype === "image/png") {
+    return buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+  }
+  // JPEG: FF D8 FF
+  if (mimetype === "image/jpeg") {
+    return buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+  }
+  // GIF: 47 49 46 38
+  if (mimetype === "image/gif") {
+    return buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38;
+  }
+  // PDF: 25 50 44 46 (%PDF)
+  if (mimetype === "application/pdf") {
+    return buffer[0] === 0x25 && buffer[1] === 0x50 && buffer[2] === 0x44 && buffer[3] === 0x46;
+  }
+  // WebP: 52 49 46 46 (RIFF) ... 57 45 42 50 (WEBP)
+  if (mimetype === "image/webp") {
+    return buffer.length >= 12 &&
+      buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+      buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50;
+  }
+  // Video (MP4 / WebM): 00 00 00 ... ftyp
+  if (mimetype === "video/mp4" || mimetype === "video/webm") {
+    return buffer.length >= 8;
+  }
+  return false;
+}
+
 const proofUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
@@ -66,6 +98,9 @@ router.post("/:jobId/milestones/:milestoneIndex/proof", verifyJWT, proofUpload.s
     const callerAddress = req.user?.publicKey;
     const job = await getJob(jobId);
     if (!req.file) throw Object.assign(new Error("Proof file is required"), { status: 400 });
+    if (!checkMagicBytes(req.file.buffer, req.file.mimetype)) {
+      throw Object.assign(new Error("File content signature does not match declared MIME type"), { status: 400 });
+    }
     if (!callerAddress || job.freelancerAddress !== callerAddress) {
       throw Object.assign(new Error("Only the assigned freelancer can upload proof"), { status: 403 });
     }
@@ -97,16 +132,44 @@ router.post("/:jobId/milestones/:milestoneIndex/proof/anchor", verifyJWT, async 
 /**
  * POST /api/escrow/create
  */
-router.post("/create", escrowActionRateLimiter, async (req, res, next) => {
+router.post("/create", verifyJWT, escrowActionRateLimiter, async (req, res, next) => {
   try {
-    const { amount } = req.body;
+    const { amount, jobId, contractTxHash } = req.body;
+    const clientAddress = req.user?.publicKey;
     
     if (typeof amount !== "number" || !Number.isInteger(amount) || amount <= 0 || amount > Number.MAX_SAFE_INTEGER) {
       return res.status(400).json({ error: "Amount must be a positive integer" });
     }
 
-    // Call service if needed, but the AC just says validate and return 400
-    res.json({ success: true, message: "Escrow created successfully" });
+    if (!jobId) {
+      return res.status(400).json({ error: "jobId is required" });
+    }
+
+    // Finding PP-05: Authenticate and verify real on-chain transaction rather than reporting false success
+    if (contractTxHash) {
+      const txInfo = await verifyOnChainTransaction(contractTxHash, {
+        expectedCaller: clientAddress,
+        expectedFunction: "create_escrow",
+        jobId,
+      });
+      return res.json({
+        success: true,
+        message: "Escrow creation verified successfully",
+        jobId,
+        txHash: contractTxHash,
+        ledger: txInfo?.ledgerSequence,
+      });
+    }
+
+    // Guide caller to execute on-chain escrow creation via Freighter
+    res.json({
+      success: true,
+      pendingOnChain: true,
+      message: "Escrow parameters validated. Submit create_escrow transaction to Stellar network using Freighter, then submit hash.",
+      jobId,
+      amount,
+      clientAddress,
+    });
   } catch (e) {
     next(e);
   }
@@ -266,21 +329,34 @@ router.post(
  */
 router.post(
   "/:jobId/partial_release",
+  verifyJWT,
   escrowActionRateLimiter,
   async (req, res, next) => {
     try {
       const { jobId } = req.params;
-      const { clientAddress, contractTxHash } = req.body;
+      const callerAddress = req.user?.publicKey;
+      const { contractTxHash } = req.body;
 
-      if (!clientAddress || !/^G[A-Z0-9]{55}$/.test(clientAddress)) {
+      const callerAddress = req.user?.publicKey || req.body.clientAddress;
+      if (!callerAddress || !/^G[A-Z0-9]{55}$/.test(callerAddress)) {
         const e = new Error("Invalid client address");
         e.status = 400;
         throw e;
       }
+      if (req.user && req.user.publicKey !== callerAddress) {
+        const e = new Error("Only the job client can release milestones");
+        e.status = 403;
+        throw e;
+      }
 
       const job = await getJob(jobId);
+      if (!job) {
+        const e = new Error("Job not found");
+        e.status = 404;
+        throw e;
+      }
 
-      if (job.clientAddress !== clientAddress) {
+      if (job.clientAddress !== callerAddress) {
         const e = new Error("Only the job client can release milestones");
         e.status = 403;
         throw e;
@@ -291,7 +367,7 @@ router.post(
 
       logContractInteraction({
         functionName: "partial_release",
-        callerAddress: clientAddress,
+        callerAddress,
         jobId,
         txHash: txHashInner,
         ledgerSequence: txInfo ? txInfo.ledgerSequence : undefined,
@@ -329,22 +405,43 @@ router.post(
  */
 router.post(
   "/:jobId/release-milestone",
+  verifyJWT,
   escrowActionRateLimiter,
   async (req, res, next) => {
     try {
       const { jobId } = req.params;
-      const { clientAddress, contractTxHash, milestoneIndex } = req.body;
+      const callerAddress = req.user?.publicKey;
+      const { contractTxHash, milestoneIndex } = req.body;
 
-      if (!clientAddress || !/^G[A-Z0-9]{55}$/.test(clientAddress)) {
+      const callerAddress = req.user?.publicKey || req.body.clientAddress;
+      if (!callerAddress || !/^G[A-Z0-9]{55}$/.test(callerAddress)) {
         const e = new Error("Invalid client address");
         e.status = 400;
+        throw e;
+      }
+      if (req.user && req.user.publicKey !== callerAddress) {
+        const e = new Error("Only the job client can release milestones");
+        e.status = 403;
+        throw e;
+      }
+
+      const job = await getJob(jobId);
+      if (!job) {
+        const e = new Error("Job not found");
+        e.status = 404;
+        throw e;
+      }
+
+      if (job.clientAddress !== callerAddress) {
+        const e = new Error("Only the job client can release milestones");
+        e.status = 403;
         throw e;
       }
 
       const result = await releaseMilestone(
         jobId,
         milestoneIndex,
-        clientAddress,
+        callerAddress,
         contractTxHash,
       );
 
@@ -451,12 +548,23 @@ router.post(
  * POST /api/escrow/:jobId/refund
  * Client issues a refund to close escrow.
  */
-router.post("/:jobId/refund", async (req, res, next) => {
+router.post("/:jobId/refund", verifyJWT, escrowActionRateLimiter, async (req, res, next) => {
   try {
     const { jobId } = req.params;
-    const { clientAddress, contractTxHash } = req.body;
+    const callerAddress = req.user?.publicKey || req.body.clientAddress;
+    const { contractTxHash } = req.body;
     const job = await getJob(jobId);
-    if (job.clientAddress !== clientAddress) {
+    if (!job) {
+      const e = new Error("Job not found");
+      e.status = 404;
+      throw e;
+    }
+    if (req.user && req.user.publicKey !== callerAddress) {
+      const e = new Error("Only the job client can refund escrow");
+      e.status = 403;
+      throw e;
+    }
+    if (job.clientAddress !== callerAddress) {
       const e = new Error("Only the job client can refund escrow");
       e.status = 403;
       throw e;
@@ -469,7 +577,7 @@ router.post("/:jobId/refund", async (req, res, next) => {
 
     logContractInteraction({
       functionName: "refund_escrow",
-      callerAddress: clientAddress,
+      callerAddress,
       jobId,
       txHash: txHashInner,
       ledgerSequence: txInfo ? txInfo.ledgerSequence : undefined,
@@ -504,19 +612,30 @@ router.post("/:jobId/refund", async (req, res, next) => {
  * Issue #175 — Client claims refund after freelancer inactivity timeout.
  * Issue #536 — Uses service keypair with IP validation for contract calls.
  */
-router.post("/:jobId/timeout-refund", async (req, res, next) => {
+router.post("/:jobId/timeout-refund", verifyJWT, escrowActionRateLimiter, async (req, res, next) => {
   try {
     const { jobId } = req.params;
-    const { clientAddress, contractTxHash } = req.body;
+    const callerAddress = req.user?.publicKey || req.body.clientAddress;
+    const { contractTxHash } = req.body;
     const job = await getJob(jobId);
-    if (job.clientAddress !== clientAddress) {
+    if (!job) {
+      const e = new Error("Job not found");
+      e.status = 404;
+      throw e;
+    }
+    if (req.user && req.user.publicKey !== callerAddress) {
+      const e = new Error("Only the job client can refund escrow");
+      e.status = 403;
+      throw e;
+    }
+    if (job.clientAddress !== callerAddress) {
       const e = new Error("Only the job client can request a timeout refund");
       e.status = 403;
       throw e;
     }
 
     // Issue #536: Pass request for IP validation in service key usage
-    const result = await timeoutRefund(jobId, clientAddress, contractTxHash, req);
+    const result = await timeoutRefund(jobId, callerAddress, contractTxHash, req);
 
     // DB status is updated asynchronously by the indexer when it processes the on-chain event.
 

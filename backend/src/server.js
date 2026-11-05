@@ -87,6 +87,12 @@ function subscribeRealtime(ws, roomId) {
       return; // Unauthorized: unauthenticated socket or address mismatch
     }
   }
+  if (roomId.startsWith("job:")) {
+    // Finding PP-10: Restrict job rooms to authenticated users (reject anonymous subscriptions)
+    if (!ws.userAddress) {
+      return;
+    }
+  }
   if (!realtimeRooms.has(roomId)) realtimeRooms.set(roomId, new Set());
   realtimeRooms.get(roomId).add(ws);
   ws.realtimeRooms.add(roomId);

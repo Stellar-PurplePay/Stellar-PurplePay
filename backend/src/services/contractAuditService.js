@@ -24,8 +24,13 @@ function isOffChainHash(txHash) {
   return !txHash || txHash.startsWith("offchain-") || txHash.startsWith("admin-");
 }
 
-async function verifyOnChainTransaction(txHash) {
+async function verifyOnChainTransaction(txHash, options = {}) {
   if (isOffChainHash(txHash)) {
+    if (options.requireOnChain) {
+      const e = new Error("On-chain transaction hash is mandatory for settlement");
+      e.status = 400;
+      throw e;
+    }
     return null;
   }
 
@@ -60,10 +65,35 @@ async function verifyOnChainTransaction(txHash) {
     throw e;
   }
 
+  // Finding PP-04: Validate source caller identity if specified
+  if (options.expectedCaller && tx.source_account && tx.source_account !== options.expectedCaller) {
+    const e = new Error(`Transaction source account mismatch: expected ${options.expectedCaller}, got ${tx.source_account}`);
+    e.status = 403;
+    throw e;
+  }
+
+  const events = parseSorobanEvents(tx);
+
+  // Validate event topic or function name if specified
+  if (options.expectedFunction && events.length > 0) {
+    const match = events.some((ev) => 
+      Array.isArray(ev.topics) && ev.topics.some((t) => String(t).includes(options.expectedFunction))
+    );
+    if (!match && process.env.NODE_ENV === "production") {
+      const e = new Error(`Transaction did not execute expected contract function: ${options.expectedFunction}`);
+      e.status = 400;
+      throw e;
+    }
+  }
+
   return {
+    verified: true,
+    txHash,
     ledgerSequence: tx.ledger,
     feeCharged: tx.fee_charged,
-    eventData: parseSorobanEvents(tx),
+    sourceAccount: tx.source_account,
+    createdAt: tx.created_at,
+    eventData: events,
   };
 }
 

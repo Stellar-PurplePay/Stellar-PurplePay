@@ -7,6 +7,7 @@ use crate::types::*;
 ///
 /// This can only be called once. Attempting to re-initialize will panic.
 pub(crate) fn initialize(env: Env, admin: Address, treasury_address: Address, version: String) {
+    admin.require_auth();
     if env.storage().instance().has(&DataKey::Admin) {
         panic!("Already initialized");
     }
