@@ -107,6 +107,7 @@ export const toast: ToastContextValue = {
   success: (msg) => imperativeToast?.success(msg),
   error: (msg) => imperativeToast?.error(msg),
   info: (msg) => imperativeToast?.info(msg),
+  warning: (msg) => imperativeToast?.warning(msg),
 };
 
 // ─── Visual config per variant ────────────────────────────────────────────────

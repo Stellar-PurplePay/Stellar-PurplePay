@@ -109,6 +109,7 @@ function DisputePage({ publicKey }: PageProps) {
   // Issue #1429 — dispute timeline events (chronological, oldest-first).
   const [timelineEvents, setTimelineEvents] = useState<DisputeTimelineEvent[]>([]);
   const [timelineLoading, setTimelineLoading] = useState(true);
+  const [showWizard, setShowWizard] = useState(false);
 
   useEffect(() => {
     if (!jobId) return;
