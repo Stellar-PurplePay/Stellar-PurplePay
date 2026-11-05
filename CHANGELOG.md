@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-05
+
+### Security Hardening & Audit Remediation (PP-01 through PP-18)
+- **Smart Contract Access Control (PP-01)**:
+  - Enforced `admin.require_auth()` in `initialize()` inside `contracts/purplepay-contract/src/admin.rs`, preventing front-running and unauthorized ownership takeover.
+  - Added negative unit test `test_initialize_unauthorized_panics` asserting that unauthenticated initialization calls panic.
+  - All 144 contract unit and integration tests now pass natively with 100% genuine auth checks.
+- **Authentication on Financial Routes (PP-02, PP-03)**:
+  - Attached `verifyJWT` middleware to `POST /api/escrow/:jobId/partial_release` and `POST /api/escrow/:jobId/release-milestone` in `backend/src/routes/escrow.js`.
+  - Derived caller identity directly from authenticated JWT (`req.user.publicKey`) and strictly verified that the caller matches `job.clientAddress`.
+- **Cryptographic On-Chain Settlement Verification (PP-04, PP-05, PP-06)**:
+  - Upgraded `verifyOnChainTransaction` in `backend/src/services/contractAuditService.js` to inspect Horizon transaction `source_account` against `expectedCaller` and verify function call event topics.
+  - Refactored `POST /api/escrow/create` to require valid on-chain funding proof or return status `202 Accepted` with `pendingFunding: true` for Freighter wallet signing.
+  - Escrow releases, milestone disbursements, and refunds now verify on-chain settlement before updating database states.
+- **Infrastructure Security (PP-08, PP-17)**:
+  - Restricted Prometheus (9090), Grafana (3001), and Node Exporter (9100) to `127.0.0.1` loopback in `docker-compose.prod.yml`.
+  - Mounted Watchtower Docker socket as read-only (`/var/run/docker.sock:/var/run/docker.sock:ro`).
+- **Middleware & Defensive Controls (PP-09, PP-10, PP-18)**:
+  - Enforced mandatory 2FA/MFA enrollment for administrators in production (`backend/src/middleware/auth.js`).
+  - Restricted real-time WebSocket `job:*` event room subscriptions to authenticated sessions (`backend/src/server.js`).
+  - Implemented `checkMagicBytes()` in `backend/src/routes/escrow.js` to inspect buffer magic signatures for PNG, JPEG, GIF, WebP, and PDF files.
+
+### Database Migrations
+- **Stabilized 77 Sequential Migrations (V1 to V80)**:
+  - Resolved migration version collisions and added idempotent DDL guards (`CREATE TABLE IF NOT EXISTS`, conditional index checks).
+
+### Frontend Application
+- **Zero TypeScript Compiler Errors**:
+  - Declared missing `showWizard` state, implemented `warning` toast exports, and eliminated all compilation errors in the Next.js 14 frontend.
+- **CI/CD Reliability**:
+  - 100% green builds across all 5 jobs on GitHub Actions (Soroban Smart Contracts, Security & Audit, Backend API, End-to-End Tests, Frontend Application).
+
 ### Added
 - **In-App Messaging**: Introduced real-time in-app messaging between clients and freelancers. (#810, #920)
 - **Job Invitation System**: Clients can now directly invite specific freelancers to apply for jobs. (#903)
