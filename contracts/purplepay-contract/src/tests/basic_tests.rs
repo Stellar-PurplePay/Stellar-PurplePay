@@ -4,6 +4,7 @@ use soroban_sdk::{testutils::Address as _, testutils::Ledger, Address, Env, Stri
 #[test]
 fn test_initialize() {
     let env = Env::default();
+    env.mock_all_auths();
     let id = env.register(PurplePayContract, ());
     let client = PurplePayContractClient::new(&env, &id);
     let admin = Address::generate(&env);
@@ -13,9 +14,22 @@ fn test_initialize() {
 }
 
 #[test]
+#[should_panic]
+fn test_initialize_unauthorized_panics() {
+    let env = Env::default();
+    // Intentionally do NOT mock auths -> initialize must panic due to missing admin authorization
+    let id = env.register(PurplePayContract, ());
+    let client = PurplePayContractClient::new(&env, &id);
+    let admin = Address::generate(&env);
+    let treasury = Address::generate(&env);
+    client.initialize(&admin, &treasury, &String::from_str(&env, "1.0.0"));
+}
+
+#[test]
 #[should_panic(expected = "Already initialized")]
 fn test_double_init_panics() {
     let env = Env::default();
+    env.mock_all_auths();
     let id = env.register(PurplePayContract, ());
     let c = PurplePayContractClient::new(&env, &id);
     let admin = Address::generate(&env);
@@ -27,6 +41,7 @@ fn test_double_init_panics() {
 #[test]
 fn test_escrow_count_starts_zero() {
     let env = Env::default();
+    env.mock_all_auths();
     let id = env.register(PurplePayContract, ());
     let c = PurplePayContractClient::new(&env, &id);
     let admin = Address::generate(&env);
