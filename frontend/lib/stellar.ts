@@ -187,12 +187,25 @@ export async function buildCreateEscrowTx(
   const inclusionFee = tierToTransactionFee(gasEstimate.medium);
 
   const amountStroops = BigInt(Math.round(budgetXlm * 10_000_000));
+  const freelancerAddress = params.freelancerPublicKey || clientPublicKey;
+  const tokenAddress = params.tokenAddress || (NETWORK === "mainnet"
+    ? "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EZH3MSUSBM"
+    : "CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC");
+
+  const escrowParamsScVal = nativeToScVal({
+    amount: amountStroops,
+    freelancer: Address.fromString(freelancerAddress),
+    milestones: null,
+    referrer: null,
+    timeout_ledgers: null,
+    token: Address.fromString(tokenAddress),
+  });
 
   const contract = new Contract(CONTRACT_ID);
   const callArgs = [
     nativeToScVal(jobId, { type: "string" }),
     Address.fromString(clientPublicKey).toScVal(),
-    nativeToScVal(amountStroops, { type: "i128" }),
+    escrowParamsScVal,
   ];
 
   const tx = new TransactionBuilder(account, {

@@ -60,13 +60,15 @@ const proofUpload = multer({
 });
 
 /** POST /api/escrow/:jobId/milestones/:milestoneIndex/proof */
-router.post("/:jobId/milestones/:milestoneIndex/proof", proofUpload.single("proof"), async (req, res, next) => {
+router.post("/:jobId/milestones/:milestoneIndex/proof", verifyJWT, proofUpload.single("proof"), async (req, res, next) => {
   try {
     const { jobId, milestoneIndex } = req.params;
-    const { freelancerAddress } = req.body;
+    const callerAddress = req.user?.publicKey;
     const job = await getJob(jobId);
     if (!req.file) throw Object.assign(new Error("Proof file is required"), { status: 400 });
-    if (job.freelancerAddress !== freelancerAddress) throw Object.assign(new Error("Only the assigned freelancer can upload proof"), { status: 403 });
+    if (!callerAddress || job.freelancerAddress !== callerAddress) {
+      throw Object.assign(new Error("Only the assigned freelancer can upload proof"), { status: 403 });
+    }
     const index = Number(milestoneIndex);
     if (!Number.isInteger(index) || index < 0 || index >= (job.milestones || []).length) {
       throw Object.assign(new Error("Invalid milestone index"), { status: 400 });
@@ -77,13 +79,16 @@ router.post("/:jobId/milestones/:milestoneIndex/proof", proofUpload.single("proo
 });
 
 /** POST /api/escrow/:jobId/milestones/:milestoneIndex/proof/anchor */
-router.post("/:jobId/milestones/:milestoneIndex/proof/anchor", async (req, res, next) => {
+router.post("/:jobId/milestones/:milestoneIndex/proof/anchor", verifyJWT, async (req, res, next) => {
   try {
     const { jobId } = req.params;
-    const { cid, freelancerAddress } = req.body;
+    const { cid } = req.body;
+    const callerAddress = req.user?.publicKey;
     const job = await getJob(jobId);
-    if (job.freelancerAddress !== freelancerAddress) throw Object.assign(new Error("Only the assigned freelancer can anchor proof"), { status: 403 });
-    const result = await sorobanEvidence.prepareDeliverableHashUpdate({ jobId, cid, callerAddress: freelancerAddress });
+    if (!callerAddress || job.freelancerAddress !== callerAddress) {
+      throw Object.assign(new Error("Only the assigned freelancer can anchor proof"), { status: 403 });
+    }
+    const result = await sorobanEvidence.prepareDeliverableHashUpdate({ jobId, cid, callerAddress });
     if (!result.success) throw Object.assign(new Error(result.error), { status: 502 });
     res.json({ success: true, data: result });
   } catch (e) { next(e); }
@@ -181,6 +186,19 @@ router.post(
       e.status = 400;
       throw e;
     }
+
+    // Verify on-chain transaction confirmation before modifying database state
+    if (contractTxHash && process.env.NODE_ENV !== "test") {
+      try {
+        await verifyOnChainTransaction(contractTxHash);
+      } catch (verifyErr) {
+        throw Object.assign(
+          new Error(`On-chain transaction verification failed: ${verifyErr.message}`),
+          { status: 400 }
+        );
+      }
+    }
+
     const referralResult = await processReferralPayout(
       jobId,
       job.freelancerAddress,

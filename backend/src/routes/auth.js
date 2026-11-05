@@ -30,6 +30,9 @@ const authReadRateLimiter = createRateLimiter(100, 1, { name: "auth-read" });
 let cachedServerKeypair = null;
 function getServerKeypair() {
   if (!cachedServerKeypair) {
+    if (!process.env.SERVER_PRIVATE_KEY && process.env.NODE_ENV === "production") {
+      console.warn("[SECURITY] SERVER_PRIVATE_KEY is unset in production. Ephemeral keypairs will cause SEP-10 validation discrepancies across workers.");
+    }
     const serverPrivateKey =
       process.env.SERVER_PRIVATE_KEY || Keypair.random().secret();
     cachedServerKeypair = Keypair.fromSecret(serverPrivateKey);
