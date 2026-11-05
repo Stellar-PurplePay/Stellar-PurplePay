@@ -1047,7 +1047,9 @@ export default function JobDetail({ publicKey, onConnect, ssrJob, ogBaseUrl }: J
           onComplete={() => {
             setShowDisputeWizard(false);
             setShowDisputeModal(false);
-            fetchJob();
+            fetchJob(job.id).then((refreshed) => {
+              if (refreshed) setJob(refreshed);
+            });
           }}
         />
       )}

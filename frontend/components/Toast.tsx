@@ -8,7 +8,7 @@ import {
 } from "react";
 
 
-type ToastVariant = "success" | "error" | "info";
+type ToastVariant = "success" | "error" | "info" | "warning";
 
 interface Toast {
   id: string;
@@ -25,6 +25,7 @@ interface ToastContextValue {
   success: (message: string) => void;
   error: (message: string) => void;
   info: (message: string) => void;
+  warning: (message: string) => void;
 }
 
 // ─── Context ──────────────────────────────────────────────────────────────────
@@ -75,6 +76,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     success: (msg) => add(msg, "success"),
     error: (msg) => add(msg, "error"),
     info: (msg) => add(msg, "info"),
+    warning: (msg) => add(msg, "warning"),
   };
 
   // Expose an imperative API for code that runs outside the provider's own
@@ -170,6 +172,27 @@ const VARIANT_STYLES: Record<
         <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
         <path
           d="M8 7V11M8 5.5V5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+    ),
+  },
+  warning: {
+    bar: "bg-amber-500",
+    label: "text-amber-400",
+    icon: (
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+        fill="none"
+        aria-hidden="true"
+      >
+        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" />
+        <path
+          d="M8 5V9M8 11.5V11"
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"

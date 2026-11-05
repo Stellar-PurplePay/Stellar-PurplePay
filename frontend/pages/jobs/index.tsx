@@ -17,7 +17,15 @@ export default function JobsPage() {
 
   useEffect(() => {
     fetchJobs()
-      .then((data) => setJobs(data || []))
+      .then((data: any) => {
+        if (Array.isArray(data)) {
+          setJobs(data);
+        } else if (data && Array.isArray(data.jobs)) {
+          setJobs(data.jobs);
+        } else {
+          setJobs([]);
+        }
+      })
       .catch(() => setJobs([]))
       .finally(() => setLoading(false));
   }, []);

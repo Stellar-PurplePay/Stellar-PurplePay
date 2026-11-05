@@ -22,13 +22,16 @@ export interface ScopeSession {
 
 /** Generate a collision-resistant id for a new co-writing session. */
 function generateSessionId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
+  const gCrypto = typeof window !== "undefined" ? window.crypto : (globalThis as any).crypto;
+  if (gCrypto && typeof gCrypto.randomUUID === "function") {
+    return gCrypto.randomUUID();
   }
-  // WebCrypto is available on every supported runtime; derive a random id from
-  // getRandomValues rather than Math.random(), which CodeQL flags as insecure.
   const bytes = new Uint8Array(16);
-  crypto.getRandomValues(bytes);
+  if (gCrypto && typeof gCrypto.getRandomValues === "function") {
+    gCrypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < 16; i++) bytes[i] = Math.floor(Math.random() * 256);
+  }
   const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
   return `scope-${hex}`;
 }

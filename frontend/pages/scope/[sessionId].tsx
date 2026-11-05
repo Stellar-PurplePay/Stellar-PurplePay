@@ -66,14 +66,13 @@ const CONFLICT_TOAST_MESSAGE =
   "Conflict detected — your changes may have been overwritten";
 
 function randomSessionId() {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  const gCrypto = typeof window !== "undefined" ? window.crypto : (globalThis as any).crypto;
+  if (gCrypto && typeof gCrypto.randomUUID === "function") return gCrypto.randomUUID();
   const arr = new Uint8Array(8);
-  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-    crypto.getRandomValues(arr);
-    return `session-${Date.now()}-${Array.from(arr).map(b => b.toString(16).padStart(2, "0")).join("")}`;
+  if (gCrypto && typeof gCrypto.getRandomValues === "function") {
+    gCrypto.getRandomValues(arr);
+    return `session-${Date.now()}-${Array.from(arr).map((b: number) => b.toString(16).padStart(2, "0")).join("")}`;
   }
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto)
-    return crypto.randomUUID();
   return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 

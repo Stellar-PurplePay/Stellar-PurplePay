@@ -296,7 +296,7 @@ export default function PostJobForm({
       description: tpl.description || prev.description,
       category: tpl.category || prev.category,
       budget: tpl.budget !== undefined && tpl.budget !== null ? String(tpl.budget) : prev.budget,
-      currency: tpl.currency || prev.currency,
+      currency: ((tpl.currency === "USDC" ? "USDC" : "XLM") as "XLM" | "USDC"),
       skills: Array.isArray(tpl.skills)
         ? tpl.skills.join(", ")
         : (typeof tpl.skills === "string" ? tpl.skills : prev.skills),

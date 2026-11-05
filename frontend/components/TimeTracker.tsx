@@ -803,15 +803,17 @@ export default function TimeTracker({
                     >
                       {reviewingId === inv.id ? "…" : "Reject"}
                     </button>
-                    <InvoiceDownloadButton
-                      job={job}
-                      invoice={inv}
-                      entries={entries}
-                      freelancerAddress={job.freelancerAddress || "Unknown"}
-                      clientAddress={job.clientAddress || "Unknown"}
-                      onSuccess={(msg) => flash(msg)}
-                      onError={(err) => setError(err)}
-                    />
+                    {job && (
+                      <InvoiceDownloadButton
+                        job={job}
+                        invoice={inv}
+                        entries={entries}
+                        freelancerAddress={job.freelancerAddress || "Unknown"}
+                        clientAddress={job.clientAddress || "Unknown"}
+                        onSuccess={(msg) => flash(msg)}
+                        onError={(err) => setError(err)}
+                      />
+                    )}
                   </>
                 ) : (
                   <>
@@ -824,15 +826,17 @@ export default function TimeTracker({
                     >
                       {inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}
                     </span>
-                    <InvoiceDownloadButton
-                      job={job}
-                      invoice={inv}
-                      entries={entries}
-                      freelancerAddress={job.freelancerAddress || "Unknown"}
-                      clientAddress={job.clientAddress || "Unknown"}
-                      onSuccess={(msg) => flash(msg)}
-                      onError={(err) => setError(err)}
-                    />
+                    {job && (
+                      <InvoiceDownloadButton
+                        job={job}
+                        invoice={inv}
+                        entries={entries}
+                        freelancerAddress={job.freelancerAddress || "Unknown"}
+                        clientAddress={job.clientAddress || "Unknown"}
+                        onSuccess={(msg) => flash(msg)}
+                        onError={(err) => setError(err)}
+                      />
+                    )}
                   </>
                 )}
               </div>

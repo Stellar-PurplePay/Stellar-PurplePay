@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS payments (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_payments_created_at ON payments(created_at);
+CREATE INDEX IF NOT EXISTS idx_payments_created_at ON payments(created_at);

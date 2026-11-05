@@ -488,6 +488,14 @@ function DisputePage({ publicKey }: PageProps) {
           <p className="text-amber-800 text-sm">Connect your wallet to submit evidence.</p>
         </div>
       )}
+
+      {showWizard && (
+        <DisputeWizard
+          jobId={job.id}
+          isOpen={showWizard}
+          onClose={() => setShowWizard(false)}
+        />
+      )}
     </div>
   );
 }

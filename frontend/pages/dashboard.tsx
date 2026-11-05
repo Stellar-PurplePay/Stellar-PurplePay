@@ -241,12 +241,15 @@ export default function Dashboard({ publicKey, onConnect }: DashboardProps) {
       await refreshDashboard();
       setSelectedJobIds(new Set());
       return {
+        success: result.failed.length === 0,
+        processedCount: ids.length,
+        failedCount: result.failed.length,
+        succeeded: result.succeeded.length,
+        failed: result.failed.length,
         results: [
           ...result.succeeded.map((s) => ({ id: s.id, success: true })),
           ...result.failed.map((f) => ({ id: f.id, success: false, error: f.error })),
         ],
-        succeeded: result.succeeded.length,
-        failed: result.failed.length,
       };
     } catch (error) {
       console.error("Bulk cancel failed:", error);

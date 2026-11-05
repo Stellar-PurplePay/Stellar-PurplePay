@@ -52,6 +52,8 @@ export interface EscrowParams {
   budget?: number;
   budgetXlm?: number;
   currency?: string;
+  freelancerPublicKey?: string;
+  tokenAddress?: string;
 }
 
 export interface EscrowResult {

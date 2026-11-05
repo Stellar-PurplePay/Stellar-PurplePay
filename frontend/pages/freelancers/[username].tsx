@@ -755,7 +755,7 @@ export default function PublicDeveloperPortfolioPage({
 
               {profile.portfolioItems && profile.portfolioItems.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {state.profile.portfolioItems.map((item, index) => {
+                  {profile.portfolioItems.map((item, index) => {
                     const badge = getVerificationBadge(item);
                     return (
                       <a
