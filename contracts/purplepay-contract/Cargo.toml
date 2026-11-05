@@ -29,3 +29,9 @@ debug-assertions = false
 panic = "abort"
 codegen-units = 1
 lto = true
+
+[lints.clippy]
+too_many_arguments = "allow"
+needless_borrow = "allow"
+unnecessary_map_or = "allow"
+items_after_test_module = "allow"

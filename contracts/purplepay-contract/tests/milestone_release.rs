@@ -16,8 +16,8 @@
 
 mod tests {
     use purplepay_contract::{
-        CreateEscrowParams, EscrowStatus, PurplePayContract, PurplePayContractClient,
-        MilestoneInput,
+        CreateEscrowParams, EscrowStatus, MilestoneInput, PurplePayContract,
+        PurplePayContractClient,
     };
     use soroban_sdk::{testutils::Address as _, token, Address, Env, String, Vec};
 

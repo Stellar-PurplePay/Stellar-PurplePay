@@ -131,16 +131,16 @@ jobs:
           restore-keys: ${{ runner.os }}-cargo-
 
       - name: Format check
-        run: cargo fmt --check || true
+        run: cargo fmt --check
 
       - name: Clippy linter
-        run: cargo clippy --all-targets -- -D warnings || true
+        run: cargo clippy --all-targets -- -D warnings
 
       - name: Contract tests
-        run: cargo test || true
+        run: cargo test
 
       - name: Release WASM build
-        run: cargo build --target wasm32v1-none --release || true
+        run: cargo build --target wasm32v1-none --release
 
   # ── 4. End-to-End Marketplace Flow ─────────────────────────────────────────
   e2e:

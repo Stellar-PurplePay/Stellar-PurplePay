@@ -10,7 +10,7 @@
     "lint:ci": "eslint . --max-warnings=0",
     "verify-sri": "node scripts/verify-sri.mjs",
     "verify-sri:update": "node scripts/verify-sri.mjs --update",
-    "type-check": "echo 'Type check disabled'",
+    "type-check": "tsc --noEmit",
     "test": "npx jest --ci",
     "test:update-snapshots": "npx jest -u",
     "test:e2e": "playwright test",

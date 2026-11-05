@@ -3,7 +3,6 @@
 mod tests {
     use purplepay_contract::{
         CreateEscrowParams, EscrowStatus, PurplePayContract, PurplePayContractClient,
-
     };
     use soroban_sdk::{testutils::Address as _, token, Address, Env, String};
 
@@ -85,7 +84,7 @@ mod tests {
         );
         contract.start_work(&job_id2, &freelancer);
         contract.release_escrow(&job_id2, &client);
-        
+
         let escrow2 = contract.get_escrow(&job_id2);
         assert_eq!(escrow2.status, EscrowStatus::Released);
 

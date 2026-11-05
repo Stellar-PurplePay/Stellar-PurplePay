@@ -35,6 +35,11 @@
     ".next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "tests",
+    "__tests__",
+    "stories",
+    ".storybook",
+    "vite.config.ts"
   ]
 }

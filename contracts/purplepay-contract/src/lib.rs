@@ -23,6 +23,10 @@
 #![allow(
     clippy::too_many_arguments,
     clippy::manual_range_contains,
+    clippy::unnecessary_map_or,
+    clippy::needless_borrow,
+    clippy::items_after_test_module,
+    dead_code,
     unused_variables,
     // soroban-sdk 27 deprecates Events::publish in favour of #[contractevent].
     // Migrating changes the emitted event ABI that the backend indexer parses,
@@ -48,14 +52,11 @@ mod messages;
 mod milestones;
 mod types;
 
-pub use types::*;
 pub use errors::*;
+pub use types::*;
 
 #[contract]
 pub struct PurplePayContract;
-
-
-
 
 #[allow(clippy::too_many_arguments)]
 #[contractimpl]
@@ -621,7 +622,12 @@ impl PurplePayContract {
     }
 
     /// Anchor an IPFS proof CID for the caller's milestone deliverable.
-    pub fn update_deliverable_proof_hash(env: Env, job_id: String, freelancer: Address, hash: String) {
+    pub fn update_deliverable_proof_hash(
+        env: Env,
+        job_id: String,
+        freelancer: Address,
+        hash: String,
+    ) {
         deliverable::update_deliverable_proof_hash(env, job_id, freelancer, hash)
     }
 
