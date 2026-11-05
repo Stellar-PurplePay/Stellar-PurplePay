@@ -36,7 +36,7 @@ const {
   _resetCache,
 } = require("../src/services/contractVersionService");
 
-const CONTRACT_ID = "CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG";
+const CONTRACT_ID = "CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X";
 
 function simulationReturning(value) {
   return { result: { retval: { native: value } } };

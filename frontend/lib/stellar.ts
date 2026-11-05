@@ -58,7 +58,7 @@ export interface EscrowResult {
   txHash: string;
 }
 
-export interface MarketPayTransaction {
+export interface PurplePayTransaction {
   id: string;
   hash: string;
   ledger: number;
@@ -70,14 +70,14 @@ export interface MarketPayTransaction {
   memo?: string;
   memo_type?: string;
   successful: boolean;
-  marketPayType?: "escrow" | "payment" | "refund" | "other";
+
   purplePayType?: "escrow" | "payment" | "refund" | "other";
 }
 
-export type PurplePayTransaction = MarketPayTransaction;
+
 
 export interface FetchTransactionsResponse {
-  transactions: MarketPayTransaction[];
+  transactions: PurplePayTransaction[];
   hasMore: boolean;
 }
 
@@ -986,7 +986,7 @@ export async function submitTransaction(
   };
 }
 
-export async function fetchMarketPayTransactions(
+export async function fetchPurplePayTransactions(
   publicKey: string,
   limit?: number,
   cursor?: string,
@@ -1011,4 +1011,4 @@ export async function fetchMarketPayTransactions(
   };
 }
 
-export const fetchPurplePayTransactions = fetchMarketPayTransactions;
+

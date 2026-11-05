@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const STORAGE_KEY = 'stellar_marketpay_onboarding_checkpoint';
+const STORAGE_KEY = 'stellar_purplepay_onboarding_checkpoint';
 
 export interface OnboardingData {
   step: number;

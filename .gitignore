@@ -41,7 +41,7 @@ Cargo.lock
 .opencode
 
 # Generated test/coverage artifacts
-contracts/marketpay-contract/coverage/
+contracts/purplepay-contract/coverage/
 frontend/test-results/
 frontend/playwright-report/
 

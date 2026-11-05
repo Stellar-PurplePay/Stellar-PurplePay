@@ -18,7 +18,7 @@ We use Certora's **CVL (Certora Verification Language)** to mathematically prove
 |------|---------|
 | `contracts/certora/escrow.spec` | CVL specification containing all rules, invariants, and ghost variables |
 | `contracts/certora/config.conf` | Certora Prover configuration (JSON5) |
-| `contracts/marketpay-contract/src/lib.rs` | The Soroban smart contract source (verification target) |
+| `contracts/purplepay-contract/src/lib.rs` | The Soroban smart contract source (verification target) |
 
 ## Prerequisites
 
@@ -47,7 +47,7 @@ We use Certora's **CVL (Certora Verification Language)** to mathematically prove
 3. **Build the Soroban contract** (Certora verifies the Rust source, but a build is needed for dependency resolution):
 
    ```bash
-   cd contracts/marketpay-contract
+   cd contracts/purplepay-contract
    cargo build --target wasm32v1-none --release
    cd ../..
    ```
@@ -170,7 +170,7 @@ Ghost variables are not part of the actual contract state — they exist only in
 
 Formal verification runs automatically via [`.github/workflows/certora.yml`](../.github/workflows/certora.yml):
 
-- **On push/PR** — triggered when files change under `contracts/marketpay-contract/src/**` or `contracts/certora/**`.
+- **On push/PR** — triggered when files change under `contracts/purplepay-contract/src/**` or `contracts/certora/**`.
 - **Nightly** — scheduled at 03:00 UTC to catch regressions from upstream Soroban SDK changes.
 - **Manual** — use **Run workflow** in the Actions tab for ad-hoc verification.
 

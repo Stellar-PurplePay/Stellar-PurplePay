@@ -89,7 +89,7 @@ Pool statistics are logged every 60 seconds and available via the `/metrics` end
 
 The following Prometheus metrics are exposed at `/metrics`:
 
-- `marketpay_db_connections{state="total|idle|waiting"}`: Current connection counts
+- `purplepay_db_connections{state="total|idle|waiting"}`: Current connection counts
 - `pg_pool_total`: Total pool connections
 - `pg_pool_idle`: Idle pool connections
 - `pg_pool_waiting`: Waiting requests

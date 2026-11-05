@@ -7,9 +7,9 @@ import { fetchProfile, syncOnboardingProgress } from "@/lib/api";
 import type { UserProfile } from "@/utils/types";
 import type { ChecklistItem } from "@/components/Onboarding/ProfileChecklist";
 
-const ONBOARDING_STORAGE_KEY = "marketpay_onboarding_completed";
-const TOOLTIPS_DISMISSED_KEY = "marketpay_tooltips_dismissed";
-const WIZARD_STORAGE_KEY = "marketpay_onboarding_wizard";
+const ONBOARDING_STORAGE_KEY = "purplepay_onboarding_completed";
+const TOOLTIPS_DISMISSED_KEY = "purplepay_tooltips_dismissed";
+const WIZARD_STORAGE_KEY = "purplepay_onboarding_wizard";
 const ONBOARDING_COMPLETE_THRESHOLD = 80;
 
 export interface OnboardingState {

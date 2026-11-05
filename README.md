@@ -9,7 +9,7 @@
 [![CI](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/workflows/ci.yml/badge.svg)](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/workflows/ci.yml)
 [![Vercel Deployment](https://img.shields.io/badge/Deployment-stellarpurplepay.vercel.app-9333ea?logo=vercel)](https://stellarpurplepay.vercel.app)
 [![Stellar Network](https://img.shields.io/badge/Stellar-Testnet-08B5E5.svg?logo=stellar)](https://stellar.org)
-[![Soroban Smart Contract](https://img.shields.io/badge/Soroban-CDFNNWMA...XCR-9B59B6.svg)](https://stellar.expert/explorer/testnet/contract/CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR)
+[![Soroban Smart Contract](https://img.shields.io/badge/Soroban-CDNSSLIZ...26X-9B59B6.svg)](https://stellar.expert/explorer/testnet/contract/CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](SECURITY.md)
@@ -23,10 +23,10 @@ Stellar PurplePay is an open-source decentralized freelance commerce platform th
 | Component | Target / Environment | Live URL / Explorer Link |
 | :--- | :--- | :--- |
 | **Production Frontend** | Vercel Edge Network | [stellarpurplepay.vercel.app](https://stellarpurplepay.vercel.app) |
-| **Soroban Smart Contract** | Stellar Testnet | [`CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR`](https://stellar.expert/explorer/testnet/contract/CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR) |
-| **Stellar Lab Contract** | Stellar Testnet | [View in Stellar Lab](https://lab.stellar.org/r/testnet/contract/CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR) |
-| **Deploy Transaction** | Stellar Testnet | [`ed31467a83467539cf...`](https://stellar.expert/explorer/testnet/tx/ed31467a83467539cfd38c1e3ebbbc959cbd02501d7b31a39dc47ec0a17bc1b2) |
-| **Admin / Treasury Key** | Stellar Testnet | `GA54U3SNFU3UQZDYNH4WSIZDDG7NQW354QUXSXLTIHCM4RZ7K3VXFKIR` |
+| **Soroban Smart Contract** | Stellar Testnet | [`CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X`](https://stellar.expert/explorer/testnet/contract/CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X) |
+| **Stellar Lab Contract** | Stellar Testnet | [View in Stellar Lab](https://lab.stellar.org/r/testnet/contract/CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X) |
+| **Deploy Transaction** | Stellar Testnet | [`8f0442f2a273464628...`](https://stellar.expert/explorer/testnet/tx/8f0442f2a273464628600ab1eabd2bedfcd987e98c8f8b1747d833fff4532ebf) |
+| **Admin / Treasury Key** | Stellar Testnet | `GBWFZHBYEKF5MR2MHW7JAZX6ZRI2PKKBL6IALEMJSBMU4JMDSIB34KP5` |
 | **Contract Version** | SemVer On-Chain | `0.1.0` |
 | **Horizon RPC** | Stellar Testnet | `https://horizon-testnet.stellar.org` |
 | **Soroban RPC** | Stellar Testnet | `https://soroban-testnet.stellar.org` |
@@ -103,13 +103,13 @@ Stellar-PurplePay/
 │   ├── migrations/            # Versioned SQL database migrations (V1–V49)
 │   └── tests/                 # Unit, integration, and security regression test suites
 ├── contracts/                 # Soroban Smart Contracts (Rust / WASM)
-│   ├── marketpay-contract/    # Primary non-custodial escrow & milestone settlement contract
-│   ├── arbitrator-registry/   # DAO arbitrator pool, voting, and dispute governance contract
-│   ├── marketpay/             # Sep-41 token interactions & auction extensions
-│   └── certora/               # Formal verification invariant specifications
-├── infra/                     # Infrastructure configuration (Nginx, Cloudflare, Docker)
-├── monitoring/                # Prometheus metrics collection and Grafana observability
-├── k6/                        # High-load performance benchmarks and stress tests
+│   ├── purplepay-contract/    # Primary non-custodial escrow & milestone settlement contract
+│   └── arbitrator-registry/   # DAO arbitrator pool, voting, and dispute governance contract
+
+
+
+
+
 ├── docs/                      # Technical specifications, ADRs, and API documentation
 └── .github/                   # GitHub Actions CI/CD workflows and issue templates
 ```
@@ -178,7 +178,7 @@ npm run dev
 ### Step 4: Build Smart Contracts (Optional for Contract Devs)
 
 ```bash
-cd ../contracts/marketpay-contract
+cd ../contracts/purplepay-contract
 cargo check --target wasm32v1-none
 cargo build --target wasm32v1-none --release
 
@@ -198,7 +198,7 @@ NEXT_PUBLIC_API_URL=https://stellar-purplepay-backend.vercel.app
 NEXT_PUBLIC_STELLAR_NETWORK=testnet
 NEXT_PUBLIC_HORIZON_URL=https://horizon-testnet.stellar.org
 NEXT_PUBLIC_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
-NEXT_PUBLIC_CONTRACT_ID=CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR
+NEXT_PUBLIC_CONTRACT_ID=CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X
 NEXT_PUBLIC_USE_CONTRACT_MOCK=false
 ```
 
@@ -210,7 +210,7 @@ JWT_SECRET=your-secure-jwt-random-secret
 STELLAR_NETWORK=testnet
 HORIZON_URL=https://horizon-testnet.stellar.org
 SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
-CONTRACT_ID=CDFNNWMAV337YGIBMZTDZGTBVRWJI4BAJNBMJMSMVAMVUHIV3DXWCXCR
+CONTRACT_ID=CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X
 ALLOWED_ORIGINS=http://localhost:3000,https://frontend-zeta-sable-22.vercel.app
 ```
 
@@ -245,7 +245,7 @@ cd ../frontend
 npm run test:e2e
 
 # Smart Contract Rust Unit Tests & Simulation
-cd ../contracts/marketpay-contract
+cd ../contracts/purplepay-contract
 cargo test
 ```
 

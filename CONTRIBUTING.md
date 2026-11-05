@@ -296,11 +296,9 @@ This is the end-to-end recipe for adding a backend route (for example a new
 `favorites` or `certificates` resource). Do the five steps **in order** — each
 one maps to a piece of the request lifecycle, so nothing gets silently dropped.
 
-> **Worked examples from the project history**
+> **Reference Architecture**
 >
-> - [#391 — feat: faucet rate limit, skill endorsements, certificates, job expiry extension](https://github.com/Stellar-PurplePay/Stellar-PurplePay/pull/391) — adds `backend/src/routes/certificates.js`, registers it in `backend/src/server.js`, and documents it with `@swagger`.
-> - [#908 — refactor(validation): extract route validation into shared Zod validators](https://github.com/Stellar-PurplePay/Stellar-PurplePay/pull/908) — the canonical validator pattern (Steps 1–2).
-> - [#1311 — test: certificates route tests](https://github.com/Stellar-PurplePay/Stellar-PurplePay/pull/1311) — the canonical route-test pattern (Step 5).
+> Refer to `backend/src/routes/certificates.js` for an example of a route registered in `backend/src/server.js` with Swagger documentation and matching tests under `backend/__tests__/`.
 
 ### Step 1 — Create the route file
 

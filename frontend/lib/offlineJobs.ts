@@ -6,7 +6,7 @@
  */
 import type { Job } from "@/utils/types";
 
-export const LAST_VIEWED_KEY = "marketpay_last_viewed_jobs";
+export const LAST_VIEWED_KEY = "purplepay_last_viewed_jobs";
 const MAX_STORED = 10;
 
 /** Persist a job to the last-viewed list. Call this when a job detail page loads. */

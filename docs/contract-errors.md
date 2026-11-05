@@ -3,7 +3,7 @@
 Canonical list of every Soroban contract error code, its numeric identifier,
 the corresponding `panic!` message, and a human-readable description.
 
-> **Source (codes):** `contracts/marketpay-contract/src/errors.rs`
+> **Source (codes):** `contracts/purplepay-contract/src/errors.rs`
 > **Source (frontend messages):** `frontend/lib/contractErrors.ts`
 > **Last updated:** 2026-07-28
 

@@ -20,7 +20,7 @@ interface AddressBookContact {
   address: string;
 }
 
-const ADDRESS_BOOK_KEY = "marketpay_address_book";
+const ADDRESS_BOOK_KEY = "purplepay_address_book";
 
 function loadContacts(): AddressBookContact[] {
   if (typeof window === "undefined") return [];

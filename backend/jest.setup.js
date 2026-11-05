@@ -1,7 +1,7 @@
 process.env.NODE_ENV = process.env.NODE_ENV || "test";
 process.env.DATABASE_URL =
   process.env.DATABASE_URL ||
-  "postgresql://test:test@localhost:5432/marketpay_test";
+  "postgresql://test:test@localhost:5432/purplepay_test";
 process.env.JWT_SECRET =
   process.env.JWT_SECRET || "test-jwt-secret-with-enough-length-for-ci";
 // Stable CSRF signing secret so token/cookie pairs generated in one test can be

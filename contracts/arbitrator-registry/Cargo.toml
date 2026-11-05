@@ -6,7 +6,7 @@ description = "Stellar PurplePay — On-chain DAO-controlled arbitrator registry
 license = "MIT"
 
 [lib]
-crate-type = ["cdylib"]
+crate-type = ["rlib", "cdylib"]
 
 [dependencies]
 soroban-sdk = "27.0.6"

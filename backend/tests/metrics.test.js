@@ -56,9 +56,9 @@ describe("Prometheus metrics", () => {
       expect(metrics.registry.contentType).toContain("text/plain");
     });
 
-    it("collects Node.js default metrics under the marketpay_ prefix", async () => {
+    it("collects Node.js default metrics under the purplepay_ prefix", async () => {
       const output = await metrics.renderMetrics();
-      expect(output).toContain("marketpay_process_cpu_user_seconds_total");
+      expect(output).toContain("purplepay_process_cpu_user_seconds_total");
     });
   });
 
@@ -115,7 +115,7 @@ describe("Prometheus metrics", () => {
       expect(sum.value).toBeCloseTo(42, 3);
     });
 
-    it("also feeds the legacy marketpay_* series in seconds", async () => {
+    it("also feeds the legacy purplepay_* series in seconds", async () => {
       metrics.observeHttpRequest(
         { method: "GET", route: "/__test__/legacy", status_code: "200" },
         2000,
@@ -123,7 +123,7 @@ describe("Prometheus metrics", () => {
       const hist = await metrics.legacyHttpRequestDurationSeconds.get();
       const sum = hist.values.find(
         (v) =>
-          v.metricName === "marketpay_http_request_duration_seconds_sum" &&
+          v.metricName === "purplepay_http_request_duration_seconds_sum" &&
           v.labels.route === "/__test__/legacy",
       );
       expect(sum.value).toBeCloseTo(2, 3);
@@ -398,9 +398,9 @@ describe("monitoring configuration", () => {
       expect(fs.existsSync(file)).toBe(true);
     });
 
-    it("defines a marketpay-backend scrape job on /metrics", () => {
+    it("defines a purplepay-backend scrape job on /metrics", () => {
       const raw = fs.readFileSync(file, "utf8");
-      expect(raw).toContain("job_name: marketpay-backend");
+      expect(raw).toContain("job_name: purplepay-backend");
       expect(raw).toContain("metrics_path: /metrics");
       expect(raw).toContain("backend:4000");
     });
@@ -427,7 +427,7 @@ describe("monitoring configuration", () => {
       MONITORING,
       "grafana",
       "dashboards",
-      "marketpay-backend-metrics.json",
+      "purplepay-backend-metrics.json",
     );
 
     it("exists and is valid JSON", () => {
@@ -497,14 +497,14 @@ describe("monitoring configuration", () => {
         "active_websocket_connections",
         "pool_queries_total",
         "pool_query_duration_ms",
-        "marketpay_db_connections",
+        "purplepay_db_connections",
         "pg_pool_total",
         "pg_pool_idle",
         "pg_pool_waiting",
         "notification_queue_pending",
-        "stellar_marketpay_horizon_request_duration_seconds",
-        "marketpay_http_requests_total",
-        "marketpay_http_request_duration_seconds",
+        "stellar_purplepay_horizon_request_duration_seconds",
+        "purplepay_http_requests_total",
+        "purplepay_http_request_duration_seconds",
         "ws_connections_active",
       ];
       for (const name of expectedMetrics) {

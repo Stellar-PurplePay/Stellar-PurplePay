@@ -48,11 +48,11 @@ async function mockFreighter(page: Page) {
 async function seedStableUiState(page: Page) {
   await page.addInitScript(() => {
     localStorage.setItem(
-      "marketpay_onboarding_completed",
+      "purplepay_onboarding_completed",
       JSON.stringify({ hasSeenWelcome: true }),
     );
     localStorage.setItem(
-      "marketpay_onboarding_wizard",
+      "purplepay_onboarding_wizard",
       JSON.stringify({ completed: true, dismissed: true }),
     );
   });

@@ -10,9 +10,9 @@ This guide provides a complete, step-by-step walkthrough for building, deploying
 
 | Field | Value |
 |-------|-------|
-| **Contract ID** | `CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG` |
+| **Contract ID** | `CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X` |
 | **Network** | Testnet (`Test SDF Network ; September 2015`) |
-| **Admin / Treasury** | `GAUC7VCPFCQQBMHMOH3NPRUSOT2RBXLJNV433JMAXUPFYKU2MCO7CHL4` (alias: `streampay-deployer`) |
+| **Admin / Treasury** | `GBWFZHBYEKF5MR2MHW7JAZX6ZRI2PKKBL6IALEMJSBMU4JMDSIB34KP5` (alias: `winningtalker-commits`) |
 | **XLM SAC (testnet)** | `CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC` |
 | **Initialized** | Yes — `initialize(admin, treasury)` called |
 | **Version** | 1 |
@@ -22,7 +22,7 @@ This guide provides a complete, step-by-step walkthrough for building, deploying
 
 | Function | Tx Hash | Explorer |
 |----------|---------|----------|
-| Initialization | `51b84452…` | [View](https://stellar.expert/explorer/testnet/tx/51b84452dc148912ec2fecf317c5ac9b3a274c69c98734e6836c1023cad30f08) |
+| Initialization | `51b84452…` | [View](https://stellar.expert/explorer/testnet/tx/45b28e65b620ab0f44b7286925d1eb9e711081b12c7af9ce83000ad6a39c68b2) |
 | `create_escrow` | `f262cd2c…` | [View](https://stellar.expert/explorer/testnet/tx/f262cd2c7b501e52cf79535dada3a846013fdf74569ae7fc31bc5845394768dd) |
 | `start_work` → `release_escrow` | `d4cd6eb6…` | [View](https://stellar.expert/explorer/testnet/tx/d4cd6eb65775916f9a38aafa256d915836973fc6d298c854fdd93ba9b372e123) |
 | `refund_escrow` | `a0faf221…` | [View](https://stellar.expert/explorer/testnet/tx/a0faf221f15a1a0ca3f7f5c0bfcfebe90d7cc64bc7b359b475b7f40777805940) |
@@ -69,16 +69,16 @@ rustc --version && stellar --version && node --version
 From the repository root:
 
 ```bash
-cd contracts/marketpay-contract
+cd contracts/purplepay-contract
 cargo build --target wasm32v1-none --release
 ```
 
 The WASM artifact is written to:
 ```
-contracts/marketpay-contract/target/wasm32-unknown-unknown/release/marketpay_contract.wasm
+contracts/purplepay-contract/target/wasm32-unknown-unknown/release/purplepay_contract.wasm
 ```
 
-`target/wasm32v1-none/release/marketpay_contract.wasm`
+`target/wasm32v1-none/release/purplepay_contract.wasm`
 
 ## 2. Configure your deploy identity
 
@@ -127,7 +127,7 @@ The script will:
 
 ```bash
 stellar contract deploy \
-  --wasm target/wasm32v1-none/release/marketpay_contract.wasm \
+  --wasm target/wasm32v1-none/release/purplepay_contract.wasm \
   --source purplepay-deployer \
   --network testnet
 ```
@@ -143,7 +143,7 @@ Contract deployed at CN4X7ICX66HT3OPNFGF5FGI34H3H777HCOXISROTSN7QD6TY7B4SAUSF
 ```bash
 # Run deployment and capture output
 deploy_output=$(stellar contract deploy \
-  --wasm contracts/marketpay-contract/target/wasm32-unknown-unknown/release/marketpay_contract.wasm \
+  --wasm contracts/purplepay-contract/target/wasm32-unknown-unknown/release/purplepay_contract.wasm \
   --source purplepay-deployer \
   --network testnet 2>&1)
 
@@ -203,7 +203,7 @@ cp backend/.env.example backend/.env
 Edit `backend/.env` and set the contract ID:
 
 ```env
-CONTRACT_ID=CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG
+CONTRACT_ID=CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X
 STELLAR_NETWORK=testnet
 HORIZON_URL=https://horizon-testnet.stellar.org
 ```
@@ -219,7 +219,7 @@ grep -q "CONTRACT_ID=C" backend/.env && echo "✓ Backend CONTRACT_ID is set" ||
 Create or edit `frontend/.env.local`:
 
 ```env
-NEXT_PUBLIC_CONTRACT_ID=CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG
+NEXT_PUBLIC_CONTRACT_ID=CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X
 NEXT_PUBLIC_STELLAR_NETWORK=testnet
 NEXT_PUBLIC_HORIZON_URL=https://horizon-testnet.stellar.org
 NEXT_PUBLIC_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
@@ -253,7 +253,7 @@ cd frontend && npm run dev &
 
 ```bash
 stellar contract invoke \
-  --id CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG \
+  --id CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X \
   --source purplepay-deployer \
   --network testnet \
   -- \
@@ -264,7 +264,7 @@ Create a test escrow from the UI (post a job) or invoke `create_escrow` via the 
 
 ```bash
 stellar contract invoke \
-  --id CBFJNX67NYYRZPLH4YYT77ZUULRJ5NI2LPEYRRLFHBTEACZOZUUYLOGG \
+  --id CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X \
   --source purplepay-deployer \
   --network testnet \
   -- \
@@ -316,7 +316,7 @@ Mainnet follows the same workflow with different endpoints:
 
 # Or manually:
 stellar contract deploy \
-  --wasm contracts/marketpay-contract/target/wasm32-unknown-unknown/release/marketpay_contract.wasm \
+  --wasm contracts/purplepay-contract/target/wasm32-unknown-unknown/release/purplepay_contract.wasm \
   --source purplepay-deployer \
   --network mainnet
 ```
@@ -337,7 +337,7 @@ stellar contract deploy \
 ## Production deployment checklist
 
 1. **Tag the release** -- `git tag v<version>` for the commit used to build WASM
-2. **Record checksum** -- `sha256sum contracts/marketpay-contract/target/wasm32-unknown-unknown/release/marketpay_contract.wasm`
+2. **Record checksum** -- `sha256sum contracts/purplepay-contract/target/wasm32-unknown-unknown/release/purplepay_contract.wasm`
 3. **Deploy WASM** -- Use a dedicated mainnet deployer key (not shared with testnet)
 4. **Initialize** -- Run `initialize` exactly once; store admin address and contract ID in your secret store
 5. **Update secrets** -- Set `CONTRACT_ID` and `NEXT_PUBLIC_CONTRACT_ID` in your production environment (e.g., Docker secrets, Vercel, AWS Secrets Manager)
@@ -365,7 +365,7 @@ rustup target add wasm32-unknown-unknown
 cargo install --locked stellar-cli
 
 # 4. Clone the repository
-git clone https://github.com/DANTE-1903/Stellar-PurplePay.git
+git clone https://github.com/Stellar-PurplePay/Stellar-PurplePay.git
 cd Stellar-PurplePay
 
 # 5. Verify prerequisites
@@ -378,7 +378,7 @@ echo "WASM target: $(rustup target list --installed | grep wasm32-unknown-unknow
 
 ```bash
 # 6. Build the contract (this takes ~2-5 minutes the first time)
-cd contracts/marketpay-contract
+cd contracts/purplepay-contract
 cargo build --target wasm32-unknown-unknown --release
 
 # 7. Create a deployer identity
@@ -463,7 +463,7 @@ The `initialize` function can only be called once per contract. If you need to r
 
 Arguments may not match the contract interface:
 
-1. Compare your invocation with the function signatures in `contracts/marketpay-contract/src/lib.rs`
+1. Compare your invocation with the function signatures in `contracts/purplepay-contract/src/lib.rs`
 2. Ensure token addresses use the correct [Stellar Asset Contract (SAC)](https://developers.stellar.org/docs/build/smart-contracts/token-interface) format for the network
 3. Verify all arguments are in the correct order and use the expected types
 

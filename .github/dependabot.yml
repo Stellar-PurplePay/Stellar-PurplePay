@@ -91,7 +91,7 @@ updates:
   # Soroban escrow contract — cargo
   # ---------------------------------------------------------------------
   - package-ecosystem: "cargo"
-    directory: "/contracts/marketpay-contract"
+    directory: "/contracts/purplepay-contract"
     schedule:
       interval: "weekly"
       day: "monday"
