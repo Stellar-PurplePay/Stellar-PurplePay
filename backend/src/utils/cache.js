@@ -15,6 +15,9 @@ let client = null;
 
 function getClient() {
   if (client) return client;
+  if (process.env.NODE_ENV === "test" && !process.env.REDIS_URL && !Redis.__store) {
+    return null;
+  }
   try {
     client = new Redis(REDIS_URL, {
       lazyConnect: true,

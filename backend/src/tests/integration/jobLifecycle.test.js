@@ -17,26 +17,21 @@ const app = require("../../server");
 const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
 
 let pool;
-let testClient;
+let jobId;
 
 beforeAll(async () => {
   pool = new Pool({ connectionString: TEST_DATABASE_URL });
-  testClient = await pool.connect();
 });
 
 afterAll(async () => {
-  if (testClient) await testClient.release();
+  if (jobId && pool) {
+    await pool.query("DELETE FROM ratings WHERE job_id = $1", [jobId]).catch(() => {});
+    await pool.query("DELETE FROM job_timeline WHERE job_id = $1", [jobId]).catch(() => {});
+    await pool.query("DELETE FROM escrows WHERE job_id = $1", [jobId]).catch(() => {});
+    await pool.query("DELETE FROM applications WHERE job_id = $1", [jobId]).catch(() => {});
+    await pool.query("DELETE FROM jobs WHERE id = $1", [jobId]).catch(() => {});
+  }
   if (pool) await pool.end();
-});
-
-beforeEach(async () => {
-  // Start transaction for test isolation
-  await testClient.query("BEGIN");
-});
-
-afterEach(async () => {
-  // Rollback transaction to clean up test data
-  await testClient.query("ROLLBACK");
 });
 
 describe("Job Lifecycle Integration Tests", () => {
@@ -44,7 +39,6 @@ describe("Job Lifecycle Integration Tests", () => {
   let freelancerPublicKey;
   let authToken;
   let freelancerAuthToken;
-  let jobId;
   let applicationId;
 
   beforeAll(async () => {
@@ -96,7 +90,7 @@ describe("Job Lifecycle Integration Tests", () => {
     jobId = jobResponse.body.data.id;
 
     // Verify job in database
-    const jobResult = await testClient.query("SELECT * FROM jobs WHERE id = $1", [jobId]);
+    const jobResult = await pool.query("SELECT * FROM jobs WHERE id = $1", [jobId]);
     expect(jobResult.rows.length).toBe(1);
     expect(jobResult.rows[0].status).toBe("open");
     expect(jobResult.rows[0].client_address).toBe(clientPublicKey);
@@ -119,7 +113,7 @@ describe("Job Lifecycle Integration Tests", () => {
     applicationId = applicationResponse.body.data.id;
 
     // Verify application in database
-    const appResult = await testClient.query(
+    const appResult = await pool.query(
       "SELECT * FROM applications WHERE id = $1",
       [applicationId]
     );
@@ -137,7 +131,7 @@ describe("Job Lifecycle Integration Tests", () => {
     expect(acceptResponse.body.success).toBe(true);
 
     // Verify job status changed to in_progress
-    const updatedJobResult = await testClient.query("SELECT * FROM jobs WHERE id = $1", [jobId]);
+    const updatedJobResult = await pool.query("SELECT * FROM jobs WHERE id = $1", [jobId]);
     expect(updatedJobResult.rows[0].status).toBe("in_progress");
     expect(updatedJobResult.rows[0].freelancer_address).toBe(freelancerPublicKey);
 
@@ -154,7 +148,7 @@ describe("Job Lifecycle Integration Tests", () => {
     // Verify escrow in database. Escrow is funded at the accepted application's
     // bid amount (95), not the job's listing budget (100) — see #850 fix
     // "pass accepted bid amount to escrow update".
-    const escrowResult = await testClient.query("SELECT * FROM escrows WHERE job_id = $1", [jobId]);
+    const escrowResult = await pool.query("SELECT * FROM escrows WHERE job_id = $1", [jobId]);
     expect(escrowResult.rows.length).toBe(1);
     expect(escrowResult.rows[0].status).toBe("funded");
     expect(parseFloat(escrowResult.rows[0].amount_xlm)).toBe(95);
@@ -171,7 +165,7 @@ describe("Job Lifecycle Integration Tests", () => {
     // The API marks the job completed immediately. The escrow row's own
     // status flips to 'released' asynchronously when the indexer observes
     // the on-chain release_escrow() event, so assert on the completed job.
-    const completedJobResult = await testClient.query("SELECT * FROM jobs WHERE id = $1", [jobId]);
+    const completedJobResult = await pool.query("SELECT * FROM jobs WHERE id = $1", [jobId]);
     expect(completedJobResult.rows[0].status).toBe("completed");
 
     // Step 6: Submit rating
@@ -190,7 +184,7 @@ describe("Job Lifecycle Integration Tests", () => {
     expect(ratingResponse.body.success).toBe(true);
 
     // Verify rating in database
-    const ratingResult = await testClient.query(
+    const ratingResult = await pool.query(
       "SELECT * FROM ratings WHERE job_id = $1 AND rater_address = $2",
       [jobId, clientPublicKey]
     );

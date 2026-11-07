@@ -214,6 +214,18 @@ function rowToJob(row) {
     extendedCount: row.extended_count || 0,
     extendedUntil: row.extended_until,
     biddingClosedAt: row.bidding_closed_at || row.biddingClosedAt || null,
+    searchHeadline:
+      row.headline_title !== undefined
+        ? row.headline_title
+        : (row.search_headline !== undefined
+            ? row.search_headline
+            : (row.searchHeadline || null)),
+    descriptionHeadline:
+      row.headline_description !== undefined
+        ? row.headline_description
+        : (row.description_headline !== undefined
+            ? row.description_headline
+            : (row.descriptionHeadline || null)),
   };
 }
  
@@ -492,6 +504,7 @@ async function listJobs({
   status = "open",
   limit = 50,
   search,
+  q,
   cursor,
   // eslint-disable-next-line no-unused-vars
   timezone,
@@ -511,8 +524,9 @@ async function listJobs({
   let selectColumns = "jobs.*";
   let orderClause = `CASE WHEN boosted = true AND (boosted_until IS NULL OR boosted_until > NOW()) THEN 0 ELSE 1 END, created_at DESC, id DESC`;
  
-  if (search && search.trim()) {
-    params.push(search.trim());
+  const searchTerm = search || q;
+  if (searchTerm && searchTerm.trim()) {
+    params.push(searchTerm.trim());
     const searchIdx = params.length;
     selectColumns = `jobs.*,
       ts_rank(search_vector, websearch_to_tsquery('english', $${searchIdx})) AS rank,

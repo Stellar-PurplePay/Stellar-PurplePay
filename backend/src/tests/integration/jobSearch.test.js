@@ -17,7 +17,6 @@ const app = require("../../server");
 const TEST_DATABASE_URL = process.env.TEST_DATABASE_URL || process.env.DATABASE_URL;
 
 let pool;
-let testClient;
 
 // Seeded inside a transaction that the app's pool could never see (different
 // connection = uncommitted). Seed with auto-commit instead and clean up by
@@ -31,11 +30,9 @@ const SEED_TITLES = [
 
 beforeAll(async () => {
   pool = new Pool({ connectionString: TEST_DATABASE_URL });
-  testClient = await pool.connect();
 });
 
 afterAll(async () => {
-  if (testClient) await testClient.release();
   if (pool) await pool.end();
 });
 

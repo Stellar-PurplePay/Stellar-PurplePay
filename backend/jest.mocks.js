@@ -30,3 +30,20 @@ jest.mock("sanitize-html", () => {
   };
   return Object.assign(sanitize, { default: sanitize });
 });
+
+// Mock Bull queues globally so integration and unit tests don't attempt to dial
+// a live Redis instance on localhost:6379 when no Redis container is running.
+jest.mock("./src/utils/queue", () => {
+  const createQueueMock = (name) => ({
+    name,
+    add: jest.fn().mockResolvedValue({ id: `mock-${name}-job-id` }),
+    process: jest.fn(),
+    on: jest.fn(),
+    close: jest.fn().mockResolvedValue(),
+  });
+  return {
+    emailQueue: createQueueMock("emailQueue"),
+    auditQueue: createQueueMock("auditQueue"),
+    linkVerificationQueue: createQueueMock("linkVerificationQueue"),
+  };
+});

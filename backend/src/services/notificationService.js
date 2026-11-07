@@ -88,19 +88,33 @@ async function queueNotification({ recipientAddress, notificationType, eventType
   const notification = rows[0];
 
   if (notificationType === "email") {
-    await emailQueue.add({
-      notificationId: notification.id,
-      recipientAddress,
-      eventType,
-      jobId,
-      payload,
-    }, {
-      attempts: 3,
-      backoff: {
-        type: "exponential",
-        delay: 5000,
-      },
-    });
+    try {
+      if (emailQueue && typeof emailQueue.add === "function") {
+        const jobPromise = emailQueue.add(
+          {
+            notificationId: notification.id,
+            recipientAddress,
+            eventType,
+            jobId,
+            payload,
+          },
+          {
+            attempts: 3,
+            backoff: {
+              type: "exponential",
+              delay: 5000,
+            },
+          }
+        );
+        if (jobPromise && typeof jobPromise.catch === "function") {
+          jobPromise.catch((err) => {
+            console.warn("[notifications] Failed to add email to queue:", err.message);
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("[notifications] Failed to enqueue email job:", err.message);
+    }
   }
 
   return notification;
