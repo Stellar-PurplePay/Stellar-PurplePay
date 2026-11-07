@@ -51,6 +51,7 @@ async function fetchGitHubContributors() {
     return contributorCache._githubData;
   }
 
+  try {
     const contributorsRepo =
       process.env.GITHUB_REPO || "Stellar-PurplePay/Stellar-PurplePay";
     const response = await axios.get(

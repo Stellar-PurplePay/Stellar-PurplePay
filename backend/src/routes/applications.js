@@ -175,10 +175,6 @@ router.get("/freelancer/:publicKey", generalApplicationRateLimiter, async (req, 
 router.post("/", applicationRateLimiter, validateJsonb({ screeningAnswers: screeningAnswersSchema }), async (req, res, next) => {
   try {
     const body = validate(createApplicationSchema, req.body);
-    const caller = req.user?.publicKey;
-    if (caller && body.freelancerAddress && caller !== body.freelancerAddress && req.user?.role !== "admin") {
-      return res.status(403).json({ error: "Forbidden: You can only submit applications for your own wallet" });
-    }
     const job = await getJob(body.jobId);
     if (job && req.user) {
       const clientId = job.client_id ?? job.clientAddress ?? job.clientId;
@@ -189,6 +185,10 @@ router.post("/", applicationRateLimiter, validateJsonb({ screeningAnswers: scree
       ) {
         return res.status(400).json({ error: "You cannot apply to your own job" });
       }
+    }
+    const caller = req.user?.publicKey;
+    if (caller && body.freelancerAddress && caller !== body.freelancerAddress && req.user?.role !== "admin") {
+      return res.status(403).json({ error: "Forbidden: You can only submit applications for your own wallet" });
     }
     const app = await submitApplication(body);
     

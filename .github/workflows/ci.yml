@@ -57,10 +57,10 @@ jobs:
         run: npm ci || npm install
 
       - name: Lint
-        run: npm run lint || true
+        run: npm run lint
 
       - name: Unit tests
-        run: npx jest --selectProjects unit --forceExit || true
+        run: npx jest --selectProjects unit --forceExit
 
       - name: Integration tests
         run: npm run test:integration -- --forceExit || true
@@ -94,16 +94,16 @@ jobs:
         run: npm ci || npm install
 
       - name: Lint
-        run: npm run lint || true
+        run: npm run lint
 
       - name: Type check
-        run: npm run type-check || true
+        run: npm run type-check
 
       - name: Unit & Component tests
-        run: npm test || true
+        run: npm test
 
       - name: Build production bundle
-        run: npm run build || true
+        run: npm run build
 
   # ── 3. Soroban Smart Contracts ────────────────────────────────────────────
   contracts:

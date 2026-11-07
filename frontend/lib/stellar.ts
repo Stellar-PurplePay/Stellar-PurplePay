@@ -167,6 +167,13 @@ export function streamAccountTransactions(
 
 // ─── Payments ─────────────────────────────────────────────────────────────────
 
+export function xlmToStroops(xlm: number | string): bigint {
+  const str = String(xlm).trim();
+  const [whole, fraction = ""] = str.split(".");
+  const paddedFraction = fraction.padEnd(7, "0").slice(0, 7);
+  return BigInt((whole || "0") + paddedFraction);
+}
+
 export async function buildCreateEscrowTx(
   params: EscrowParams,
 ): Promise<string> {
@@ -188,7 +195,7 @@ export async function buildCreateEscrowTx(
   // Use the "medium" tier as the default inclusion fee for escrow creation
   const inclusionFee = tierToTransactionFee(gasEstimate.medium);
 
-  const amountStroops = BigInt(Math.round(budgetXlm * 10_000_000));
+  const amountStroops = xlmToStroops(budgetXlm);
   const freelancerAddress = params.freelancerPublicKey || clientPublicKey;
   const tokenAddress = params.tokenAddress || (NETWORK === "mainnet"
     ? "CAS3J7GYLGXMF6TDJBBYYSE3HQ6BBSMLNUQ34T6TZMYMW2EZH3MSUSBM"
@@ -309,7 +316,7 @@ export async function createEscrowOnChain(
       client: params.clientPublicKey,
       freelancer: params.clientPublicKey,
       token: "native",
-      amount: String(BigInt(Math.round(budgetXlm * 10_000_000))),
+      amount: String(xlmToStroops(budgetXlm)),
     });
     return { txHash };
   }

@@ -33,6 +33,12 @@ router.use(adminRateLimiter);
 // Helper: enqueue admin audit entries â€” never blocks the response.
 // Writes to both audit_logs (general) and admin_audit_log (admin-specific).
 function logAdminAction({ action, adminAddress, targetId, targetType, details }) {
+  pool.query(
+    `INSERT INTO admin_audit_log (admin_address, action, target_type, target_id, details, created_at)
+     VALUES ($1, $2, $3, $4, $5, NOW())`,
+    [adminAddress, action, targetType, targetId || null, JSON.stringify(details || {})]
+  ).catch(() => {});
+
   auditQueue
     .add({
       type: "audit_log",

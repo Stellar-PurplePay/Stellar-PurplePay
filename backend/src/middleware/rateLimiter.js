@@ -1,5 +1,6 @@
 "use strict";
 
+const crypto = require("crypto");
 const rateLimit = require("express-rate-limit");
 const pool = require("../db/pool");
 const { getClientIp } = require("../utils/clientIp");
@@ -52,6 +53,7 @@ const createRateLimiter = (maxRequests, windowMinutes, options = {}) => {
     handler: (req, res) => {
       const retryAfter = Math.ceil(windowMinutes * 60);
       res.set("Retry-After", String(retryAfter));
+      res.set("Cache-Control", "no-store");
       rateLimitLogger.warn({
         endpoint: options.name || req.originalUrl,
         ip: getClientIp(req),
@@ -62,7 +64,6 @@ const createRateLimiter = (maxRequests, windowMinutes, options = {}) => {
         requestId: req.requestId,
       }, "Rate limit exceeded");
       return res.status(429).json({
-        error: "Too many requests — please wait before trying again",
         message: "Too many requests — please wait before trying again",
       });
     },
@@ -128,4 +129,43 @@ async function createDisputeRateLimiter(req, res, next) {
   }
 }
 
-module.exports = { createRateLimiter, createDisputeRateLimiter, getRateLimitScale, scaleMaxRequests, rateLimitLogger };
+function hashRateLimitIdentifier(namespace, identifier) {
+  if (!identifier) return `${namespace}:anonymous`;
+  const hash = crypto.createHash("sha256").update(String(identifier)).digest("hex").slice(0, 32);
+  return `${namespace}:${hash}`;
+}
+
+function createSensitiveRateLimiters(config = {}) {
+  const {
+    namespace = "default",
+    windowMinutes = 15,
+    maxRequestsPerIp = 100,
+    maxRequestsPerPrincipal = 50,
+    principalKeyGenerator = (req) => req.user?.publicKey || req.ip,
+  } = config;
+
+  const ipLimiter = createRateLimiter(maxRequestsPerIp, windowMinutes, {
+    name: `${namespace}_ip`,
+    keyGenerator: (req) => getClientIp(req),
+  });
+
+  const principalLimiter = createRateLimiter(maxRequestsPerPrincipal, windowMinutes, {
+    name: `${namespace}_principal`,
+    keyGenerator: (req) => {
+      const principal = principalKeyGenerator(req);
+      return hashRateLimitIdentifier(namespace, principal);
+    },
+  });
+
+  return [ipLimiter, principalLimiter];
+}
+
+module.exports = {
+  createRateLimiter,
+  createSensitiveRateLimiters,
+  createDisputeRateLimiter,
+  hashRateLimitIdentifier,
+  getRateLimitScale,
+  scaleMaxRequests,
+  rateLimitLogger,
+};

@@ -57,7 +57,10 @@ fn release_milestone_at(env: &Env, escrow: &mut Escrow, position: u32) -> i128 {
         panic!("Milestone already rejected");
     }
     for previous_milestone in escrow.milestones.iter() {
-        if previous_milestone.id < milestone.id && !previous_milestone.released {
+        if previous_milestone.id < milestone.id
+            && !previous_milestone.released
+            && !previous_milestone.rejected
+        {
             panic!(
                 "{}",
                 ContractError::PreviousMilestoneNotApproved.panic_message()
@@ -65,16 +68,41 @@ fn release_milestone_at(env: &Env, escrow: &mut Escrow, position: u32) -> i128 {
         }
     }
 
+    // Count unresolved milestones (including this one) and sum resolved amounts
+    let mut unresolved_count = 0;
+    let mut resolved_sum = 0i128;
+    for ms in escrow.milestones.iter() {
+        if !ms.released && !ms.rejected {
+            unresolved_count += 1;
+        } else {
+            let ms_amount = escrow
+                .amount
+                .checked_mul(ms.percentage as i128)
+                .expect("Arithmetic overflow")
+                .checked_div(100)
+                .expect("Arithmetic overflow");
+            resolved_sum = resolved_sum
+                .checked_add(ms_amount)
+                .expect("Arithmetic overflow");
+        }
+    }
+
+    let payout = if unresolved_count == 1 {
+        escrow
+            .amount
+            .checked_sub(resolved_sum)
+            .expect("Arithmetic underflow")
+    } else {
+        escrow
+            .amount
+            .checked_mul(milestone.percentage as i128)
+            .expect("Arithmetic overflow")
+            .checked_div(100)
+            .expect("Arithmetic overflow")
+    };
+
     milestone.released = true;
     escrow.milestones.set(position, milestone.clone());
-
-    // Compute payout for this milestone's percentage of the total
-    let payout = escrow
-        .amount
-        .checked_mul(milestone.percentage as i128)
-        .expect("Arithmetic overflow")
-        .checked_div(100)
-        .expect("Arithmetic overflow");
 
     let token_client = token::Client::new(env, &escrow.token);
 
@@ -282,16 +310,41 @@ pub(crate) fn reject_milestone(env: Env, job_id: String, milestone_index: u32, c
         panic!("Milestone already rejected");
     }
 
+    // Count unresolved milestones (including this one) and sum resolved amounts
+    let mut unresolved_count = 0;
+    let mut resolved_sum = 0i128;
+    for ms in escrow.milestones.iter() {
+        if !ms.released && !ms.rejected {
+            unresolved_count += 1;
+        } else {
+            let ms_amount = escrow
+                .amount
+                .checked_mul(ms.percentage as i128)
+                .expect("Arithmetic overflow")
+                .checked_div(100)
+                .expect("Arithmetic overflow");
+            resolved_sum = resolved_sum
+                .checked_add(ms_amount)
+                .expect("Arithmetic overflow");
+        }
+    }
+
+    let refund = if unresolved_count == 1 {
+        escrow
+            .amount
+            .checked_sub(resolved_sum)
+            .expect("Arithmetic underflow")
+    } else {
+        escrow
+            .amount
+            .checked_mul(milestone.percentage as i128)
+            .expect("Arithmetic overflow")
+            .checked_div(100)
+            .expect("Arithmetic overflow")
+    };
+
     milestone.rejected = true;
     escrow.milestones.set(position, milestone.clone());
-
-    // Compute this milestone's percentage of the total and refund to client
-    let refund = escrow
-        .amount
-        .checked_mul(milestone.percentage as i128)
-        .expect("Arithmetic overflow")
-        .checked_div(100)
-        .expect("Arithmetic overflow");
 
     let token_client = token::Client::new(&env, &escrow.token);
     token_client.transfer(&env.current_contract_address(), &escrow.client, &refund);

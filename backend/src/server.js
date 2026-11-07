@@ -1,5 +1,4 @@
 
-Server · JS
 /* global userAddress, userLastSeen, userClients, setWebsocketConnections, broadcastToUser, createServiceLogger, sendEmail, logError, startEscrowTimeoutChecker, refreshWsMetrics, startNotificationProcessor, startAdminReportScheduler, startWeeklyDigestScheduler, startPurgeDeletedRecords, startRecurringEscrowTicker */
 /* eslint-disable */
 /**
@@ -53,12 +52,39 @@ const invitationRoutes     = require("./routes/invitations");
  
 const migrate           = require("./db/migrate");
 const IndexerService    = require("./services/indexerService");
-const { PriceAlertService } = require("./services/priceAlertService");
+const priceAlertModule  = require("./services/priceAlertService");
+const PriceAlertService = typeof priceAlertModule === "function" ? priceAlertModule : (priceAlertModule.PriceAlertService || class { start() {} });
 const pool              = require("./db/pool");
 const anchorRoutes        = require("./routes/anchors");
 const scopeRoutes        = require("./routes/scope");
 const analyticsRoutes    = require("./routes/analytics");
 const searchRoutes       = require("./routes/search");
+
+const adminRoutes        = require("./routes/admin");
+const admin2faRoutes     = require("./routes/admin2fa");
+const assessmentRoutes   = require("./routes/assessments");
+const auditRoutes        = require("./routes/audit");
+const categoryRoutes     = require("./routes/categories");
+const certificateRoutes  = require("./routes/certificates");
+const developerRoutes    = require("./routes/developer");
+const disputeRoutes      = require("./routes/disputes");
+const faucetRoutes       = require("./routes/faucet");
+const insightsRoutes     = require("./routes/insights");
+const jobTemplateRoutes  = require("./routes/jobTemplates");
+const messageRoutes      = require("./routes/messageRoutes");
+const notificationRoutes = require("./routes/notifications");
+const onboardingRoutes   = require("./routes/onboarding");
+const pingRoutes         = require("./routes/ping");
+const publicRoutes       = require("./routes/public");
+const publicJobBoardRoutes = require("./routes/publicJobBoard");
+const rateLimitRoutes    = require("./routes/rateLimit");
+const savedSearchRoutes  = require("./routes/savedSearches");
+const skillRoutes        = require("./routes/skills");
+const sponsorshipRoutes  = require("./routes/sponsorship");
+const timeEntryRoutes    = require("./routes/timeEntries");
+const tokenRoutes        = require("./routes/tokens");
+const webauthnRoutes     = require("./routes/webauthn");
+const webhookRoutes      = require("./routes/webhooks");
  
 const { setWebsocketConnections } = require("./metrics");
 const { startEscrowTimeoutChecker } = require("./services/escrowService");
@@ -138,6 +164,9 @@ function broadcastToUser(userAddress, event, payload) {
     if (ws.readyState === WS_OPEN) ws.send(message);
   }
 }
+
+const { setBroadcastToUser } = require("./services/notificationService");
+setBroadcastToUser(broadcastToUser);
  
 const {
   upsertScopeSession,
@@ -196,8 +225,12 @@ app.use(doubleCsrfProtection);
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 150, standardHeaders: true, legacyHeaders: true }));
  
 // ─── Routes ───────────────────────────────────────────────────────────────────
+app.use("/ping",              pingRoutes);
 app.use("/health",            healthRoutes);
+app.use("/api/health",        healthRoutes);
 app.use("/api/auth",          authRoutes);
+app.use("/api/admin/2fa",     admin2faRoutes);
+app.use("/api/admin",         adminRoutes);
 app.use("/api/jobs",          jobRoutes);
 app.use("/api/applications",  applicationRoutes);
 app.use("/api/profiles",      profileRoutes);
@@ -210,7 +243,30 @@ app.use("/api/contributors",  contributorRoutes);
 app.use("/api/verification",  verificationRoutes);
 app.use("/api/nft",           nftRoutes);
 app.use("/api/ai-scorer",     aiScorerRoutes);
+app.use("/api/ai",            aiScorerRoutes);
 app.use("/api/anchors",       anchorRoutes);
+app.use("/api/assessments",   assessmentRoutes);
+app.use("/api/audit",         auditRoutes);
+app.use("/api/categories",    categoryRoutes);
+app.use("/api/certificates",  certificateRoutes);
+app.use("/api/developer",     developerRoutes);
+app.use("/api/disputes",      disputeRoutes);
+app.use("/api/faucet",        faucetRoutes);
+app.use("/api/insights",      insightsRoutes);
+app.use("/api/job-templates", jobTemplateRoutes);
+app.use("/api/messages",      messageRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/onboarding",    onboardingRoutes);
+app.use("/api/public",        publicRoutes);
+app.use("/api/v1/public",     publicJobBoardRoutes);
+app.use("/api/rate-limit",    rateLimitRoutes);
+app.use("/api/saved-searches", savedSearchRoutes);
+app.use("/api/skills",        skillRoutes);
+app.use("/api/sponsorship",   sponsorshipRoutes);
+app.use("/api/time-entries",  timeEntryRoutes);
+app.use("/api/tokens",        tokenRoutes);
+app.use("/api/webauthn",      webauthnRoutes);
+app.use("/api/webhooks",      webhookRoutes);
  
 app.get("/api/indexer/health", (req, res) => {
   res.json({
@@ -218,13 +274,11 @@ app.get("/api/indexer/health", (req, res) => {
     indexer: indexerService.getHealth(),
   });
 });
-app.use("/api/contributors",    contributorRoutes);
 app.use("/api/gas-estimate",    gasEstimatorRoutes);
 app.use("/api/transactions",   transactionRoutes);
 app.use("/api/dao",            daoRoutes);
 app.use("/api/proposal-templates", proposalTemplateRoutes);
 app.use("/api/price-alerts",      priceAlertRoutes);
-app.use("/api/ai",                aiScorerRoutes);
 app.use("/api/scope",             scopeRoutes);
 app.use("/api/turrets",           turretRoutes);
 app.use("/api/referrals",         referralRoutes);
@@ -297,7 +351,12 @@ wsServer.on("connection", async (ws, request) => {
     ws.realtimeRooms = new Set();
     realtimeClients.add(ws);
     if (userAddress) {
-      if (!userClients.has(userAddress)) userClients.set(userAddress, new Set());
+      const existing = userClients.get(userAddress);
+      if (existing && existing.size >= 5) {
+        ws.close(1008, "Too many connections");
+        return;
+      }
+      if (!existing) userClients.set(userAddress, new Set());
       userClients.get(userAddress).add(ws);
     }
     const requestedRooms = [
@@ -405,6 +464,11 @@ wsServer.on("connection", async (ws, request) => {
         const message = JSON.parse(String(raw));
         if (!message || typeof message !== "object") return;
         if (message.type === "scope:update") {
+          const freshSession = await loadScopeSession(sessionId);
+          if (freshSession?.finalized || session?.finalized) {
+            sendJson(ws, "scope:error", { error: "Scope session is locked" });
+            return;
+          }
           const nextCursors = { ...(session.cursors || {}), ...(message.cursors || {}) };
           session = await upsertScopeSession(sessionId, {
             content: typeof message.content === "string" ? message.content : session.content,
@@ -451,6 +515,7 @@ wsServer.on("connection", async (ws, request) => {
               sessionId,
               content: session.content,
               payload: session.finalized_payload || null,
+              finalizedHash: contentHash,
               updatedAt: session.updated_at,
             });
           }

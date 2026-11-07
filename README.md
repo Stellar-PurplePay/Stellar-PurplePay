@@ -265,6 +265,7 @@ cargo test
 ## 📜 Community, Standards & Compliance
 
 - **[Changelog](CHANGELOG.md)** — Detailed record of releases, audit remediations, and protocol upgrades.
+- **[Observability & Metrics](backend/docs/METRICS.md)** — Prometheus metrics, operational dashboards, and alerting rules.
 - **[Code of Conduct](CODE_OF_CONDUCT.md)** — Contributor Covenant 2.1 standards for an open, respectful, and inclusive community.
 - **[Contributing Guidelines](CONTRIBUTING.md)** — Architectural conventions, branch naming standards, commit hygiene, and pull request checklist.
 - **[Security Policy](SECURITY.md)** — Responsible disclosure policy, private advisory channels, and response SLAs.

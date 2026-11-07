@@ -21,7 +21,7 @@
 
 const pool = require("../db/pool");
 
-const REFERRAL_BONUS_BPS = Number(process.env.REFERRAL_BONUS_BPS) || 100; // 1% = 100 basis points
+const REFERRAL_BONUS_BPS = Number(process.env.REFERRAL_BONUS_BPS) || 200; // 2% = 200 basis points
 
 /**
  * Validate a Stellar G-address.

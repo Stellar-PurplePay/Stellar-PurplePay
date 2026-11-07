@@ -56,6 +56,18 @@ jest.mock("../../services/priceAlertService", () =>
   jest.fn().mockImplementation(() => ({ start: jest.fn() })),
 );
 
+jest.mock("../../services/cacheService", () => ({
+  ping: jest.fn().mockResolvedValue("up"),
+  get: jest.fn().mockResolvedValue(null),
+  set: jest.fn().mockResolvedValue("OK"),
+}));
+
+jest.mock("../../services/sorobanClient", () => ({
+  getServer: () => ({
+    getLatestLedger: jest.fn().mockResolvedValue({ sequence: 12345 }),
+  }),
+}));
+
 jest.mock("../../db/migrate", () => ({
   migrate: jest.fn().mockResolvedValue(undefined),
 }));

@@ -29,21 +29,27 @@ jest.mock("axios", () => ({
 const axios = require("axios");
 
 // Mock stellar-sdk to avoid its axios dependency chain and network calls.
-jest.mock("@stellar/stellar-sdk", () => ({
-  Horizon: jest.fn(),
-  Networks: { TESTNET: "Test SDF Network ; September 2015" },
-  Keypair: { fromSecret: jest.fn(), fromPublicKey: jest.fn() },
-  TransactionBuilder: jest.fn(),
-  Account: jest.fn(),
-  Contract: jest.fn(),
-  nativeToScVal: jest.fn(),
-  scValToNative: jest.fn(),
-  Address: jest.fn(),
-  rpc: { Server: jest.fn() },
-  xdr: {},
-  Utils: { readChallengeTx: jest.fn(), verifyChallengeTxSigners: jest.fn() },
-  SorobanRpc: { Server: jest.fn() },
-}));
+jest.mock("@stellar/stellar-sdk", () => {
+  const AssetMock = jest.fn().mockImplementation((code, issuer) => ({ code, issuer, getCode: () => code, getIssuer: () => issuer, isNative: () => false }));
+  AssetMock.native = jest.fn(() => ({ isNative: () => true, getCode: () => "XLM" }));
+
+  return {
+    Horizon: jest.fn(),
+    Networks: { TESTNET: "Test SDF Network ; September 2015" },
+    Keypair: { fromSecret: jest.fn(), fromPublicKey: jest.fn() },
+    TransactionBuilder: jest.fn(),
+    Account: jest.fn(),
+    Asset: AssetMock,
+    Contract: jest.fn(),
+    nativeToScVal: jest.fn(),
+    scValToNative: jest.fn(),
+    Address: jest.fn(),
+    rpc: { Server: jest.fn() },
+    xdr: {},
+    Utils: { readChallengeTx: jest.fn(), verifyChallengeTxSigners: jest.fn() },
+    SorobanRpc: { Server: jest.fn() },
+  };
+});
 
 jest.mock("../services/indexerService", () =>
   jest.fn().mockImplementation(() => ({ start: jest.fn() })),

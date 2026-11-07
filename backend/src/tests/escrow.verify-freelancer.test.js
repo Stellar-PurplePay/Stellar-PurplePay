@@ -27,7 +27,7 @@ beforeAll(() => {
 
 // ─── Module mocks ────────────────────────────────────────────────
 
-jest.mock("../../db/pool", () => {
+jest.mock("../db/pool", () => {
   const mockQuery = jest.fn().mockResolvedValue({ rows: [] });
   const mock = {
     query: mockQuery,
@@ -41,22 +41,22 @@ jest.mock("../../db/pool", () => {
   return mock;
 });
 
-jest.mock("../../services/indexerService", () =>
+jest.mock("../services/indexerService", () =>
   jest.fn().mockImplementation(() => ({
     start: jest.fn(),
     getHealth: jest.fn().mockReturnValue({ running: false, synced: false }),
   })),
 );
 
-jest.mock("../../services/priceAlertService", () =>
+jest.mock("../services/priceAlertService", () =>
   jest.fn().mockImplementation(() => ({ start: jest.fn() })),
 );
 
-jest.mock("../../db/migrate", () => ({
+jest.mock("../db/migrate", () => ({
   migrate: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock("../../routes/notifications", () => {
+jest.mock("../routes/notifications", () => {
   const { Router } = require("express");
   const router = Router();
   router.get("/", (req, res) => res.json({ success: true }));
@@ -66,7 +66,7 @@ jest.mock("../../routes/notifications", () => {
 // ─── Imports ─────────────────────────────────────────────────────
 
 const request = require("supertest");
-const app = require("../../server");
+const app = require("../server");
 
 // ─── Constants ───────────────────────────────────────────────────
 

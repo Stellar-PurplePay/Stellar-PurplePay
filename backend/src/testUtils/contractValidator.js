@@ -20,7 +20,13 @@ function resolveRefs(schema) {
     const schemaName = schema.$ref.replace("#/components/schemas/", "");
     const resolved = componentSchemas[schemaName];
     if (!resolved) throw new Error(`Unknown $ref: ${schema.$ref}`);
-    return resolveRefs(resolved);
+    const res = resolveRefs(resolved);
+    if (schema.nullable === true) {
+      return {
+        oneOf: [res, { type: "null" }],
+      };
+    }
+    return res;
   }
 
   const out = {};
@@ -39,7 +45,31 @@ function resolveRefs(schema) {
 }
 
 function getResponseSchema(apiPath, method, statusCode) {
-  const pathSpec = openApiSpec.paths?.[apiPath];
+  let resolvedPath = apiPath;
+  if (!openApiSpec.paths?.[resolvedPath]) {
+    const aliases = {
+      "/health": "/api/health",
+      "/api/health": "/health",
+      "/api/profiles/{address}": "/api/profiles/{publicKey}",
+      "/api/profiles/{publicKey}": "/api/profiles/{address}",
+    };
+    if (aliases[resolvedPath]) {
+      resolvedPath = aliases[resolvedPath];
+    }
+  }
+
+  let pathSpec = openApiSpec.paths?.[resolvedPath];
+
+  if (!pathSpec) {
+    const normalizedInput = resolvedPath.replace(/\{[^}]+\}/g, "{}");
+    for (const [key, val] of Object.entries(openApiSpec.paths || {})) {
+      if (key.replace(/\{[^}]+\}/g, "{}") === normalizedInput) {
+        pathSpec = val;
+        break;
+      }
+    }
+  }
+
   if (!pathSpec) throw new Error(`No OpenAPI spec for path: ${apiPath}`);
 
   const methodSpec = pathSpec[method.toLowerCase()];

@@ -14,6 +14,7 @@
 const pool = require("../db/pool");
 const { uploadMessage } = require("./ipfsService");
 const { createJobNotification, EVENT_TYPES } = require("./notificationService");
+const { encrypt } = require("./encryptionService");
 
 /* ─── helpers ────────────────────────────────────────────────────────────────── */
 
@@ -136,15 +137,16 @@ async function createMessage({ jobId, senderAddress, content, contractTxHash }) 
       throw e;
     }
 
-    // ── Step 1: Upload message to IPFS ──────────────────────────────────────
+    // ── Step 1: Encrypt message and upload to IPFS ─────────────────────────
     let ipfsCid = null;
     try {
+      const encryptedContent = encrypt(trimmedContent) || trimmedContent;
       const ipfsResult = await uploadMessage({
         jobId,
         senderAddress,
         recipientAddress: receiverAddress,
-        content: trimmedContent,
-        encrypted: false, // Set to true when client-side encryption is enabled
+        content: encryptedContent,
+        encrypted: true,
       });
       ipfsCid = ipfsResult.cid;
     } catch (ipfsError) {

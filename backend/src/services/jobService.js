@@ -199,15 +199,21 @@ function rowToJob(row) {
     shareCount: row.share_count || 0,
     boosted: row.boosted || false,
     boostedUntil: row.boosted_until,
+    viewCount: row.view_count !== undefined ? row.view_count : (row.views !== undefined ? row.views : 0),
     deadline: row.deadline,
     timezone: row.timezone,
     screeningQuestions: row.screening_questions || [],
     milestones: row.milestones || [],
+    disputeReason: row.dispute_reason,
+    disputeDescription: row.dispute_description,
+    disputedBy: row.disputed_by,
+    disputedAt: row.disputed_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     expiresAt: row.expires_at,
     extendedCount: row.extended_count || 0,
     extendedUntil: row.extended_until,
+    biddingClosedAt: row.bidding_closed_at || row.biddingClosedAt || null,
   };
 }
  
@@ -284,10 +290,7 @@ let createJob = async function ({
     ? screeningQuestions.slice(0, 5).filter((q) => q && q.trim().length > 0)
     : [];
  
-  // RECONSTRUCTED: these four values were not in the pasted file but are used
-  // by the INSERT below. If main computes them differently (e.g. validates
-  // milestones), use main's version of this block.
-  const safeMilestones = Array.isArray(milestones) ? milestones : [];
+  const safeMilestones = validateMilestones(milestones, budget);
   const jobVisibility = visibility;
   const resolvedCategoryName = category;
   let resolvedCategoryId = null;

@@ -173,6 +173,23 @@ jest.mock("@/components/Toast", () => {
 });
 
 jest.mock("@/lib/api", () => ({
+  fetchMyJobs: jest.fn().mockResolvedValue([]),
+  fetchMyApplications: jest.fn().mockResolvedValue([]),
+  fetchMyInvitations: jest.fn().mockResolvedValue([]),
+  fetchTalentPool: jest.fn().mockResolvedValue([]),
+  fetchApplications: jest.fn().mockResolvedValue([]),
+  fetchClientSpendingAnalytics: jest.fn().mockResolvedValue(null),
+  fetchPriceAlertPreference: jest.fn().mockResolvedValue(null),
+  upsertPriceAlertPreference: jest.fn().mockResolvedValue({}),
+  fetchSavedSearches: jest.fn().mockResolvedValue([]),
+  updateSavedSearch: jest.fn().mockResolvedValue({}),
+  deleteSavedSearch: jest.fn().mockResolvedValue({}),
+  createProposalTemplate: jest.fn().mockResolvedValue({}),
+  updateProposalTemplate: jest.fn().mockResolvedValue({}),
+  deleteProposalTemplate: jest.fn().mockResolvedValue({}),
+  batchJobOperation: jest.fn().mockResolvedValue({}),
+  bulkExtendJobs: jest.fn().mockResolvedValue({}),
+  declineInvitation: jest.fn().mockResolvedValue({}),
   fetchCategories: jest.fn().mockResolvedValue([]),
   submitRating: jest.fn().mockResolvedValue({}),
   submitApplication: jest.fn().mockResolvedValue({}),

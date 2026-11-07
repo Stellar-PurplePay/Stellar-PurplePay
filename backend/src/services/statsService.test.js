@@ -253,7 +253,7 @@ describe("getTopCategories()", () => {
 // right SQL names — the actual index creation is verified by running the
 // migration against a live DB.
 
-describe("Migration V57 SQL contracts", () => {
+describe("Migration stats indexes and MV SQL contracts", () => {
   it("MV name used in service matches migration", () => {
     // Inspect the module source to ensure the literal string matches
     const src = require("fs").readFileSync(__filename.replace(".test.js", ".js"), "utf8");
@@ -262,13 +262,10 @@ describe("Migration V57 SQL contracts", () => {
 
   it("idx_jobs_status is created in the up migration", () => {
     const path = require("path");
-    const upSql = require("fs").readFileSync(
-      path.resolve(
-        __dirname,
-        "../db/migrations/V57__stats_indexes_and_mv.up.sql"
-      ),
-      "utf8"
-    );
+    const fs = require("fs");
+    const dir = path.resolve(__dirname, "../db/migrations");
+    const file = fs.readdirSync(dir).find((f) => f.includes("stats_indexes_and_mv.up.sql"));
+    const upSql = fs.readFileSync(path.join(dir, file), "utf8");
     expect(upSql).toContain("idx_jobs_status");
     expect(upSql).toContain("idx_applications_status");
     expect(upSql).toContain("idx_escrows_status");
@@ -278,13 +275,10 @@ describe("Migration V57 SQL contracts", () => {
 
   it("down migration drops all objects created in the up migration", () => {
     const path = require("path");
-    const downSql = require("fs").readFileSync(
-      path.resolve(
-        __dirname,
-        "../db/migrations/V57__stats_indexes_and_mv.down.sql"
-      ),
-      "utf8"
-    );
+    const fs = require("fs");
+    const dir = path.resolve(__dirname, "../db/migrations");
+    const file = fs.readdirSync(dir).find((f) => f.includes("stats_indexes_and_mv.down.sql"));
+    const downSql = fs.readFileSync(path.join(dir, file), "utf8");
     expect(downSql).toContain("DROP MATERIALIZED VIEW IF EXISTS platform_stats_mv");
     expect(downSql).toContain("idx_jobs_status");
     expect(downSql).toContain("idx_applications_status");

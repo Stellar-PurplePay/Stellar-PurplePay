@@ -113,4 +113,30 @@ async function requireAdmin2FA(req, res, next) {
   }
 }
 
-module.exports = { verifyJWT, requireAdminRole, requireAdmin2FA, JWT_SECRET, requireJwtSecret };
+async function optionalJWT(req, res, next) {
+  let token = null;
+
+  if (req.headers.cookie) {
+    const cookies = parseCookies(req.headers.cookie);
+    token = cookies.token;
+  }
+
+  if (!token) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+  }
+
+  if (!token) return next();
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch {
+    return res.status(401).json({ error: "Unauthorized: Invalid or expired token" });
+  }
+}
+
+module.exports = { verifyJWT, optionalJWT, requireAdminRole, requireAdmin2FA, JWT_SECRET, requireJwtSecret };

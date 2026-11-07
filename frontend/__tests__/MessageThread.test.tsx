@@ -22,6 +22,21 @@ jest.mock("@/lib/crypto", () => ({
   decryptFromSender: jest.fn(),
 }));
 
+jest.mock("@tanstack/react-virtual", () => ({
+  useVirtualizer: ({ count }: { count: number }) => ({
+    getVirtualItems: () =>
+      Array.from({ length: count }, (_, index) => ({
+        index,
+        key: index,
+        start: index * 50,
+        size: 50,
+      })),
+    getTotalSize: () => count * 50,
+    scrollToIndex: jest.fn(),
+    measureElement: jest.fn(),
+  }),
+}));
+
 describe("MessageThread Component — Cursor Pagination & Infinite Scroll (Issue #1446)", () => {
   const JOB_ID = "test-job-123";
   const USER_A = "GA" + "1".repeat(54);

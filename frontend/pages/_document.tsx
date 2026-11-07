@@ -1,5 +1,4 @@
 import Document, { Html, Head, Main, NextScript, DocumentContext, DocumentInitialProps } from "next/document";
-import SanitizedHtml from "@/components/SanitizedHtml";
 
 // Inline script applied before hydration to prevent flash of wrong theme.
 // Must remain synchronous and inline — do NOT move to next/script.
@@ -36,7 +35,8 @@ export default function PurplePayDocument({ nonce }: PurplePayDocumentProps) {
   return (
     <Html lang="en">
       <Head nonce={nonce}>
-        <SanitizedHtml as="script" nonce={nonce} html={themeScript} />
+        {/* eslint-disable-next-line sri/no-raw-dangerously-set-inner-html */}
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: themeScript }} />
       </Head>
       <body>
         <Main />

@@ -226,3 +226,92 @@ fn test_empty_milestones_vec_is_allowed_as_single_payment() {
     // 1000 - 1% fee (10) = 990 to the freelancer.
     assert_eq!(token_client.balance(&freelancer), 990);
 }
+
+#[test]
+fn test_reject_first_milestone_allows_releasing_second_milestone() {
+    let env = Env::default();
+    let (contract, client, freelancer, token_id) = setup(&env);
+    let job_id = String::from_str(&env, "ms-reject-release-next");
+
+    let mut ms = Vec::new(&env);
+    ms.push_back(MilestoneInput {
+        description: String::from_str(&env, "Phase 1"),
+        percentage: 40,
+    });
+    ms.push_back(MilestoneInput {
+        description: String::from_str(&env, "Phase 2"),
+        percentage: 60,
+    });
+
+    contract.create_escrow_with_milestones(
+        &job_id,
+        &client,
+        &CreateEscrowParams {
+            freelancer: freelancer.clone(),
+            token: token_id.clone(),
+            amount: 1_000,
+            milestones: Some(ms),
+            timeout_ledgers: None,
+            referrer: None,
+        },
+    );
+    contract.start_work(&job_id, &freelancer);
+
+    // Reject milestone 0 -> refunds 400 to client
+    contract.reject_milestone(&job_id, &0u32, &client);
+
+    let token_client = token::Client::new(&env, &token_id);
+    assert_eq!(token_client.balance(&client), 400);
+
+    // Now release milestone 1 -> should succeed because milestone 0 is rejected, not blocking
+    contract.release_milestone(&job_id, &1u32, &client);
+
+    // Milestone 1: 600 - 1% fee (6) = 594 to freelancer
+    assert_eq!(token_client.balance(&freelancer), 594);
+
+    let escrow = contract.get_escrow(&job_id);
+    assert_eq!(escrow.status, EscrowStatus::Released);
+}
+
+#[test]
+fn test_dust_reconciliation_reconciles_last_milestone() {
+    let env = Env::default();
+    let (contract, client, freelancer, token_id) = setup(&env);
+    let job_id = String::from_str(&env, "ms-dust-reconciliation");
+
+    let mut ms = Vec::new(&env);
+    ms.push_back(MilestoneInput {
+        description: String::from_str(&env, "Phase 1"),
+        percentage: 33,
+    });
+    ms.push_back(MilestoneInput {
+        description: String::from_str(&env, "Phase 2"),
+        percentage: 33,
+    });
+    ms.push_back(MilestoneInput {
+        description: String::from_str(&env, "Phase 3"),
+        percentage: 34,
+    });
+
+    contract.create_escrow_with_milestones(
+        &job_id,
+        &client,
+        &CreateEscrowParams {
+            freelancer: freelancer.clone(),
+            token: token_id.clone(),
+            amount: 99,
+            milestones: Some(ms),
+            timeout_ledgers: None,
+            referrer: None,
+        },
+    );
+    contract.start_work(&job_id, &freelancer);
+
+    contract.release_milestone(&job_id, &0u32, &client);
+    contract.release_milestone(&job_id, &1u32, &client);
+    contract.release_milestone(&job_id, &2u32, &client);
+
+    let token_client = token::Client::new(&env, &token_id);
+    // Contract should have exactly 0 tokens left stranded for this escrow
+    assert_eq!(token_client.balance(&contract.address), 0);
+}

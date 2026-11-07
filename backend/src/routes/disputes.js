@@ -122,7 +122,9 @@ router.get("/:jobId", readRateLimiter, async (req, res, next) => {
       return {
         ...ev,
         gatewayUrl,
-        available: await sorobanEvidence.isEvidenceAvailable(gatewayUrl),
+        available: typeof sorobanEvidence?.isEvidenceAvailable === "function"
+          ? await sorobanEvidence.isEvidenceAvailable(gatewayUrl)
+          : true,
       };
     }));
 

@@ -171,17 +171,36 @@ pub(crate) fn resolve_dispute(
         escrow.client.clone()
     };
 
+    // Calculate unreleased remaining amount
+    let mut remaining_amount: i128 = 0;
+    for ms in escrow.milestones.iter() {
+        if !ms.released {
+            let ms_amount = escrow
+                .amount
+                .checked_mul(ms.percentage as i128)
+                .expect("Arithmetic overflow")
+                .checked_div(100)
+                .expect("Arithmetic overflow");
+            remaining_amount = remaining_amount
+                .checked_add(ms_amount)
+                .expect("Arithmetic overflow");
+        }
+    }
+    let distributable_base = if escrow.milestones.is_empty() {
+        escrow.amount
+    } else {
+        remaining_amount
+    };
+
     // Calculate arbitrator fee first
-    let arbitrator_fee = escrow
-        .amount
+    let arbitrator_fee = distributable_base
         .checked_mul(arbitrator_fee_bps as i128)
         .expect("Arithmetic overflow")
         .checked_div(10_000)
         .expect("Arithmetic overflow");
 
     // Net distributable amount remaining for the dispute participants
-    let distributable_amount = escrow
-        .amount
+    let distributable_amount = distributable_base
         .checked_sub(arbitrator_fee)
         .expect("Arithmetic underflow");
 
@@ -194,6 +213,14 @@ pub(crate) fn resolve_dispute(
     let loser_amount = distributable_amount
         .checked_sub(winner_amount)
         .expect("Arithmetic underflow");
+
+    // Mark all milestones resolved
+    let mut updated_ms = soroban_sdk::Vec::new(&env);
+    for mut ms in escrow.milestones.iter() {
+        ms.released = true;
+        updated_ms.push_back(ms);
+    }
+    escrow.milestones = updated_ms;
 
     // Update escrow status and clean up stale keys BEFORE external transfers
     escrow.status = EscrowStatus::Released;

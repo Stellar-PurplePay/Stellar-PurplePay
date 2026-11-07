@@ -272,18 +272,25 @@ function buildApplicationRow(overrides = {}) {
 
 function buildProfileRow(overrides = {}) {
   return {
+    publicKey: FAKE_FREELANCER_KEY,
     public_key: FAKE_FREELANCER_KEY,
     role: "freelancer",
+    displayName: "Alice Dev",
     display_name: "Alice Dev",
     bio: "Stellar developer with 3 years of Soroban experience.",
     skills: ["Rust", "Soroban"],
+    completedJobs: 5,
     completed_jobs: 5,
+    totalEarnedXlm: 1250,
     total_earned_xlm: "1250.0000000",
     rating: 4.8,
     tier: "Top Rated",
     availability: { status: "available" },
+    portfolioItems: [],
     portfolio_items: [],
+    createdAt: new Date().toISOString(),
     created_at: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     ...overrides,
   };
@@ -324,7 +331,7 @@ describe("GET /api/jobs/:id — get single job", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     pool.query.mockImplementation(async (sql) => {
-      if (sql === "SELECT * FROM jobs WHERE id = $1") {
+      if (sql.includes("FROM jobs WHERE id = $1")) {
         return { rows: [buildJobRow()] };
       }
       return { rows: [] };
@@ -395,7 +402,15 @@ describe("PATCH /api/jobs/:id/escrow — store escrow contract ID", () => {
 describe("DELETE /api/jobs/:id — delete a job", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    pool.query.mockResolvedValue({ rows: [] });
+    pool.query.mockImplementation(async (sql) => {
+      if (sql.includes("FROM jobs WHERE id = $1")) {
+        return { rows: [buildJobRow({ client_address: FAKE_CLIENT_KEY })] };
+      }
+      if (sql.includes("UPDATE jobs SET deleted_at")) {
+        return { rows: [], rowCount: 1 };
+      }
+      return { rows: [] };
+    });
   });
 
   it("200 — response shape matches OpenAPI contract (/api/jobs/{id} DELETE 200)", async () => {

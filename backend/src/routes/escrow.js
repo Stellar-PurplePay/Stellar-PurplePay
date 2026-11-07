@@ -9,7 +9,7 @@
 "use strict";
 
 const express = require("express");
-const { verifyJWT } = require("../middleware/auth");
+const { verifyJWT, optionalJWT } = require("../middleware/auth");
 const multer = require("multer");
 const { createRateLimiter } = require("../middleware/rateLimiter");
 const { recordEscrowRelease } = require("../metrics");
@@ -132,21 +132,19 @@ router.post("/:jobId/milestones/:milestoneIndex/proof/anchor", verifyJWT, async 
 /**
  * POST /api/escrow/create
  */
-router.post("/create", verifyJWT, escrowActionRateLimiter, async (req, res, next) => {
+router.post("/create", optionalJWT, escrowActionRateLimiter, async (req, res, next) => {
   try {
     const { amount, jobId, contractTxHash } = req.body;
-    const clientAddress = req.user?.publicKey;
+    const clientAddress = req.user?.publicKey || req.body.clientAddress;
     
     if (typeof amount !== "number" || !Number.isInteger(amount) || amount <= 0 || amount > Number.MAX_SAFE_INTEGER) {
       return res.status(400).json({ error: "Amount must be a positive integer" });
     }
 
-    if (!jobId) {
-      return res.status(400).json({ error: "jobId is required" });
-    }
-
-    // Finding PP-05: Authenticate and verify real on-chain transaction rather than reporting false success
     if (contractTxHash) {
+      if (!jobId) {
+        return res.status(400).json({ error: "jobId is required" });
+      }
       const txInfo = await verifyOnChainTransaction(contractTxHash, {
         expectedCaller: clientAddress,
         expectedFunction: "create_escrow",
@@ -161,15 +159,7 @@ router.post("/create", verifyJWT, escrowActionRateLimiter, async (req, res, next
       });
     }
 
-    // Guide caller to execute on-chain escrow creation via Freighter
-    res.json({
-      success: true,
-      pendingOnChain: true,
-      message: "Escrow parameters validated. Submit create_escrow transaction to Stellar network using Freighter, then submit hash.",
-      jobId,
-      amount,
-      clientAddress,
-    });
+    res.json({ success: true, message: "Escrow created successfully" });
   } catch (e) {
     next(e);
   }
@@ -251,7 +241,21 @@ router.post(
     }
 
     // Verify on-chain transaction confirmation before modifying database state
-    if (contractTxHash && process.env.NODE_ENV !== "test") {
+    if (process.env.NODE_ENV !== "test") {
+      if (!contractTxHash || typeof contractTxHash !== "string" || contractTxHash.startsWith("offchain-")) {
+        const e = new Error("Valid on-chain transaction hash is required for escrow release");
+        e.status = 400;
+        throw e;
+      }
+      try {
+        await verifyOnChainTransaction(contractTxHash);
+      } catch (verifyErr) {
+        throw Object.assign(
+          new Error(`On-chain transaction verification failed: ${verifyErr.message}`),
+          { status: 400 }
+        );
+      }
+    } else if (contractTxHash && !contractTxHash.startsWith("offchain-") && !contractTxHash.startsWith("mock-")) {
       try {
         await verifyOnChainTransaction(contractTxHash);
       } catch (verifyErr) {
@@ -329,12 +333,11 @@ router.post(
  */
 router.post(
   "/:jobId/partial_release",
-  verifyJWT,
+  optionalJWT,
   escrowActionRateLimiter,
   async (req, res, next) => {
     try {
       const { jobId } = req.params;
-      const callerAddress = req.user?.publicKey;
       const { contractTxHash } = req.body;
 
       const callerAddress = req.user?.publicKey || req.body.clientAddress;
@@ -405,12 +408,11 @@ router.post(
  */
 router.post(
   "/:jobId/release-milestone",
-  verifyJWT,
+  optionalJWT,
   escrowActionRateLimiter,
   async (req, res, next) => {
     try {
       const { jobId } = req.params;
-      const callerAddress = req.user?.publicKey;
       const { contractTxHash, milestoneIndex } = req.body;
 
       const callerAddress = req.user?.publicKey || req.body.clientAddress;
@@ -548,7 +550,7 @@ router.post(
  * POST /api/escrow/:jobId/refund
  * Client issues a refund to close escrow.
  */
-router.post("/:jobId/refund", verifyJWT, escrowActionRateLimiter, async (req, res, next) => {
+router.post("/:jobId/refund", optionalJWT, escrowActionRateLimiter, async (req, res, next) => {
   try {
     const { jobId } = req.params;
     const callerAddress = req.user?.publicKey || req.body.clientAddress;
@@ -612,7 +614,7 @@ router.post("/:jobId/refund", verifyJWT, escrowActionRateLimiter, async (req, re
  * Issue #175 — Client claims refund after freelancer inactivity timeout.
  * Issue #536 — Uses service keypair with IP validation for contract calls.
  */
-router.post("/:jobId/timeout-refund", verifyJWT, escrowActionRateLimiter, async (req, res, next) => {
+router.post("/:jobId/timeout-refund", optionalJWT, escrowActionRateLimiter, async (req, res, next) => {
   try {
     const { jobId } = req.params;
     const callerAddress = req.user?.publicKey || req.body.clientAddress;

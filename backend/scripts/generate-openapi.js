@@ -110,17 +110,25 @@ List endpoints support cursor-based pagination via the \`after\` query parameter
       schemas: {
         Error: {
           type: 'object',
-          description: 'Structured API error response',
+          description: 'Standard API error response',
+          required: ['error'],
           properties: {
             error: {
-              type: 'object',
-              required: ['code', 'message'],
-              properties: {
-                code: { type: 'string', description: 'Machine-readable error code', example: 'JOB_NOT_FOUND' },
-                message: { type: 'string', description: 'Human-readable error message', example: 'Job not found' },
-                details: { description: 'Optional additional context', nullable: true }
-              }
-            }
+              oneOf: [
+                { type: 'string', description: 'Human-readable error message' },
+                {
+                  type: 'object',
+                  properties: {
+                    code: { type: 'string', description: 'Machine-readable error code', example: 'JOB_NOT_FOUND' },
+                    message: { type: 'string', description: 'Human-readable error message', example: 'Job not found' },
+                    details: { description: 'Optional additional context', nullable: true }
+                  }
+                }
+              ]
+            },
+            code: { type: 'string', description: 'Machine-readable error code' },
+            message: { type: 'string' },
+            details: { type: 'object' }
           }
         },
         Job: {

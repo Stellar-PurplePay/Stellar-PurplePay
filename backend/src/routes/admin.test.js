@@ -1091,7 +1091,7 @@ describe("POST /api/admin/cost-report/generate", () => {
     });
 
     expect(res.status).toBe(200);
-    expect(res.body.message).toBe("Cost report generation triggered.");
+    expect(res.body.message).toBe("Cost report generation triggered. Report will be emailed to admin.");
   });
 });
 

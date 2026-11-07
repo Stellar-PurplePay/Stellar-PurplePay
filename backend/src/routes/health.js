@@ -172,11 +172,14 @@ async function checkSoroban() {
  *                       type: string
  *                       example: ok
  *                 stellar:
- *                   type: object
- *                   properties:
- *                     status: { type: string, example: ok }
- *                     network: { type: string, example: testnet }
- *                     ledger: { type: number, example: 12345678 }
+ *                   oneOf:
+ *                     - type: string
+ *                       example: up
+ *                     - type: object
+ *                       properties:
+ *                         status: { type: string, example: ok }
+ *                         network: { type: string, example: testnet }
+ *                         ledger: { type: number, example: 12345678 }
  *                 uptime_seconds: { type: number, example: 3600 }
  *                 version: { type: string, example: "1.0.0" }
  *                 contractVersion:

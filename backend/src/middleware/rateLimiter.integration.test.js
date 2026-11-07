@@ -11,6 +11,12 @@ jest.mock('../services/cacheService', () => ({
   ping: jest.fn().mockResolvedValue('up'),
 }));
 
+jest.mock('../services/sorobanClient', () => ({
+  getServer: () => ({
+    getLatestLedger: jest.fn().mockResolvedValue({ sequence: 12345 }),
+  }),
+}));
+
 global.fetch = jest.fn().mockResolvedValue({
   ok: true,
   json: jest.fn().mockResolvedValue({ _embedded: { records: [{ sequence: 123 }] } }),

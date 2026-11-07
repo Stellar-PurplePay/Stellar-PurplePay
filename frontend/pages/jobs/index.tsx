@@ -5,29 +5,111 @@
 import type { GetStaticProps } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState, useRef } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import JobCard from "@/components/JobCard";
 import JobFiltersPanel from "@/components/JobFiltersPanel";
 import { fetchJobs } from "@/lib/api";
 import type { Job } from "@/utils/types";
 
 export default function JobsPage() {
+  const router = useRouter();
+  const category = typeof router.query.category === "string" ? router.query.category : undefined;
+
   const [jobs, setJobs] = useState<Job[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const parentRef = useRef<HTMLDivElement>(null);
+  const activeCategoryRef = useRef(category);
 
   useEffect(() => {
-    fetchJobs()
+    activeCategoryRef.current = category;
+    setNextCursor(null);
+    setLoading(true);
+
+    let cancelled = false;
+    const params: { category?: string; cursor?: string } = {};
+    if (category) params.category = category;
+
+    fetchJobs(params)
       .then((data: any) => {
+        if (cancelled) return;
         if (Array.isArray(data)) {
           setJobs(data);
+          setNextCursor(null);
         } else if (data && Array.isArray(data.jobs)) {
           setJobs(data.jobs);
+          setNextCursor(data.nextCursor || null);
         } else {
           setJobs([]);
+          setNextCursor(null);
         }
       })
-      .catch(() => setJobs([]))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!cancelled) setJobs([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [category]);
+
+  const rowVirtualizer = useVirtualizer({
+    count: jobs.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 200,
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+  const lastItem = virtualItems[virtualItems.length - 1];
+
+  useEffect(() => {
+    if (!lastItem || loadingMore || !nextCursor) return;
+    if (lastItem.index >= jobs.length - 1) {
+      const currentCategory = activeCategoryRef.current;
+      setLoadingMore(true);
+      const params: { category?: string; cursor?: string } = {
+        cursor: nextCursor,
+      };
+      if (currentCategory) params.category = currentCategory;
+
+      fetchJobs(params)
+        .then((data: any) => {
+          if (activeCategoryRef.current !== currentCategory) return;
+          if (data && Array.isArray(data.jobs)) {
+            setJobs((prev) => [...prev, ...data.jobs]);
+            setNextCursor(data.nextCursor || null);
+          } else {
+            setNextCursor(null);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          setLoadingMore(false);
+        });
+    }
+  }, [lastItem, loadingMore, nextCursor, jobs.length]);
+
+  useEffect(() => {
+    const handleFocusSearch = () => {};
+    const handleToggleBookmark = () => {};
+    const handleToggleTheme = () => {};
+
+    window.addEventListener("shortcut-focus-search", handleFocusSearch);
+    window.addEventListener("shortcut-toggle-bookmark", handleToggleBookmark);
+    window.addEventListener("shortcut-toggle-theme", handleToggleTheme);
+
+    return () => {
+      window.removeEventListener("shortcut-focus-search", handleFocusSearch);
+      window.removeEventListener("shortcut-toggle-bookmark", handleToggleBookmark);
+      window.removeEventListener("shortcut-toggle-theme", handleToggleTheme);
+    };
   }, []);
 
   return (
@@ -74,7 +156,7 @@ export default function JobsPage() {
               </Link>
             </div>
           ) : (
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div ref={parentRef} className="grid sm:grid-cols-2 gap-4">
               {jobs.map((job) => (
                 <JobCard key={job.id} job={job} />
               ))}

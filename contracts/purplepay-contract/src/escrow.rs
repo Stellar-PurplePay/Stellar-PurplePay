@@ -641,13 +641,31 @@ pub(crate) fn timeout_refund(env: Env, job_id: String, client: Address) {
         panic!("Timeout period has not expired yet");
     }
 
-    // Return funds to client
+    // Calculate unreleased remaining amount
+    let mut remaining_amount = escrow.amount;
+    for ms in escrow.milestones.iter() {
+        if ms.released {
+            let ms_amount = escrow
+                .amount
+                .checked_mul(ms.percentage as i128)
+                .expect("Arithmetic overflow")
+                .checked_div(100)
+                .expect("Arithmetic overflow");
+            remaining_amount = remaining_amount
+                .checked_sub(ms_amount)
+                .expect("Arithmetic underflow");
+        }
+    }
+
+    // Return remaining funds to client
     let token_client = token::Client::new(&env, &escrow.token);
-    token_client.transfer(
-        &env.current_contract_address(),
-        &escrow.client,
-        &escrow.amount,
-    );
+    if remaining_amount > 0 {
+        token_client.transfer(
+            &env.current_contract_address(),
+            &escrow.client,
+            &remaining_amount,
+        );
+    }
 
     escrow.status = EscrowStatus::Refunded;
     env.storage()
@@ -659,7 +677,7 @@ pub(crate) fn timeout_refund(env: Env, job_id: String, client: Address) {
         (
             escrow.client.clone(),
             escrow.freelancer.clone(),
-            escrow.amount,
+            remaining_amount,
         ),
     );
 }

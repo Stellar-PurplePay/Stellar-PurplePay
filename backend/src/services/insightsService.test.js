@@ -98,13 +98,15 @@ describe("insightsService Suite (Issue #1450)", () => {
     });
   });
 
-  describe("Migration V58 Verification (Issue #1450)", () => {
+  describe("Migration idx_escrow_freelancer_date Verification (Issue #1450)", () => {
     const migrationsDir = path.join(__dirname, "../db/migrations");
-    const upFile = path.join(migrationsDir, "V58__idx_escrow_freelancer_date.up.sql");
-    const downFile = path.join(migrationsDir, "V58__idx_escrow_freelancer_date.down.sql");
+    const upFileName = fs.readdirSync(migrationsDir).find(f => f.includes("idx_escrow_freelancer_date.up.sql"));
+    const downFileName = fs.readdirSync(migrationsDir).find(f => f.includes("idx_escrow_freelancer_date.down.sql"));
+    const upFile = path.join(migrationsDir, upFileName);
+    const downFile = path.join(migrationsDir, downFileName);
     const schemaFile = path.join(__dirname, "../db/schema.sql");
 
-    it("has V58__idx_escrow_freelancer_date.up.sql creating the composite index", () => {
+    it("has idx_escrow_freelancer_date.up.sql creating the composite index", () => {
       expect(fs.existsSync(upFile)).toBe(true);
       const sql = fs.readFileSync(upFile, "utf8");
 
@@ -114,7 +116,7 @@ describe("insightsService Suite (Issue #1450)", () => {
       expect(sql).toContain("ADD COLUMN IF NOT EXISTS freelancer_id");
     });
 
-    it("has V58__idx_escrow_freelancer_date.down.sql rolling back index and column", () => {
+    it("has idx_escrow_freelancer_date.down.sql rolling back index and column", () => {
       expect(fs.existsSync(downFile)).toBe(true);
       const sql = fs.readFileSync(downFile, "utf8");
 

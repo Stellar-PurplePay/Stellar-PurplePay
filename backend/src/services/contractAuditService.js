@@ -115,7 +115,7 @@ function parseSorobanEvents(tx) {
  * added upstream. Failed writes are logged by the audit worker and never
  * propagate back to the caller.
  */
-function logContractInteraction({
+async function logContractInteraction({
   functionName,
   callerAddress,
   jobId,
@@ -124,23 +124,46 @@ function logContractInteraction({
   feeCharged,
   eventData,
 }) {
-  if (!TRACKED_CONTRACT_FUNCTIONS.has(functionName)) return;
-  if (!callerAddress || !txHash) return;
+  if (!TRACKED_CONTRACT_FUNCTIONS.has(functionName)) return null;
+  if (!callerAddress || !txHash) return null;
 
-  auditQueue
-    .add({
-      type: "contract_audit_log",
-      payload: {
-        functionName,
-        callerAddress,
-        jobId: jobId || null,
-        txHash,
-        ledgerSequence: ledgerSequence || null,
-        feeCharged: feeCharged || null,
-        eventData: eventData != null ? eventData : null,
-      },
-    })
-    .catch(() => {});
+  try {
+    if (auditQueue && typeof auditQueue.add === "function") {
+      auditQueue
+        .add({
+          type: "contract_audit_log",
+          payload: {
+            functionName,
+            callerAddress,
+            jobId: jobId || null,
+            txHash,
+            ledgerSequence: ledgerSequence || null,
+            feeCharged: feeCharged || null,
+            eventData: eventData != null ? eventData : null,
+          },
+        })
+        .catch(() => {});
+    }
+  } catch (_err) {
+    // Ignore queue dispatch error and proceed to database persistence
+  }
+
+  const { rows } = await pool.query(
+    `INSERT INTO contract_audit_log
+     (function_name, caller_address, job_id, tx_hash, ledger_sequence, fee_charged, event_data)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     RETURNING *`,
+    [
+      functionName,
+      callerAddress,
+      jobId || null,
+      txHash,
+      ledgerSequence || null,
+      feeCharged || null,
+      eventData ? JSON.stringify(eventData) : null,
+    ],
+  );
+  return rows[0] || null;
 }
 
 async function verifyAndLogContractInteraction(params) {

@@ -16,18 +16,20 @@ jest.mock("@stellar/stellar-sdk", () => {
     this.setTimeout = () => this;
     this.build = () => ({ tx: true });
   }
+  const rpcMock = {
+    Server: jest.fn().mockImplementation(() => ({
+      simulateTransaction: (...args) => mockSimulate(...args),
+    })),
+    Api: { isSimulationError: (sim) => "error" in sim },
+  };
   return {
     TransactionBuilder,
     Account: jest.fn(),
     Contract: jest.fn().mockImplementation(() => ({ call: mockCall })),
     scValToNative: (scVal) => scVal.native,
     Networks: { TESTNET: "Test SDF Network ; September 2015" },
-    rpc: {
-      Server: jest.fn().mockImplementation(() => ({
-        simulateTransaction: (...args) => mockSimulate(...args),
-      })),
-      Api: { isSimulationError: (sim) => "error" in sim },
-    },
+    rpc: rpcMock,
+    SorobanRpc: rpcMock,
   };
 });
 

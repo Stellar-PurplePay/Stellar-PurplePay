@@ -43,18 +43,64 @@ async function createRecurringEscrow({
 }) {
   const intervalLedgers = intervalDays * LEDGERS_PER_DAY;
 
+  const job = typeof getJob === "function" ? await Promise.resolve().then(() => getJob(jobId)).catch(() => null) : null;
+  const timezone = job?.timezone || "UTC";
+
   const isMonthly = intervalDays === 30 || intervalDays === 31;
   let anchorDay = null;
   let nextReleaseDate = null;
 
   if (isMonthly) {
     const now = new Date();
-    anchorDay = now.getUTCDate();
-    const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, anchorDay, now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds()));
-    if (next.getUTCMonth() !== (now.getUTCMonth() + 1) % 12) {
-      next.setUTCDate(0);
+    try {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: timezone,
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+        hour12: false,
+      }).formatToParts(now);
+      const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+      const curYear = parseInt(map.year, 10);
+      const curMonth = parseInt(map.month, 10);
+      const curDay = parseInt(map.day, 10);
+      const curHour = parseInt(map.hour, 10) % 24;
+      const curMin = parseInt(map.minute, 10);
+      const curSec = parseInt(map.second, 10);
+
+      anchorDay = curDay;
+      const nextYear = curMonth === 12 ? curYear + 1 : curYear;
+      const nextMonth = curMonth === 12 ? 1 : curMonth + 1;
+      const nextDay = Math.min(curDay, new Date(Date.UTC(nextYear, nextMonth, 0)).getUTCDate());
+
+      const approxUtc = new Date(Date.UTC(nextYear, nextMonth - 1, nextDay, curHour, curMin, curSec));
+      const approxParts = new Intl.DateTimeFormat("en-US", {
+        timeZone: timezone,
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+        hour12: false,
+      }).formatToParts(approxUtc);
+      const aMap = Object.fromEntries(approxParts.map((p) => [p.type, p.value]));
+      const tzHour = parseInt(aMap.hour, 10) % 24;
+      let diffHours = (curHour - tzHour + 24) % 24;
+      if (diffHours > 12) diffHours -= 24;
+      const finalUtc = new Date(approxUtc.getTime() + diffHours * 3600000);
+      nextReleaseDate = finalUtc.toISOString();
+    } catch {
+      anchorDay = now.getUTCDate();
+      const next = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, anchorDay, now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds(), now.getUTCMilliseconds()));
+      if (next.getUTCMonth() !== (now.getUTCMonth() + 1) % 12) {
+        next.setUTCDate(0);
+      }
+      nextReleaseDate = next.toISOString();
     }
-    nextReleaseDate = next.toISOString();
   }
 
   const { rows } = await pool.query(
@@ -62,14 +108,14 @@ async function createRecurringEscrow({
      SET is_recurring = true,
          interval_ledgers = $1,
          releases_remaining = $2,
-         last_release_ledger = NULL,
          amount_per_release = $3,
-         anchor_day = $5,
-         next_release_date = $6,
+         last_release_ledger = NULL,
+         next_release_date = $5,
+         anchor_day = $6,
          updated_at = NOW()
      WHERE job_id = $4
      RETURNING *`,
-    [intervalLedgers, totalReleases, amountPerRelease, jobId, anchorDay, nextReleaseDate]
+    [intervalLedgers, totalReleases, amountPerRelease, jobId, nextReleaseDate, anchorDay]
   );
 
   if (!rows.length) {
