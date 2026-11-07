@@ -1,11 +1,11 @@
 const {
   createRecurringEscrow,
   tickRecurringEscrow,
-  startRecurringEscrowTicker,
+  startRecurringEscrowTicker: _startRecurringEscrowTicker,
   getActiveRecurringEscrows
 } = require("./recurringEscrowService");
 const pool = require("../db/pool");
-const { getJob } = require("./jobService");
+const { getJob: _getJob } = require("./jobService");
 
 jest.mock("../db/pool", () => ({
   query: jest.fn(),

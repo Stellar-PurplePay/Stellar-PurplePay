@@ -12,7 +12,7 @@
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const { verifyJWT } = require("../middleware/auth");
+const { verifyJWT: _verifyJWT } = require("../middleware/auth");
 const { createRateLimiter } = require("../middleware/rateLimiter");
 const sponsorshipService = require("../services/sponsorshipService");
 const { createError, ErrorCodes } = require("../utils/errors");

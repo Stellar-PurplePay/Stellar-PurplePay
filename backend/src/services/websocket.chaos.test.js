@@ -674,7 +674,11 @@ describe("WebSocket chaos & reconnection resilience (#888)", () => {
     expect(initMessages[1].payload.sessionId).toBe(sessionId);
 
     client.send(JSON.stringify({ type: "scope:update", content: "after-restart", cursors: {} }));
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    const updateDeadline = Date.now() + 5_000;
+    while (messages.filter((message) => message.event === "scope:update").length < 1) {
+      if (Date.now() >= updateDeadline) throw new Error("did not receive scope:update within 5 seconds");
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
     expect(messages.filter((message) => message.event === "scope:update")).toHaveLength(1);
 
     stopped = true;

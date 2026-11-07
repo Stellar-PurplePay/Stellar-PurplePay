@@ -11,7 +11,7 @@
 
 const express = require("express");
 const router = express.Router();
-const { verifyJWT } = require("../middleware/auth");
+const { verifyJWT: _verifyJWT } = require("../middleware/auth");
 const { createRateLimiter } = require("../middleware/rateLimiter");
 const jobTemplateService = require("../services/jobTemplateService");
 const { createError, ErrorCodes } = require("../utils/errors");

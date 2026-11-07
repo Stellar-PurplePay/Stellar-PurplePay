@@ -259,7 +259,7 @@ const METRICS_ROWS = {
   ],
 };
 
-function stubMetrics() {
+function _stubMetrics() {
   pool.query.mockImplementation((sql) => {
     const text = String(sql).replace(/\s+/g, " ").trim();
     if (text.includes("admin_profiles")) return Promise.resolve({ rows: [] });

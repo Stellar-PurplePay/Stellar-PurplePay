@@ -442,7 +442,6 @@ async function getJob(id, { includeDeleted = false } = {}) {
  * @param {Object} jobRow  Row containing `created_at` and `id`.
  * @returns {string}        Base64-encoded JSON cursor.
  */
-// eslint-disable-next-line no-unused-vars
 function encodeCursor(jobRow) {
   return Buffer.from(
     JSON.stringify({

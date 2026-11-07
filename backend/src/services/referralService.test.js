@@ -12,7 +12,7 @@ jest.mock("../db/pool", () => ({
   }),
 }));
 
-const pool = require("../db/pool");
+const _pool = require("../db/pool");
 const {
   registerReferral,
   getReferrerForReferee,
@@ -24,7 +24,7 @@ const {
 describe("referralService", () => {
   const REFERRER = "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
   const REFEREE = "GBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB";
-  const OTHER_REFERRER = "GCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
+  const _OTHER_REFERRER = "GCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
   const JOB_ID = "123e4567-e89b-12d3-a456-426614174000";
 
   beforeEach(() => {

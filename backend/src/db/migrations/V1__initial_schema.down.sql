@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS time_invoices CASCADE;
 DROP TABLE IF EXISTS time_entries CASCADE;
 DROP TABLE IF EXISTS notification_preferences CASCADE;
 DROP TABLE IF EXISTS dispute_evidence CASCADE;
+DROP TABLE IF EXISTS disputes CASCADE;
 DROP TABLE IF EXISTS webauthn_credentials CASCADE;
 DROP TABLE IF EXISTS scope_sessions CASCADE;
 DROP TABLE IF EXISTS referral_payouts CASCADE;

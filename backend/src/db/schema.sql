@@ -457,6 +457,22 @@ CREATE TABLE IF NOT EXISTS webauthn_credentials (
 CREATE INDEX IF NOT EXISTS webauthn_credentials_public_key_idx ON webauthn_credentials(public_key);
 
 -- ─────────────────────────────────────────
+-- disputes (Issue #223, Issue #1429)
+-- ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS disputes (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  job_id      UUID NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+  raised_by   TEXT NOT NULL REFERENCES profiles(public_key),
+  status      TEXT NOT NULL DEFAULT 'open',
+  resolved_by TEXT REFERENCES profiles(public_key),
+  resolution  TEXT,
+  resolved_at TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS disputes_job_id_idx ON disputes(job_id);
+
+-- ─────────────────────────────────────────
 -- dispute_evidence (IPFS evidence upload — Issue #223)
 -- ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS dispute_evidence (

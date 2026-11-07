@@ -38,23 +38,28 @@ CREATE INDEX IF NOT EXISTS idx_dispute_events_evidence
 -- arbitrator_assigned / evidence_submitted have no reliable historical actor
 -- data, so only future events are recorded for them.
 -- ─────────────────────────────────────────
-INSERT INTO dispute_events (job_id, event_type, actor_address, created_at)
-SELECT d.job_id, 'opened', d.raised_by, d.created_at
-FROM disputes d
-WHERE NOT EXISTS (
-  SELECT 1 FROM dispute_events de
-  WHERE de.job_id = d.job_id AND de.event_type = 'opened'
-);
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'disputes') THEN
+    INSERT INTO dispute_events (job_id, event_type, actor_address, created_at)
+    SELECT d.job_id, 'opened', d.raised_by, d.created_at
+    FROM disputes d
+    WHERE NOT EXISTS (
+      SELECT 1 FROM dispute_events de
+      WHERE de.job_id = d.job_id AND de.event_type = 'opened'
+    );
 
-INSERT INTO dispute_events (job_id, event_type, actor_address, payload, created_at)
-SELECT d.job_id, 'resolved', d.resolved_by,
-       jsonb_build_object('resolution', d.resolution),
-       d.resolved_at
-FROM disputes d
-WHERE d.status = 'resolved'
-  AND d.resolved_by IS NOT NULL
-  AND d.resolved_at IS NOT NULL
-  AND NOT EXISTS (
-    SELECT 1 FROM dispute_events de
-    WHERE de.job_id = d.job_id AND de.event_type = 'resolved'
-  );
+    INSERT INTO dispute_events (job_id, event_type, actor_address, payload, created_at)
+    SELECT d.job_id, 'resolved', d.resolved_by,
+           jsonb_build_object('resolution', d.resolution),
+           d.resolved_at
+    FROM disputes d
+    WHERE d.status = 'resolved'
+      AND d.resolved_by IS NOT NULL
+      AND d.resolved_at IS NOT NULL
+      AND NOT EXISTS (
+        SELECT 1 FROM dispute_events de
+        WHERE de.job_id = d.job_id AND de.event_type = 'resolved'
+      );
+  END IF;
+END $$;

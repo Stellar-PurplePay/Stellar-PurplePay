@@ -425,7 +425,7 @@ export default function DisputeWizard({
                     <span className="text-2xl">🤖</span>
                     <div className="text-sm text-amber-200">
                       <p className="font-semibold text-amber-100 mb-1">
-                        Hello! Let's get your dispute sorted.
+                        Hello! Let&apos;s get your dispute sorted.
                       </p>
                       <p>
                         First, select the main category that describes what happened with this job.
@@ -444,9 +444,9 @@ export default function DisputeWizard({
 
                   {/* Category Selection Tree */}
                   <div>
-                    <label className="block text-xs font-semibold text-amber-200 uppercase tracking-wider mb-2">
+                    <span className="block text-xs font-semibold text-amber-200 uppercase tracking-wider mb-2">
                       Select Primary Issue Type
-                    </label>
+                    </span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {ISSUE_CATEGORIES.map((cat) => (
                         <button
@@ -630,12 +630,20 @@ export default function DisputeWizard({
 
                   {/* Resolution Options */}
                   <div className="space-y-2.5">
-                    <label className="block text-xs font-semibold text-amber-200 uppercase tracking-wider">
+                    <span className="block text-xs font-semibold text-amber-200 uppercase tracking-wider">
                       Select Desired Remedy
-                    </label>
+                    </span>
                     {RESOLUTION_OPTIONS.map((opt) => (
                       <div
                         key={opt.id}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setResolutionType(opt.id);
+                          }
+                        }}
                         onClick={() => setResolutionType(opt.id)}
                         className={`p-3 rounded-xl border cursor-pointer transition-all ${
                           resolutionType === opt.id
@@ -726,6 +734,14 @@ export default function DisputeWizard({
 
                   {/* Drop zone */}
                   <div
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        fileInputRef.current?.click();
+                      }
+                    }}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={handleFileDrop}
                     onClick={() => fileInputRef.current?.click()}
@@ -799,7 +815,7 @@ export default function DisputeWizard({
                         Dispute case preview
                       </p>
                       <p>
-                        I've gathered your answers and pre-filled the dispute case. Review the details below before submitting to arbitration.
+                        I&apos;ve gathered your answers and pre-filled the dispute case. Review the details below before submitting to arbitration.
                       </p>
                     </div>
                   </div>
