@@ -10,6 +10,21 @@ if (!JWT_SECRET) {
   throw new Error("JWT_SECRET env var is required");
 }
 
+if (process.env.NODE_ENV === "production") {
+  if (JWT_SECRET.length < 32) {
+    throw new Error("FATAL: JWT_SECRET must be at least 32 characters in production");
+  }
+  const insecureDefaults = [
+    "ci-test-jwt-secret-with-sufficient-length",
+    "dev-secret",
+    "secret",
+    "changeme",
+  ];
+  if (insecureDefaults.includes(JWT_SECRET)) {
+    throw new Error("FATAL: JWT_SECRET cannot use default or test secrets in production");
+  }
+}
+
 function requireJwtSecret() {
   return JWT_SECRET;
 }

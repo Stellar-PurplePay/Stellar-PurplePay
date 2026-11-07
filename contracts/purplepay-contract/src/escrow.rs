@@ -178,6 +178,7 @@ pub(crate) fn create_escrow_internal(
         &DataKey::TimeoutTimestamp(job_id.clone()),
         &timeout_timestamp,
     );
+    env.storage().instance().extend_ttl(100_000, 200_000);
 
     // Increment counter
     let count: u32 = env

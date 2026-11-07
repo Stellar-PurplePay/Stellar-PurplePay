@@ -39,6 +39,7 @@ pub(crate) fn initialize(env: Env, admin: Address, treasury_address: Address, ve
         .instance()
         .set(&DataKey::UnfreezeThreshold, &2u32);
     env.storage().instance().set(&DataKey::Frozen, &false);
+    env.storage().instance().extend_ttl(100_000, 200_000);
 }
 
 // ─── Upgrade & versioning ─────────────────────────────────────────────────

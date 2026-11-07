@@ -491,7 +491,7 @@ router.get("/logs", verifyJWT, requireAdminRole, requireAdmin2FA, async (req, re
 });
 
 // â”€â”€ GET /api/admin/audit-log â€” dedicated admin audit log (new table) â”€â”€â”€â”€â”€â”€â”€â”€â”€
-router.get("/audit-log", verifyJWT, requireAdminRole, requireAdmin2FA, async (req, res) => {
+router.get("/admin-audit-log", verifyJWT, requireAdminRole, requireAdmin2FA, async (req, res) => {
   try {
     const { limit = 100, offset = 0 } = req.query;
 

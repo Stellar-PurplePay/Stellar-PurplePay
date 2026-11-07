@@ -519,61 +519,6 @@ router.post("/:publicKey/price-alerts", profileUpdateRateLimiter, async (req, re
   }
 });
 
-router.get("/:publicKey/endorsements", generalProfileRateLimiter, async (req, res, next) => {
-  try {
-    const endorsements = await getSkillEndorsements(req.params.publicKey);
-    res.json({ success: true, data: endorsements });
-  } catch (e) {
-    next(e);
-  }
-});
-
-/**
- * @swagger
- * /api/profiles/{publicKey}/endorse:
- *   post:
- *     summary: Endorse a skill
- *     tags: [Profiles]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: publicKey
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - skill
- *               - endorserAddress
- *             properties:
- *               skill:
- *                 type: string
- *               endorserAddress:
- *                 type: string
- *     responses:
- *       200:
- *         description: Skill endorsed
- */
-router.post("/:publicKey/endorse", profileUpdateRateLimiter, async (req, res, next) => {
-  try {
-    const { skill, endorserAddress } = validate(endorseSkillSchema, req.body);
-    await endorseSkill({
-      skill,
-      endorserAddress,
-      recipientAddress: req.params.publicKey,
-    });
-    res.json({ success: true, data: null });
-  } catch (e) {
-    next(e);
-  }
-});
-
 /**
  * @swagger
  * /api/profiles/{publicKey}/spending:
@@ -858,7 +803,7 @@ router.get("/:publicKey/endorsements", generalProfileRateLimiter, async (req, re
 });
 
 // POST /api/profiles/:publicKey/endorse — endorse a skill
-router.post("/:publicKey/endorse", verifyJWT, async (req, res, next) => {
+router.post("/:publicKey/endorse", profileUpdateRateLimiter, verifyJWT, async (req, res, next) => {
   try {
     const { publicKey } = req.params;
     const { skill } = validate(endorseSkillSchema, req.body);

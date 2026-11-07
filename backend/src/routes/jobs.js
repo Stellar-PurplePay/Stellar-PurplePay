@@ -347,6 +347,218 @@ router.get("/:id/timeline", generalJobRateLimiter, async (req, res, next) => {
     next(e);
   }
 });
+
+// GET /api/jobs/feed.rss — RSS 2.0 feed
+router.get("/feed.rss", generalJobRateLimiter, async (req, res, next) => {
+  try {
+    const { category, skills, min_budget, max_budget } = req.query;
+    const result = await listJobs({ category, status: "open", limit: 50 });
+    const jobs = filterFeedJobs(result.jobs, { skills, min_budget, max_budget }).slice(0, 20);
+    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
+    const feedUrl = `${baseUrl}/api/jobs/feed.rss${category ? `?category=${encodeURIComponent(category)}` : ""}`;
+    const lastBuildDate =
+      jobs.length > 0
+        ? formatDateRss(new Date(jobs[0].createdAt))
+        : formatDateRss(new Date());
+ 
+    let rss = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>${escapeXml(`Stellar PurplePay — Job Listings${feedTitleSuffix({ category, skills })}`)}</title>
+    <description>Latest freelance job opportunities on Stellar PurplePay</description>
+    <link>${baseUrl}/jobs</link>
+    <atom:link href="${feedUrl}" rel="self" type="application/rss+xml" />
+    <language>en-us</language>
+    <lastBuildDate>${lastBuildDate}</lastBuildDate>
+`;
+ 
+    jobs.forEach((job) => {
+      const jobUrl = `${baseUrl}/jobs/${job.id}`;
+      const pubDate = formatDateRss(new Date(job.createdAt));
+      const description = escapeXml(truncateDescription(job.description, 200));
+      rss += `    <item>
+      <title>${escapeXml(job.title)}</title>
+      <description>${description}</description>
+      <link>${jobUrl}</link>
+      <guid isPermaLink="true">${jobUrl}</guid>
+      <pubDate>${pubDate}</pubDate>
+      <category>${escapeXml(job.category)}</category>
+      <dc:creator>${escapeXml(job.clientDisplayName || job.clientAddress || "Anonymous")}</dc:creator>
+      <skills>${escapeXml((job.skills || []).join(", "))}</skills>
+      <budget>${escapeXml(job.budget.toString())} XLM</budget>
+    </item>
+`;
+    });
+ 
+    rss += `  </channel>
+</rss>`;
+ 
+    res.set("Content-Type", "application/rss+xml; charset=utf-8");
+    res.send(rss);
+  } catch (e) {
+    next(e);
+  }
+});
+ 
+// GET /api/jobs/feed.atom
+router.get("/feed.atom", generalJobRateLimiter, async (req, res, next) => {
+  try {
+    const { category, skills, min_budget, max_budget } = req.query;
+    const result = await listJobs({ category, status: "open", limit: 50 });
+    const jobs = filterFeedJobs(result.jobs, { skills, min_budget, max_budget }).slice(0, 20);
+    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
+    const feedUrl = `${baseUrl}/api/jobs/feed.atom${category ? `?category=${encodeURIComponent(category)}` : ""}`;
+    const updatedDate =
+      jobs.length > 0
+        ? formatDateAtom(new Date(jobs[0].createdAt))
+        : formatDateAtom(new Date());
+ 
+    let atom = `<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>${escapeXml(`Stellar PurplePay — Job Listings${feedTitleSuffix({ category, skills })}`)}</title>
+  <subtitle>Latest freelance job opportunities on Stellar PurplePay</subtitle>
+  <link href="${baseUrl}/jobs" rel="alternate" type="text/html" />
+  <link href="${feedUrl}" rel="self" type="application/atom+xml" />
+  <updated>${updatedDate}</updated>
+  <id>${feedUrl}</id>
+`;
+ 
+    jobs.forEach((job) => {
+      const jobUrl = `${baseUrl}/jobs/${job.id}`;
+      const published = formatDateAtom(new Date(job.createdAt));
+      const summary = escapeXml(truncateDescription(job.description, 200));
+      atom += `  <entry>
+    <title>${escapeXml(job.title)}</title>
+    <summary>${summary}</summary>
+    <link href="${jobUrl}" rel="alternate" type="text/html" />
+    <id>${jobUrl}</id>
+    <published>${published}</published>
+    <updated>${published}</updated>
+    <author><name>${escapeXml(job.clientDisplayName || job.clientAddress || "Anonymous")}</name></author>
+    <category term="${escapeXml(job.category)}" />
+    <skills>${escapeXml((job.skills || []).join(", "))}</skills>
+    <budget>${escapeXml(job.budget.toString())} XLM</budget>
+  </entry>
+`;
+    });
+ 
+    atom += `</feed>`;
+    res.set("Content-Type", "application/atom+xml; charset=utf-8");
+    res.send(atom);
+  } catch (e) {
+    next(e);
+  }
+});
+ 
+// GET /api/jobs/drafts — list job drafts for authenticated user
+router.get("/drafts", verifyJWT, async (req, res, next) => {
+  try {
+    const drafts = await jobDraftService.getDrafts(req.user.publicKey, 5);
+    res.json({ success: true, data: drafts });
+  } catch (e) {
+    next(e);
+  }
+});
+ 
+// POST /api/jobs/drafts — save or update a job draft
+router.post("/drafts", verifyJWT, async (req, res, next) => {
+  try {
+    const draft = await jobDraftService.saveDraft(req.user.publicKey, req.body);
+    res.status(201).json({ success: true, data: draft });
+  } catch (e) {
+    next(e);
+  }
+});
+ 
+// GET /api/jobs/drafts/:id — get a specific draft
+router.get("/drafts/:id", verifyJWT, async (req, res, next) => {
+  try {
+    const draft = await jobDraftService.getDraft(
+      req.params.id,
+      req.user.publicKey,
+    );
+    if (!draft)
+      return res.status(404).json({ error: "Draft not found" });
+    res.json({ success: true, data: draft });
+  } catch (e) {
+    next(e);
+  }
+});
+ 
+// DELETE /api/jobs/drafts/:id — delete a draft
+router.delete("/drafts/:id", verifyJWT, async (req, res, next) => {
+  try {
+    await jobDraftService.deleteDraft(req.params.id, req.user.publicKey);
+    res.json({ success: true });
+  } catch (e) {
+    next(e);
+  }
+});
+ 
+// PUT /api/jobs/drafts/:id — upsert a job draft (partial data)
+router.put("/drafts/:id", verifyJWT, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const draftData = { id, ...req.body };
+    const draft = await jobDraftService.saveDraft(req.user.publicKey, draftData);
+    res.json({ success: true, data: draft });
+  } catch (e) {
+    next(e);
+  }
+});
+ 
+// GET /api/jobs/recommended — get personalized job recommendations
+router.get("/recommended", verifyJWT, async (req, res, next) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
+    const recommendations = await recommendationService.getRecommendations(
+      req.user.publicKey,
+      limit,
+    );
+    res.json({ success: true, data: recommendations });
+  } catch (e) {
+    next(e);
+  }
+});
+ 
+// GET /api/jobs/suggest — get job suggestions for autocomplete
+router.get("/suggest", suggestRateLimiter, async (req, res, next) => {
+  try {
+    const q = req.query.q || "";
+    const suggestions = await getSuggestions(q);
+    res.json({ success: true, data: suggestions });
+  } catch (e) { next(e); }
+});
+ 
+// GET /api/analytics/categories — stats per category
+router.get(
+  "/analytics/categories",
+  generalJobRateLimiter,
+  async (req, res, next) => {
+    try {
+      const { getCategoryAnalytics } = require("../services/jobService");
+      const data = await getCategoryAnalytics();
+      res.json({ success: true, data });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
+ 
+// GET /api/analytics/overview — platform-wide totals
+router.get(
+  "/analytics/overview",
+  generalJobRateLimiter,
+  async (req, res, next) => {
+    try {
+      const { getAnalyticsOverview } = require("../services/jobService");
+      const data = await getAnalyticsOverview();
+      res.json({ success: true, data });
+    } catch (e) {
+      next(e);
+    }
+  },
+);
  
 // GET /api/jobs/:id — get single job
 router.get("/:id", generalJobRateLimiter, async (req, res, next) => {
@@ -832,218 +1044,6 @@ router.post(
   },
 );
  
-// GET /api/jobs/feed.rss — RSS 2.0 feed
-router.get("/feed.rss", generalJobRateLimiter, async (req, res, next) => {
-  try {
-    const { category, skills, min_budget, max_budget } = req.query;
-    const result = await listJobs({ category, status: "open", limit: 50 });
-    const jobs = filterFeedJobs(result.jobs, { skills, min_budget, max_budget }).slice(0, 20);
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
-    const feedUrl = `${baseUrl}/api/jobs/feed.rss${category ? `?category=${encodeURIComponent(category)}` : ""}`;
-    const lastBuildDate =
-      jobs.length > 0
-        ? formatDateRss(new Date(jobs[0].createdAt))
-        : formatDateRss(new Date());
- 
-    let rss = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <channel>
-    <title>${escapeXml(`Stellar PurplePay — Job Listings${feedTitleSuffix({ category, skills })}`)}</title>
-    <description>Latest freelance job opportunities on Stellar PurplePay</description>
-    <link>${baseUrl}/jobs</link>
-    <atom:link href="${feedUrl}" rel="self" type="application/rss+xml" />
-    <language>en-us</language>
-    <lastBuildDate>${lastBuildDate}</lastBuildDate>
-`;
- 
-    jobs.forEach((job) => {
-      const jobUrl = `${baseUrl}/jobs/${job.id}`;
-      const pubDate = formatDateRss(new Date(job.createdAt));
-      const description = escapeXml(truncateDescription(job.description, 200));
-      rss += `    <item>
-      <title>${escapeXml(job.title)}</title>
-      <description>${description}</description>
-      <link>${jobUrl}</link>
-      <guid isPermaLink="true">${jobUrl}</guid>
-      <pubDate>${pubDate}</pubDate>
-      <category>${escapeXml(job.category)}</category>
-      <dc:creator>${escapeXml(job.clientDisplayName || job.clientAddress || "Anonymous")}</dc:creator>
-      <skills>${escapeXml((job.skills || []).join(", "))}</skills>
-      <budget>${escapeXml(job.budget.toString())} XLM</budget>
-    </item>
-`;
-    });
- 
-    rss += `  </channel>
-</rss>`;
- 
-    res.set("Content-Type", "application/rss+xml; charset=utf-8");
-    res.send(rss);
-  } catch (e) {
-    next(e);
-  }
-});
- 
-// GET /api/jobs/feed.atom
-router.get("/feed.atom", generalJobRateLimiter, async (req, res, next) => {
-  try {
-    const { category, skills, min_budget, max_budget } = req.query;
-    const result = await listJobs({ category, status: "open", limit: 50 });
-    const jobs = filterFeedJobs(result.jobs, { skills, min_budget, max_budget }).slice(0, 20);
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
-    const feedUrl = `${baseUrl}/api/jobs/feed.atom${category ? `?category=${encodeURIComponent(category)}` : ""}`;
-    const updatedDate =
-      jobs.length > 0
-        ? formatDateAtom(new Date(jobs[0].createdAt))
-        : formatDateAtom(new Date());
- 
-    let atom = `<?xml version="1.0" encoding="UTF-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>${escapeXml(`Stellar PurplePay — Job Listings${feedTitleSuffix({ category, skills })}`)}</title>
-  <subtitle>Latest freelance job opportunities on Stellar PurplePay</subtitle>
-  <link href="${baseUrl}/jobs" rel="alternate" type="text/html" />
-  <link href="${feedUrl}" rel="self" type="application/atom+xml" />
-  <updated>${updatedDate}</updated>
-  <id>${feedUrl}</id>
-`;
- 
-    jobs.forEach((job) => {
-      const jobUrl = `${baseUrl}/jobs/${job.id}`;
-      const published = formatDateAtom(new Date(job.createdAt));
-      const summary = escapeXml(truncateDescription(job.description, 200));
-      atom += `  <entry>
-    <title>${escapeXml(job.title)}</title>
-    <summary>${summary}</summary>
-    <link href="${jobUrl}" rel="alternate" type="text/html" />
-    <id>${jobUrl}</id>
-    <published>${published}</published>
-    <updated>${published}</updated>
-    <author><name>${escapeXml(job.clientDisplayName || job.clientAddress || "Anonymous")}</name></author>
-    <category term="${escapeXml(job.category)}" />
-    <skills>${escapeXml((job.skills || []).join(", "))}</skills>
-    <budget>${escapeXml(job.budget.toString())} XLM</budget>
-  </entry>
-`;
-    });
- 
-    atom += `</feed>`;
-    res.set("Content-Type", "application/atom+xml; charset=utf-8");
-    res.send(atom);
-  } catch (e) {
-    next(e);
-  }
-});
- 
-// GET /api/jobs/drafts — list job drafts for authenticated user
-router.get("/drafts", verifyJWT, async (req, res, next) => {
-  try {
-    const drafts = await jobDraftService.getDrafts(req.user.publicKey, 5);
-    res.json({ success: true, data: drafts });
-  } catch (e) {
-    next(e);
-  }
-});
- 
-// POST /api/jobs/drafts — save or update a job draft
-router.post("/drafts", verifyJWT, async (req, res, next) => {
-  try {
-    const draft = await jobDraftService.saveDraft(req.user.publicKey, req.body);
-    res.status(201).json({ success: true, data: draft });
-  } catch (e) {
-    next(e);
-  }
-});
- 
-// GET /api/jobs/drafts/:id — get a specific draft
-router.get("/drafts/:id", verifyJWT, async (req, res, next) => {
-  try {
-    const draft = await jobDraftService.getDraft(
-      req.params.id,
-      req.user.publicKey,
-    );
-    if (!draft)
-      return res.status(404).json({ error: "Draft not found" });
-    res.json({ success: true, data: draft });
-  } catch (e) {
-    next(e);
-  }
-});
- 
-// DELETE /api/jobs/drafts/:id — delete a draft
-router.delete("/drafts/:id", verifyJWT, async (req, res, next) => {
-  try {
-    await jobDraftService.deleteDraft(req.params.id, req.user.publicKey);
-    res.json({ success: true });
-  } catch (e) {
-    next(e);
-  }
-});
- 
-// PUT /api/jobs/drafts/:id — upsert a job draft (partial data)
-router.put("/drafts/:id", verifyJWT, async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const draftData = { id, ...req.body };
-    const draft = await jobDraftService.saveDraft(req.user.publicKey, draftData);
-    res.json({ success: true, data: draft });
-  } catch (e) {
-    next(e);
-  }
-});
- 
-// GET /api/jobs/recommended — get personalized job recommendations
-router.get("/recommended", verifyJWT, async (req, res, next) => {
-  try {
-    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
-    const recommendations = await recommendationService.getRecommendations(
-      req.user.publicKey,
-      limit,
-    );
-    res.json({ success: true, data: recommendations });
-  } catch (e) {
-    next(e);
-  }
-});
- 
-// GET /api/jobs/suggest — get job suggestions for autocomplete
-router.get("/suggest", suggestRateLimiter, async (req, res, next) => {
-  try {
-    const q = req.query.q || "";
-    const suggestions = await getSuggestions(q);
-    res.json({ success: true, data: suggestions });
-  } catch (e) { next(e); }
-});
- 
-// GET /api/analytics/categories — stats per category
-router.get(
-  "/analytics/categories",
-  generalJobRateLimiter,
-  async (req, res, next) => {
-    try {
-      const { getCategoryAnalytics } = require("../services/jobService");
-      const data = await getCategoryAnalytics();
-      res.json({ success: true, data });
-    } catch (e) {
-      next(e);
-    }
-  },
-);
- 
-// GET /api/analytics/overview — platform-wide totals
-router.get(
-  "/analytics/overview",
-  generalJobRateLimiter,
-  async (req, res, next) => {
-    try {
-      const { getAnalyticsOverview } = require("../services/jobService");
-      const data = await getAnalyticsOverview();
-      res.json({ success: true, data });
-    } catch (e) {
-      next(e);
-    }
-  },
-);
- 
 // POST /api/jobs/batch — unified batch endpoint for bulk operations (#869)
 router.post(
   "/batch",
@@ -1170,27 +1170,6 @@ router.post(
     }
   },
 );
-// GET /api/jobs/analytics/categories — stats per category
-router.get("/analytics/categories", generalJobRateLimiter, async (req, res, next) => {
-  try {
-    const { getCategoryAnalytics } = require("../services/jobService");
-    const data = await getCategoryAnalytics();
-    res.json({ success: true, data });
-  } catch (e) {
-    next(e);
-  }
-});
-
-// GET /api/jobs/analytics/overview — platform-wide totals
-router.get("/analytics/overview", generalJobRateLimiter, async (req, res, next) => {
-  try {
-    const { getAnalyticsOverview } = require("../services/jobService");
-    const data = await getAnalyticsOverview();
-    res.json({ success: true, data });
-  } catch (e) {
-    next(e);
-  }
-});
 
 module.exports = router;
  
