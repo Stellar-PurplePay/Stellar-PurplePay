@@ -107,7 +107,8 @@
     ],
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "src/tests/integration"
+      "src/tests/integration",
+      "src/db"
     ],
     "collectCoverageFrom": [
       "src/services/jobService.js",
@@ -149,7 +150,8 @@
         ],
         "testPathIgnorePatterns": [
           "/node_modules/",
-          "src/tests/integration"
+          "src/tests/integration",
+          "src/db"
         ],
         "transformIgnorePatterns": [
           "node_modules/(?!(isomorphic-dompurify|dompurify|@exodus|@stellar|@noble|uuid|sanitize-html|htmlparser2|domhandler|domutils|entities|dom-serializer|domelementtype|uint8array-extras|date-fns)/)"
@@ -165,12 +167,13 @@
         "displayName": "integration",
         "testEnvironment": "node",
         "testMatch": [
-          "**/src/tests/integration/**/*.test.js"
+          "**/src/tests/integration/**/*.test.js",
+          "**/src/db/**/*.test.js"
         ],
         "setupFiles": [
           "<rootDir>/jest.setup.js"
         ],
-        "testTimeout": 30000,
+        "testTimeout": 60000,
         "transformIgnorePatterns": [
           "node_modules/(?!(isomorphic-dompurify|dompurify|@exodus|@stellar|@noble|uuid|sanitize-html|htmlparser2|domhandler|domutils|entities|dom-serializer|domelementtype|uint8array-extras|date-fns)/)"
         ],

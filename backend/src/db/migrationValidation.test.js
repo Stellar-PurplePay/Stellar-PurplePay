@@ -33,6 +33,8 @@ async function resetSchema(client) {
 
 // ─── Setup / Teardown ─────────────────────────────────────────────────────────
 
+jest.setTimeout(60000);
+
 beforeAll(async () => {
   try {
     const client = await pool.connect();
@@ -46,6 +48,13 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  if (hasPostgres) {
+    try {
+      await migrate();
+    } catch {
+      // ignore
+    }
+  }
   await pool.end();
 });
 

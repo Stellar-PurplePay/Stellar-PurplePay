@@ -5,9 +5,11 @@ const {
   loadMigrationPairs,
   ensureMigrationsTable,
   rollbackLastMigration,
+  migrate,
 } = require("./migrate");
 
 describe("Database Migrations (V1–V49)", () => {
+  jest.setTimeout(60000);
   let hasPostgres = false;
 
   beforeAll(async () => {
@@ -24,6 +26,7 @@ describe("Database Migrations (V1–V49)", () => {
 
   afterAll(async () => {
     if (hasPostgres) {
+      await migrate();
       await pool.end();
     }
   });
@@ -110,7 +113,7 @@ describe("Database Migrations (V1–V49)", () => {
     } finally {
       client.release();
     }
-  });
+  }, 60000);
 
   it("verifies rollback scripts execute cleanly for all migrations", async () => {
     if (!hasPostgres) {
@@ -143,5 +146,5 @@ describe("Database Migrations (V1–V49)", () => {
     } finally {
       client.release();
     }
-  });
+  }, 60000);
 });

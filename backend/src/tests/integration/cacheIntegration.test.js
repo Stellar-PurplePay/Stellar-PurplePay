@@ -68,7 +68,7 @@ jest.mock("../../services/xlmPriceService", () => ({
 jest.mock("../../services/jobService", () => ({
   listJobs: jest.fn(async () => ({ jobs: [], nextCursor: null })),
   createJob: jest.fn(async (data) => ({ id: "job-123", ...data })),
-  getJob: jest.fn(async (id) => ({ id })),
+  getJob: jest.fn(async (id) => ({ id, clientAddress: "G" + "A".repeat(55) })),
   updateJobStatus: jest.fn(async (id, status) => ({ id, status })),
   listJobsByClient: jest.fn(async () => []),
   updateJobEscrowId: jest.fn(async (id) => ({ id })),
@@ -105,6 +105,7 @@ jest.mock("../../middleware/auth", () => {
       req.user = { publicKey: "G" + "A".repeat(55) };
       next();
     },
+    optionalJWT: (req, _res, next) => next(),
     requireAdminRole: (req, _res, next) => next(),
     requireAdmin2FA: (req, _res, next) => next(),
     JWT_SECRET: jwtSecret,
