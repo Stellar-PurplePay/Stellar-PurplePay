@@ -2,4 +2,5 @@
 
 DROP INDEX IF EXISTS idx_job_timeline_tx_hash;
 DROP INDEX IF EXISTS idx_job_timeline_job_id_created;
-DROP TABLE IF EXISTS job_timeline;
+DROP TABLE IF EXISTS escrow_releases CASCADE;
+DROP TABLE IF EXISTS job_timeline CASCADE;

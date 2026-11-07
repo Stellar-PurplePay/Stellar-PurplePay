@@ -27,7 +27,6 @@ describe("Database Migrations (V1–V49)", () => {
   afterAll(async () => {
     if (hasPostgres) {
       await migrate();
-      await pool.end();
     }
   });
 
