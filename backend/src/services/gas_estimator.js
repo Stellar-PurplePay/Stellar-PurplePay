@@ -269,6 +269,35 @@ async function getSafeGasEstimate(opts = {}) {
   }
 }
 
+/**
+ * Compute a safety-buffered fee to protect transactions against sudden ledger congestion.
+ *
+ * @param {number|string|bigint} feeStroops - Base fee in stroops
+ * @param {Object} [options]
+ * @param {number} [options.bufferPercent=15] - Percentage buffer to apply (default 15%)
+ * @param {boolean} [options.isSurge=false] - Whether surge volatility is active (adds 15% extra)
+ * @param {number} [options.maxFeeStroops=10000000] - Hard upper ceiling (1 XLM max fee)
+ * @returns {{ bufferedStroops: number, bufferedXlm: string, bufferAppliedPercent: number }}
+ */
+function calculateBufferedFee(feeStroops, options = {}) {
+  const {
+    bufferPercent = 15,
+    isSurge = false,
+    maxFeeStroops = 10_000_000,
+  } = options;
+
+  const base = Math.max(100, Math.round(Number(feeStroops) || 100));
+  const effectiveBuffer = isSurge ? bufferPercent + 15 : bufferPercent;
+  const multiplier = 1 + effectiveBuffer / 100;
+  const buffered = Math.min(Math.round(base * multiplier), maxFeeStroops);
+
+  return {
+    bufferedStroops: buffered,
+    bufferedXlm: stroopsToXlm(buffered),
+    bufferAppliedPercent: effectiveBuffer,
+  };
+}
+
 module.exports = {
   getGasEstimate,
   getSafeGasEstimate,
@@ -276,6 +305,7 @@ module.exports = {
   extractFeeDataPoints,
   stroopsToXlm,
   percentile,
+  calculateBufferedFee,
   CACHE_KEY,
   CACHE_TTL,
 };

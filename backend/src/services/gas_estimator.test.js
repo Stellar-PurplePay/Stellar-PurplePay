@@ -19,6 +19,7 @@ const {
   computeTiers,
   stroopsToXlm,
   getSafeGasEstimate,
+  calculateBufferedFee,
 } = require("./gas_estimator");
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -246,6 +247,16 @@ describe("getSafeGasEstimate", () => {
     expect(result.fast).toBeDefined();
 
     global.fetch = originalFetch;
+  });
+
+  test("calculateBufferedFee applies buffer and handles surge", () => {
+    const normal = calculateBufferedFee(1000, { bufferPercent: 20 });
+    expect(normal.bufferedStroops).toBe(1200);
+    expect(normal.bufferAppliedPercent).toBe(20);
+
+    const surge = calculateBufferedFee(1000, { bufferPercent: 20, isSurge: true });
+    expect(surge.bufferedStroops).toBe(1350); // 20% + 15% = 35%
+    expect(surge.bufferAppliedPercent).toBe(35);
   });
 });
 
