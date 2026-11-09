@@ -168,7 +168,14 @@ async function quoteXlmToUsdc(amountXlm) {
 }
 
 function applySlippage(amount, slippageBps) {
-  return toFixed7((parseFloat(amount) * (10_000 - slippageBps)) / 10_000);
+  const s = String(amount || "0").trim();
+  const [whole, frac = ""] = s.split(".");
+  const paddedFrac = frac.padEnd(7, "0").slice(0, 7);
+  const totalStroops = BigInt(whole || "0") * 10_000_000n + BigInt(paddedFrac);
+  const minStroops = (totalStroops * BigInt(10_000 - slippageBps)) / 10_000n;
+  const intPart = minStroops / 10_000_000n;
+  const decPart = (minStroops % 10_000_000n).toString().padStart(7, "0");
+  return `${intPart}.${decPart}`;
 }
 
 /**
