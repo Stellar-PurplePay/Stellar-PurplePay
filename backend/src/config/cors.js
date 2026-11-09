@@ -49,7 +49,12 @@ function createCorsOptions({ env = process.env, logger = console } = {}) {
       "X-XSRF-Token", // legacy alias — see note at top of file
       "Idempotency-Key",
       "X-Request-ID",
+      "X-Client-Version",
+      "X-Stellar-Network",
+      "X-Webhook-Signature",
+      "X-Webhook-Timestamp",
     ],
+    maxAge: 86400,
     credentials: true,
   };
 }

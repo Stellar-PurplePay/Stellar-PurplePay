@@ -54,4 +54,11 @@ describe("CORS configuration", () => {
       "https://admin.example",
     ]);
   });
+
+  it("includes security headers and preflight maxAge", () => {
+    const options = createCorsOptions();
+    expect(options.maxAge).toBe(86400);
+    expect(options.allowedHeaders).toContain("X-Webhook-Signature");
+    expect(options.allowedHeaders).toContain("X-Stellar-Network");
+  });
 });
