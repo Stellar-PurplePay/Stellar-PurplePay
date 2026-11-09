@@ -90,6 +90,8 @@ const partialReleaseRoutes = require("./routes/partialReleaseRoutes");
 const paymentStreamRoutes = require("./routes/paymentStreamRoutes");
 const receiptRoutes       = require("./routes/receiptRoutes");
 const transactionQueryRoutes = require("./routes/transactionQueryRoutes");
+const { createStellarRateLimiter } = require("./middleware/stellarRateLimiter");
+const { createSorobanCircuitMiddleware } = require("./middleware/sorobanCircuitBreaker");
  
 const { setWebsocketConnections } = require("./metrics");
 const { startEscrowTimeoutChecker } = require("./services/escrowService");
@@ -293,6 +295,8 @@ app.use("/api/talent-pools",      talentPoolRoutes);
 app.use("/api/invitations",       rateLimit({ windowMs: 60_000, max: 20 }), invitationRoutes);
 app.use("/api/analytics",         analyticsRoutes);
 app.use("/api/search",            searchRoutes);
+app.use("/api/stellar",            createStellarRateLimiter(), createSorobanCircuitMiddleware());
+app.use("/api/escrow",             createStellarRateLimiter(), createSorobanCircuitMiddleware());
 app.use("/api/stellar/trustlines", trustlineRoutes);
 app.use("/api/escrow/milestones",  milestoneExtensionRoutes);
 app.use("/api/escrow/milestones",  partialReleaseRoutes);
