@@ -43,10 +43,28 @@ describe("applicationValidator schemas", () => {
         validate(createApplicationSchema, {
           jobId: "job-123",
           freelancerId: "GFL123",
-          proposal: "Prop",
+          proposal: "Valid proposal text",
           bidAmount: -10,
         }),
       ).toThrow();
+    });
+
+    it("fails when proposal is too short or bidAmount exceeds upper limit", () => {
+      expect(() =>
+        validate(createApplicationSchema, {
+          jobId: "job-123",
+          proposal: "Short",
+          bidAmount: 100,
+        })
+      ).toThrow("proposal must be at least 10 characters long");
+
+      expect(() =>
+        validate(createApplicationSchema, {
+          jobId: "job-123",
+          proposal: "Valid proposal text long enough",
+          bidAmount: 200_000_000,
+        })
+      ).toThrow("bidAmount must be a positive number up to 100,000,000");
     });
   });
 

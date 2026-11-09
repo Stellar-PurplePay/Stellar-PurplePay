@@ -12,11 +12,18 @@ const reqStr = (msg) =>
 const createApplicationSchema = z
   .object({
     jobId: reqStr("jobId is required"),
-    proposal: reqStr("proposal is required"),
+    proposal: z
+      .string({ message: "proposal is required" })
+      .trim()
+      .min(10, "proposal must be at least 10 characters long")
+      .max(10000, "proposal cannot exceed 10000 characters"),
     bidAmount: z
       .union([z.number(), z.string()])
       .transform((val) => Number(val))
-      .refine((val) => !isNaN(val) && val > 0, "bidAmount must be a positive number"),
+      .refine(
+        (val) => !isNaN(val) && val > 0 && val <= 100_000_000,
+        "bidAmount must be a positive number up to 100,000,000"
+      ),
     freelancerId: z.string().optional(),
     freelancerAddress: z.string().optional(),
     estimatedDuration: z.string().optional(),

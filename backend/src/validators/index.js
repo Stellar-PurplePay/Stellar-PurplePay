@@ -26,10 +26,10 @@ function validate(schema, data) {
   return result.data;
 }
 
-const escrowValidator = require("./escrowValidator");
-
 module.exports = {
   validate,
   z,
-  ...escrowValidator,
 };
+
+const escrowValidator = require("./escrowValidator");
+Object.assign(module.exports, escrowValidator);
