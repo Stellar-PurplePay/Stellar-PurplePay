@@ -36,4 +36,25 @@ function getClientIp(req) {
   return socketIp || normalizeIp(req.ip || "") || "unknown";
 }
 
-module.exports = { getClientIp, normalizeIp, getTrustedProxyIps };
+function maskSubnet(ip) {
+  const normalized = normalizeIp(ip);
+  if (!normalized || normalized === "unknown") return "unknown";
+
+  // IPv4 /24 subnet masking
+  if (normalized.includes(".")) {
+    const parts = normalized.split(".");
+    if (parts.length === 4) {
+      return `${parts[0]}.${parts[1]}.${parts[2]}.0/24`;
+    }
+  }
+
+  // IPv6 /64 prefix masking
+  if (normalized.includes(":")) {
+    const segments = normalized.split(":");
+    return segments.slice(0, 4).join(":") + "::/64";
+  }
+
+  return normalized;
+}
+
+module.exports = { getClientIp, normalizeIp, getTrustedProxyIps, maskSubnet };
