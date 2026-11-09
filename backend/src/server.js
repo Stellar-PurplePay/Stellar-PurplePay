@@ -365,7 +365,22 @@ wsServer.on("connection", async (ws, request) => {
     requestedRooms.forEach((roomId) => subscribeRealtime(ws, roomId));
     sendJson(ws, "connected", { channel: "realtime" });
  
+    let msgCount = 0;
+    let windowStart = Date.now();
+    const WS_MAX_MESSAGES_PER_MINUTE = 120;
+
     ws.on("message", (raw) => {
+      const now = Date.now();
+      if (now - windowStart > 60000) {
+        windowStart = now;
+        msgCount = 0;
+      }
+      msgCount += 1;
+      if (msgCount > WS_MAX_MESSAGES_PER_MINUTE) {
+        ws.close(1008, "Message rate limit exceeded");
+        return;
+      }
+
       try {
         const message = JSON.parse(String(raw));
         if (message?.type === "subscribe" && Array.isArray(message.rooms)) {
