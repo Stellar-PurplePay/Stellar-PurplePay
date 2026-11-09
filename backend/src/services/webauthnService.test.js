@@ -13,6 +13,7 @@ const {
   registerCredential,
   adminListCredentials,
   adminRevokeCredential,
+  verifyAndUpdateCredentialCounter,
   _resetRegistrationAttemptsForTest,
 } = require("./webauthnService");
 
@@ -130,6 +131,29 @@ describe("webauthnService", () => {
       await expect(adminRevokeCredential("missing")).rejects.toMatchObject({
         status: 404,
         message: "Passkey not found",
+      });
+    });
+  });
+
+  describe("signature counter & clone detection", () => {
+    it("updates counter successfully when counter increases monotonically", async () => {
+      pool.query
+        .mockResolvedValueOnce({ rows: [{ id: "cred-1", counter: 5 }] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      const res = await verifyAndUpdateCredentialCounter("cred-1", 6);
+      expect(res.verified).toBe(true);
+      expect(res.counter).toBe(6);
+      expect(pool.query).toHaveBeenCalledTimes(2);
+      expect(pool.query.mock.calls[1][0]).toContain("UPDATE webauthn_credentials SET counter = $1");
+    });
+
+    it("rejects authentication with 403 when counter does not advance (clone detection)", async () => {
+      pool.query.mockResolvedValueOnce({ rows: [{ id: "cred-1", counter: 10 }] });
+
+      await expect(verifyAndUpdateCredentialCounter("cred-1", 9)).rejects.toMatchObject({
+        status: 403,
+        code: "AUTHENTICATOR_CLONED",
       });
     });
   });

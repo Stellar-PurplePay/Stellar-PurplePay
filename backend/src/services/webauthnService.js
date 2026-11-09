@@ -137,6 +137,32 @@ async function adminRevokeCredential(id) {
   return rows[0];
 }
 
+async function verifyAndUpdateCredentialCounter(credentialId, newCounter) {
+  const { rows } = await pool.query(
+    "SELECT id, counter FROM webauthn_credentials WHERE credential_id = $1",
+    [credentialId]
+  );
+  if (!rows.length) {
+    throw createError("Passkey not found", 404);
+  }
+
+  const currentCounter = Number(rows[0].counter || 0);
+  const nextCounter = Number(newCounter || 0);
+
+  if (currentCounter > 0 && nextCounter <= currentCounter) {
+    const err = createError("Authenticator clone or replay attack detected", 403);
+    err.code = "AUTHENTICATOR_CLONED";
+    throw err;
+  }
+
+  await pool.query(
+    "UPDATE webauthn_credentials SET counter = $1, last_used_at = NOW() WHERE credential_id = $2",
+    [nextCounter, credentialId]
+  );
+
+  return { verified: true, counter: nextCounter };
+}
+
 function _resetRegistrationAttemptsForTest() {
   registrationAttempts.clear();
 }
@@ -153,5 +179,6 @@ module.exports = {
   removeCredential,
   adminListCredentials,
   adminRevokeCredential,
+  verifyAndUpdateCredentialCounter,
   _resetRegistrationAttemptsForTest,
 };
