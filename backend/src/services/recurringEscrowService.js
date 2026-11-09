@@ -14,6 +14,7 @@ const {
 } = require("./notificationService");
 const { createServiceLogger, logError } = require("../utils/logger");
 const { getServicePublicKey } = require("./stellarServiceKey");
+const { withLock } = require("../utils/distributedLock");
 
 const LEDGERS_PER_DAY = 17280; // Approximate number of ledgers per day on Stellar
 
@@ -41,6 +42,22 @@ async function createRecurringEscrow({
   intervalDays,
   totalReleases,
 }) {
+  if (!Number.isInteger(intervalDays) || intervalDays < 1 || intervalDays > 365) {
+    const e = new Error("intervalDays must be an integer between 1 and 365");
+    e.status = 400;
+    throw e;
+  }
+  if (!Number.isInteger(totalReleases) || totalReleases < 1 || totalReleases > 120) {
+    const e = new Error("totalReleases must be an integer between 1 and 120");
+    e.status = 400;
+    throw e;
+  }
+  if (!Number.isFinite(Number(amountPerRelease)) || Number(amountPerRelease) <= 0) {
+    const e = new Error("amountPerRelease must be a positive number");
+    e.status = 400;
+    throw e;
+  }
+
   const intervalLedgers = intervalDays * LEDGERS_PER_DAY;
 
   const job = typeof getJob === "function" ? await Promise.resolve().then(() => getJob(jobId)).catch(() => null) : null;
@@ -142,86 +159,88 @@ async function createRecurringEscrow({
  * @returns {Promise<Object>} Result of the tick operation
  */
 async function tickRecurringEscrow(jobId) {
-  const { rows } = await pool.query(
-    `SELECT * FROM escrows 
-     WHERE job_id = $1 AND is_recurring = true AND releases_remaining > 0 AND status = 'funded'`,
-    [jobId]
-  );
-
-  if (!rows.length) {
-    const e = new Error("Active recurring escrow not found");
-    e.status = 404;
-    throw e;
-  }
-
-  const escrow = rows[0];
-
-  // Compute next release date if it's monthly
-  let nextReleaseDate = null;
-  if (escrow.anchor_day && escrow.next_release_date) {
-    const currentNext = new Date(escrow.next_release_date);
-    const expectedMonth = currentNext.getUTCMonth() + 1;
-    const next = new Date(Date.UTC(currentNext.getUTCFullYear(), expectedMonth, escrow.anchor_day, currentNext.getUTCHours(), currentNext.getUTCMinutes(), currentNext.getUTCSeconds(), currentNext.getUTCMilliseconds()));
-    if (next.getUTCMonth() !== expectedMonth % 12) {
-      next.setUTCDate(0);
-    }
-    nextReleaseDate = next.toISOString();
-  }
-
-  // Update the last release ledger and decrement releases remaining
-  const { rows: updatedRows } = await pool.query(
-    `UPDATE escrows
-     SET releases_remaining = releases_remaining - 1,
-         last_release_ledger = (SELECT COALESCE(MAX(ledger), 0) FROM ledger_timestamps),
-         next_release_date = COALESCE($2, next_release_date),
-         updated_at = NOW()
-     WHERE job_id = $1
-     RETURNING *`,
-    [jobId, nextReleaseDate]
-  );
-
-  const updatedEscrow = updatedRows[0];
-
-  // If no releases remaining, mark as released
-  if (updatedEscrow.releases_remaining === 0) {
-    await pool.query(
-      `UPDATE escrows
-       SET status = 'released', released_at = NOW(), updated_at = NOW()
-       WHERE job_id = $1`,
+  return withLock(`lock:escrow:recurring:${jobId}`, async () => {
+    const { rows } = await pool.query(
+      `SELECT * FROM escrows 
+       WHERE job_id = $1 AND is_recurring = true AND releases_remaining > 0 AND status = 'funded'`,
       [jobId]
     );
-  }
 
-  await logContractInteraction({
-    functionName: "release_recurring_escrow",
-    callerAddress: getServicePublicKey(),
-    jobId,
-    txHash: `offchain-${Date.now()}`,
-  });
+    if (!rows.length) {
+      const e = new Error("Active recurring escrow not found");
+      e.status = 404;
+      throw e;
+    }
 
-  // Notify both parties
-  const job = await getJob(jobId);
-  await notifyEscrowEvent({
-    eventType: EVENT_TYPES.ESCROW_RELEASED,
-    jobId,
-    clientAddress: job.clientAddress,
-    freelancerAddress: job.freelancerAddress,
-    data: {
-      jobTitle: job.title,
+    const escrow = rows[0];
+
+    // Compute next release date if it's monthly
+    let nextReleaseDate = null;
+    if (escrow.anchor_day && escrow.next_release_date) {
+      const currentNext = new Date(escrow.next_release_date);
+      const expectedMonth = currentNext.getUTCMonth() + 1;
+      const next = new Date(Date.UTC(currentNext.getUTCFullYear(), expectedMonth, escrow.anchor_day, currentNext.getUTCHours(), currentNext.getUTCMinutes(), currentNext.getUTCSeconds(), currentNext.getUTCMilliseconds()));
+      if (next.getUTCMonth() !== expectedMonth % 12) {
+        next.setUTCDate(0);
+      }
+      nextReleaseDate = next.toISOString();
+    }
+
+    // Update the last release ledger and decrement releases remaining
+    const { rows: updatedRows } = await pool.query(
+      `UPDATE escrows
+       SET releases_remaining = releases_remaining - 1,
+           last_release_ledger = (SELECT COALESCE(MAX(ledger), 0) FROM ledger_timestamps),
+           next_release_date = COALESCE($2, next_release_date),
+           updated_at = NOW()
+       WHERE job_id = $1
+       RETURNING *`,
+      [jobId, nextReleaseDate]
+    );
+
+    const updatedEscrow = updatedRows[0];
+
+    // If no releases remaining, mark as released
+    if (updatedEscrow.releases_remaining === 0) {
+      await pool.query(
+        `UPDATE escrows
+         SET status = 'released', released_at = NOW(), updated_at = NOW()
+         WHERE job_id = $1`,
+        [jobId]
+      );
+    }
+
+    await logContractInteraction({
+      functionName: "release_recurring_escrow",
+      callerAddress: getServicePublicKey(),
       jobId,
-      amount: escrow.amount_per_release,
-      currency: job.currency,
-      isRecurring: true,
-      releasesRemaining: updatedEscrow.releases_remaining,
-    },
-  });
+      txHash: `offchain-${Date.now()}`,
+    });
 
-  return {
-    success: true,
-    message: "Recurring escrow ticked successfully",
-    releasesRemaining: updatedEscrow.releases_remaining,
-    amountReleased: escrow.amount_per_release,
-  };
+    // Notify both parties
+    const job = await getJob(jobId);
+    await notifyEscrowEvent({
+      eventType: EVENT_TYPES.ESCROW_RELEASED,
+      jobId,
+      clientAddress: job.clientAddress,
+      freelancerAddress: job.freelancerAddress,
+      data: {
+        jobTitle: job.title,
+        jobId,
+        amount: escrow.amount_per_release,
+        currency: job.currency,
+        isRecurring: true,
+        releasesRemaining: updatedEscrow.releases_remaining,
+      },
+    });
+
+    return {
+      success: true,
+      message: "Recurring escrow ticked successfully",
+      releasesRemaining: updatedEscrow.releases_remaining,
+      amountReleased: escrow.amount_per_release,
+    };
+  });
 }
 
 /**
