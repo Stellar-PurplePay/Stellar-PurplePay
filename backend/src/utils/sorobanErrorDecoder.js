@@ -18,6 +18,12 @@ const ESCROW_CONTRACT_ERROR_MAP = {
   12: { name: "FeeExceedsLimit", description: "Platform or arbitrator fee exceeds the configured maximum limit." },
   13: { name: "InvalidEngagementId", description: "Engagement ID exceeds allowed size or contains invalid bytes." },
   14: { name: "ArbitratorNotSet", description: "No arbitrator address is configured for this escrow." },
+  15: { name: "EscrowNotDisputed", description: "Dispute resolution failed because the escrow is not in Disputed status." },
+  16: { name: "InvalidFee", description: "Configured platform fee exceeds the maximum allowed ceiling (10.00% / 1,000 bps)." },
+  17: { name: "InvalidMilestoneCount", description: "Milestone count must be between 1 and 25 to guarantee gas bounds." },
+  18: { name: "InvalidMilestoneData", description: "Milestone descriptions cannot be empty and percentages must sum to 100%." },
+  19: { name: "ContractPaused", description: "Contract operations are currently paused by the administrator emergency circuit breaker." },
+  20: { name: "ContractNotPaused", description: "Contract cannot be unpaused because it is not currently paused." },
 };
 
 const HOST_ERROR_TYPE_MAP = {

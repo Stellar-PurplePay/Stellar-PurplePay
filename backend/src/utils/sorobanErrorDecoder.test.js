@@ -13,6 +13,33 @@ describe("sorobanErrorDecoder", () => {
     expect(decoded.description).toContain("Caller does not have required permissions");
   });
 
+  it("decodes contract pause, fee, and milestone validation error codes (15-20)", () => {
+    const paused = decodeSorobanError("HostError: Error(Contract, #19)");
+    expect(paused.code).toBe(19);
+    expect(paused.name).toBe("ContractPaused");
+    expect(paused.description).toContain("paused by the administrator");
+
+    const unpaused = decodeSorobanError("HostError: Error(Contract, #20)");
+    expect(unpaused.code).toBe(20);
+    expect(unpaused.name).toBe("ContractNotPaused");
+
+    const feeError = decodeSorobanError("HostError: Error(Contract, #16)");
+    expect(feeError.code).toBe(16);
+    expect(feeError.name).toBe("InvalidFee");
+
+    const countError = decodeSorobanError("HostError: Error(Contract, #17)");
+    expect(countError.code).toBe(17);
+    expect(countError.name).toBe("InvalidMilestoneCount");
+
+    const dataError = decodeSorobanError("HostError: Error(Contract, #18)");
+    expect(dataError.code).toBe(18);
+    expect(dataError.name).toBe("InvalidMilestoneData");
+
+    const undisputed = decodeSorobanError("HostError: Error(Contract, #15)");
+    expect(undisputed.code).toBe(15);
+    expect(undisputed.name).toBe("EscrowNotDisputed");
+  });
+
   it("handles unknown contract error code gracefully", () => {
     const errorMsg = "HostError: Error(Contract, #999)";
     const decoded = decodeSorobanError(errorMsg);
