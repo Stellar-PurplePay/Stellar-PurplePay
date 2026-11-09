@@ -91,6 +91,7 @@ const paymentStreamRoutes = require("./routes/paymentStreamRoutes");
 const receiptRoutes       = require("./routes/receiptRoutes");
 const transactionQueryRoutes = require("./routes/transactionQueryRoutes");
 const escrowReconciliationRoutes = require("./routes/escrowReconciliationRoutes");
+const { createAuditLogRouter } = require("./routes/auditLogRoutes");
 const { createStellarRateLimiter } = require("./middleware/stellarRateLimiter");
 const { createSorobanCircuitMiddleware } = require("./middleware/sorobanCircuitBreaker");
  
@@ -305,6 +306,7 @@ app.use("/api/escrow/reconciliation", escrowReconciliationRoutes);
 app.use("/api/stellar/stream",     paymentStreamRoutes);
 app.use("/api/stellar/receipts",   receiptRoutes);
 app.use("/api/stellar/transactions", transactionQueryRoutes);
+app.use("/api/audit-logs",          createAuditLogRouter());
  
 // 404 handler — must come after all routes
 app.use((req, res) => {
