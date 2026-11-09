@@ -253,4 +253,60 @@ router.get("/db", healthRateLimiter, async (req, res) => {
   });
 });
 
+/**
+ * @swagger
+ * /api/health/deep:
+ *   get:
+ *     summary: Deep health inspection with component latencies
+ *     description: Runs latency measurements across DB, Redis, Horizon, and Soroban RPC with memory and process diagnostics.
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: All deep probes operational
+ *       503:
+ *         description: One or more deep probes degraded
+ */
+router.get("/deep", healthRateLimiter, async (req, res) => {
+  const timings = {};
+
+  const measure = async (name, fn) => {
+    const start = Date.now();
+    try {
+      const result = await fn();
+      timings[name] = { status: result, latency_ms: Date.now() - start };
+      return result;
+    } catch (err) {
+      timings[name] = { status: "down", error: err.message, latency_ms: Date.now() - start };
+      return "down";
+    }
+  };
+
+  const [postgres, redis, horizon, soroban] = await Promise.all([
+    measure("db", checkPostgres),
+    measure("redis", checkRedis),
+    measure("horizon", checkHorizon),
+    measure("soroban", checkSoroban),
+  ]);
+
+  const allUp =
+    postgres === "up" &&
+    redis === "up" &&
+    horizon === "up" &&
+    soroban === "up";
+
+  const mem = process.memoryUsage();
+  res.status(allUp ? 200 : 503).json({
+    status: allUp ? "healthy" : "degraded",
+    checks: timings,
+    pool: getPoolStats(),
+    memory: {
+      heapUsedMb: Math.round((mem.heapUsed / 1024 / 1024) * 100) / 100,
+      heapTotalMb: Math.round((mem.heapTotal / 1024 / 1024) * 100) / 100,
+      rssMb: Math.round((mem.rss / 1024 / 1024) * 100) / 100,
+    },
+    uptime_seconds: Math.floor((Date.now() - SERVER_START) / 1000),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 module.exports = router;
