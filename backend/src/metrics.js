@@ -159,6 +159,27 @@ const escrowReleaseErrorsTotal = createMetric(promClient.Counter, {
   labelNames: ["reason"],
 });
 
+// ─── Soroban RPC Metrics ───────────────────────────────────────────────────
+const sorobanRpcRequestsTotal = createMetric(promClient.Counter, {
+  name: "purplepay_soroban_rpc_requests_total",
+  help: "Total Soroban JSON-RPC calls by method and outcome status",
+  labelNames: ["method", "status"],
+});
+
+const sorobanRpcDurationMs = createMetric(promClient.Histogram, {
+  name: "purplepay_soroban_rpc_duration_ms",
+  help: "Latency of Soroban JSON-RPC calls in milliseconds",
+  labelNames: ["method"],
+  buckets: [25, 50, 100, 250, 500, 1000, 2500, 5000],
+});
+
+function recordSorobanRpcCall(method, status, durationMs) {
+  sorobanRpcRequestsTotal.inc({ method: method || "unknown", status: status || "unknown" });
+  if (typeof durationMs === "number" && durationMs >= 0) {
+    sorobanRpcDurationMs.observe({ method: method || "unknown" }, durationMs);
+  }
+}
+
 // ─── Cache metrics (Issue #1512) ─────────────────────────────────────────────
 /** Cache hit counter for Redis-backed caches, labeled by cache name. */
 const cacheHitsTotal = createMetric(promClient.Counter, {
@@ -396,6 +417,10 @@ module.exports = {
   poolQueriesTotal,
   escrowReleasesTotal,
   escrowReleaseErrorsTotal,
+  // soroban metrics
+  sorobanRpcRequestsTotal,
+  sorobanRpcDurationMs,
+  recordSorobanRpcCall,
   // supporting metrics
   dbConnections,
   pgPoolTotal,
