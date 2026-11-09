@@ -85,6 +85,7 @@ const tokenRoutes        = require("./routes/tokens");
 const webauthnRoutes     = require("./routes/webauthn");
 const webhookRoutes      = require("./routes/webhooks");
 const trustlineRoutes    = require("./routes/trustlineRoutes");
+const milestoneExtensionRoutes = require("./routes/milestoneExtensionRoutes");
  
 const { setWebsocketConnections } = require("./metrics");
 const { startEscrowTimeoutChecker } = require("./services/escrowService");
@@ -289,6 +290,7 @@ app.use("/api/invitations",       rateLimit({ windowMs: 60_000, max: 20 }), invi
 app.use("/api/analytics",         analyticsRoutes);
 app.use("/api/search",            searchRoutes);
 app.use("/api/stellar/trustlines", trustlineRoutes);
+app.use("/api/escrow/milestones",  milestoneExtensionRoutes);
  
 // 404 handler — must come after all routes
 app.use((req, res) => {
