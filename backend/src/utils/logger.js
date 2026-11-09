@@ -85,18 +85,37 @@ function resolveRequestId(req) {
   return generateRequestId();
 }
 
+const SENSITIVE_KEY_PATTERN = /password|token|secret|key|credential|private|auth|passphrase|seed/i;
+const STELLAR_SECRET_PATTERN = /\bS[A-Z2-7]{55}\b/g;
+
+function sanitizeValue(value, depth = 0) {
+  if (depth > 6) return "[MAX_DEPTH]";
+  if (typeof value === "string") {
+    return value.replace(STELLAR_SECRET_PATTERN, "S[REDACTED_SECRET_KEY]");
+  }
+  if (!value || typeof value !== "object") return value;
+
+  if (Array.isArray(value)) {
+    return value.map((item) => sanitizeValue(item, depth + 1));
+  }
+
+  const sanitized = {};
+  for (const [k, v] of Object.entries(value)) {
+    if (SENSITIVE_KEY_PATTERN.test(k)) {
+      sanitized[k] = "[REDACTED]";
+    } else {
+      sanitized[k] = sanitizeValue(v, depth + 1);
+    }
+  }
+  return sanitized;
+}
+
 /**
- * Sanitize request body for logging (remove sensitive fields).
+ * Deeply sanitize request body and objects for logging (redact secrets and sensitive keys).
  * @param {unknown} body
  */
 function sanitizeBody(body) {
-  if (!body || typeof body !== "object") return body;
-  const sensitiveFields = ["password", "token", "secret", "key", "credential"];
-  const sanitized = { ...body };
-  for (const field of sensitiveFields) {
-    if (sanitized[field]) sanitized[field] = "[REDACTED]";
-  }
-  return sanitized;
+  return sanitizeValue(body, 0);
 }
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
