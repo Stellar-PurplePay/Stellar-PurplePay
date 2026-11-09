@@ -10,6 +10,7 @@
 "use strict";
 
 const express    = require("express");
+const crypto     = require("crypto");
 const router     = express.Router();
 const multer     = require("multer");
 const pool       = require("../db/pool");
@@ -287,6 +288,11 @@ router.post(
       // anything other than an explicit true is stored as not-pinned.
       const pinned = ipfsResult?.pinned === true;
 
+      const fileSha256 = crypto
+        .createHash("sha256")
+        .update(req.file.buffer)
+        .digest("hex");
+
       const { rows } = await pool.query(
         `INSERT INTO dispute_evidence
            (job_id, uploader_address, file_name, file_size, mime_type, ipfs_cid, pinned)
@@ -306,6 +312,7 @@ router.post(
           mimeType:        ev.mime_type,
           fileUrl:         ev.ipfs_cid,
           pinned:          ev.pinned === true,
+          sha256:          fileSha256,
           gatewayUrl:      ipfsService.getGatewayUrl(ev.ipfs_cid),
           createdAt:       ev.created_at,
         },
