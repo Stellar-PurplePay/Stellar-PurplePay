@@ -90,6 +90,7 @@ const partialReleaseRoutes = require("./routes/partialReleaseRoutes");
 const paymentStreamRoutes = require("./routes/paymentStreamRoutes");
 const receiptRoutes       = require("./routes/receiptRoutes");
 const transactionQueryRoutes = require("./routes/transactionQueryRoutes");
+const escrowReconciliationRoutes = require("./routes/escrowReconciliationRoutes");
 const { createStellarRateLimiter } = require("./middleware/stellarRateLimiter");
 const { createSorobanCircuitMiddleware } = require("./middleware/sorobanCircuitBreaker");
  
@@ -300,6 +301,7 @@ app.use("/api/escrow",             createStellarRateLimiter(), createSorobanCirc
 app.use("/api/stellar/trustlines", trustlineRoutes);
 app.use("/api/escrow/milestones",  milestoneExtensionRoutes);
 app.use("/api/escrow/milestones",  partialReleaseRoutes);
+app.use("/api/escrow/reconciliation", escrowReconciliationRoutes);
 app.use("/api/stellar/stream",     paymentStreamRoutes);
 app.use("/api/stellar/receipts",   receiptRoutes);
 app.use("/api/stellar/transactions", transactionQueryRoutes);
