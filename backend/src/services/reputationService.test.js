@@ -88,6 +88,33 @@ describe("reputationService", () => {
       expect(score).toBe(100);
     });
 
+    it("applies fraud penalty deduction for lost disputes", () => {
+      const base = computeScore({
+        completedJobs: 10,
+        engagedJobs: 10,
+        disputedJobs: 2,
+        avgResponseHours: 5,
+        avgRating: 4.5,
+        ratingCount: 5,
+        referralTotal: 2,
+        referralConverted: 2,
+      });
+
+      const withLosses = computeScore({
+        completedJobs: 10,
+        engagedJobs: 10,
+        disputedJobs: 2,
+        lostDisputes: 2,
+        avgResponseHours: 5,
+        avgRating: 4.5,
+        ratingCount: 5,
+        referralTotal: 2,
+        referralConverted: 2,
+      });
+
+      expect(withLosses.score).toBe(Number((base.score - 10).toFixed(2)));
+    });
+
     it("penalises disputes and slow responses", () => {
       const good = computeScore({ ...emptyMetrics, completedJobs: 5, engagedJobs: 5, avgResponseHours: 2 });
       const bad = computeScore({

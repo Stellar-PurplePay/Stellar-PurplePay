@@ -166,12 +166,17 @@ function computeScore(m) {
   }
   const referralPart = m.referralTotal > 0 ? referralQuality : 0.5;
 
-  const score =
+  const disputeLosses = Number(m.disputeLosses || m.lostDisputes || 0);
+  const fraudPenalty = disputeLosses * 5;
+
+  const rawScore =
     completedPart * WEIGHTS.completedJobs +
     disputePart * WEIGHTS.disputeRate +
     responsePart * WEIGHTS.responseTime +
     ratingPart * WEIGHTS.rating +
     referralPart * WEIGHTS.referralQuality;
+
+  const score = Math.max(0, rawScore - fraudPenalty);
 
   return {
     score: Number(Math.max(0, Math.min(100, score)).toFixed(2)),
