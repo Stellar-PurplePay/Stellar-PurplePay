@@ -3,7 +3,7 @@
  */
 "use strict";
 const express = require("express");
-const { Utils, Keypair } = require("@stellar/stellar-sdk");
+const { Utils, Keypair, StrKey } = require("@stellar/stellar-sdk");
 const {
   ensureAdminProfile,
   get2FAStatus,
@@ -22,8 +22,12 @@ const { createRateLimiter } = require("../middleware/rateLimiter");
 
 const router = express.Router();
 
-// Strict limit on authentication attempts: 10 per 15 minutes per IP
-const authWriteRateLimiter = createRateLimiter(10, 15, { name: "auth-write" });
+// Strict limit on authentication attempts: 10 per 15 minutes per IP (relaxed in test)
+const authWriteRateLimiter = createRateLimiter(
+  process.env.NODE_ENV === "test" ? 100 : 10,
+  15,
+  { name: "auth-write" }
+);
 // Looser limit on read-only auth endpoints: 100 per minute per IP
 const authReadRateLimiter = createRateLimiter(100, 1, { name: "auth-read" });
 
@@ -110,11 +114,14 @@ router.get("/csrf-token", authReadRateLimiter, (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.get("/", (req, res, next) => {
+router.get("/", authReadRateLimiter, (req, res, next) => {
   try {
     const accountId = req.query.account;
     if (!accountId) {
       return res.status(400).json({ error: "Missing account parameter" });
+    }
+    if (!StrKey.isValidEd25519PublicKey(accountId)) {
+      return res.status(400).json({ error: "Invalid Stellar public key format" });
     }
     const network = req.query.network === "mainnet" ? "mainnet" : "testnet";
     const networkPassphrase = resolvePassphrase(network);
@@ -180,13 +187,16 @@ router.get("/", (req, res, next) => {
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.post("/", async (req, res, next) => {
+router.post("/", authWriteRateLimiter, async (req, res, next) => {
   try {
     const { transaction, network: reqNetwork } = req.body;
-    if (!transaction) {
+    if (!transaction || typeof transaction !== "string") {
       return res
         .status(400)
         .json({ error: "Missing transaction in request body" });
+    }
+    if (transaction.length > 32768) {
+      return res.status(400).json({ error: "Transaction payload exceeds maximum allowed size" });
     }
     const network = reqNetwork === "mainnet" ? "mainnet" : "testnet";
     const networkPassphrase = resolvePassphrase(network);
