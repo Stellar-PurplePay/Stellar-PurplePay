@@ -106,9 +106,9 @@ const pool = require("../../db/pool");
 
 // ─── Test constants ───────────────────────────────────────────────────────────
 
-// Valid Stellar public key format: G + 55 uppercase alphanumeric chars = 56 total
-const FAKE_FREELANCER_KEY = "G" + "A".repeat(55);
-const FAKE_CLIENT_KEY = "G" + "B".repeat(55);
+// Valid Stellar public key format with correct CRC checksum
+const FAKE_FREELANCER_KEY = "GCGQCFTEFE4W5BNG2QXJN4244ZCQMGLO6G5X65NILEKVLGZTSNZUVHJP";
+const FAKE_CLIENT_KEY = "GCBCQGT7EUV42BBA6MGZBOKTMVRO54YGQXOUQUIH5BER4EAJATYR3FKQ";
 const FAKE_JOB_ID = "11111111-1111-1111-1111-111111111111";
 const FAKE_APP_ID = "22222222-2222-2222-2222-222222222222";
 const FAKE_CHALLENGE_XDR = "AAAAAFakeChallengeTransactionXDRBase64Encoded==";
