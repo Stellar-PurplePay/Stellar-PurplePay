@@ -69,7 +69,16 @@ const {
  * @property {string|null} nextCursor  Opaque base64 cursor for the next page, or null when exhausted.
  */
  
-const VALID_STATUSES = ["open", "in_progress", "completed", "cancelled"];
+const VALID_STATUSES = ["open", "in_progress", "completed", "cancelled", "expired", "disputed"];
+
+const VALID_TRANSITIONS = {
+  open: ["in_progress", "cancelled", "expired"],
+  in_progress: ["completed", "cancelled", "disputed"],
+  disputed: ["completed", "cancelled", "in_progress"],
+  completed: [],
+  cancelled: [],
+  expired: ["open"],
+};
  
 const VALID_CATEGORIES = [
   "Smart Contracts",
@@ -728,13 +737,28 @@ let updateJobStatus = async function (id, status) {
     throw e;
   }
  
-  // Fetch old value before updating (for audit log)
+  // Fetch old value before updating (for audit log and transition check)
   const { rows: oldRows } = await pool.query(
     "SELECT * FROM jobs WHERE id = $1",
     [id],
   );
-  const oldJob = oldRows.length ? rowToJob(oldRows[0]) : null;
- 
+  if (!oldRows.length) {
+    const e = new Error("Job not found");
+    e.status = 404;
+    throw e;
+  }
+  const oldJob = rowToJob(oldRows[0]);
+  if (oldJob.status === status) {
+    return oldJob;
+  }
+
+  const allowed = VALID_TRANSITIONS[oldJob.status] || [];
+  if (!allowed.includes(status)) {
+    const e = new Error(`Invalid status transition from '${oldJob.status}' to '${status}'`);
+    e.status = 400;
+    throw e;
+  }
+
   const { rows } = await pool.query(
     "UPDATE jobs SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *",
     [status, id],
@@ -1708,5 +1732,7 @@ module.exports = {
   recordTimelineEvent,
   getJobTimeline,
   TIMELINE_EVENT_TYPES,
+  VALID_STATUSES,
+  VALID_TRANSITIONS,
 };
  

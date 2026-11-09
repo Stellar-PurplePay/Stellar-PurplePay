@@ -503,6 +503,22 @@ it("filters by status", async () => {
     it("throws 404 when job not found", async () => {
       await expect(updateJobStatus("nonexistent", "open")).rejects.toThrow("Job not found");
     });
+
+    it("rejects illegal transitions from terminal status", async () => {
+      const job = await createJob({
+        title: "Terminal status test",
+        description: "Description format that is long enough to pass validation.",
+        budget: "100",
+        category: "Frontend Development",
+        clientAddress: validClientAddress,
+        currency: "XLM",
+      });
+      await updateJobStatus(job.id, "cancelled");
+
+      await expect(updateJobStatus(job.id, "in_progress")).rejects.toThrow(
+        "Invalid status transition from 'cancelled' to 'in_progress'"
+      );
+    });
   });
 
   // ─── assignFreelancer ──────────────────────────────────────────────────
