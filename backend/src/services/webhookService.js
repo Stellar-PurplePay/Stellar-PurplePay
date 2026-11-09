@@ -10,11 +10,32 @@ const logger = createServiceLogger("webhookService");
 const MAX_RETRIES = 3;
 const BASE_BACKOFF_MS = 200;
 
-function buildSignature(secret, payload) {
+function buildSignature(secret, payload, timestamp = null) {
+  const dataToSign = timestamp != null ? `${timestamp}.${payload}` : payload;
   return crypto
     .createHmac("sha256", secret)
-    .update(payload)
+    .update(dataToSign)
     .digest("hex");
+}
+
+function verifyWebhookSignature({ secret, payload, signature, timestamp = null, toleranceSeconds = 300 }) {
+  if (!secret || !payload || !signature) return false;
+
+  if (timestamp != null) {
+    const parsedTs = parseInt(timestamp, 10);
+    if (!Number.isFinite(parsedTs)) return false;
+    const now = Math.floor(Date.now() / 1000);
+    if (Math.abs(now - parsedTs) > toleranceSeconds) {
+      return false; // Timestamp outside freshness window
+    }
+  }
+
+  const expectedSig = buildSignature(secret, payload, timestamp);
+  const sigBuf = Buffer.from(signature, "hex");
+  const expBuf = Buffer.from(expectedSig, "hex");
+
+  if (sigBuf.length !== expBuf.length) return false;
+  return crypto.timingSafeEqual(sigBuf, expBuf);
 }
 
 function wait(ms) {
@@ -82,6 +103,7 @@ async function deliverSingleWebhook(webhook, eventType, payload) {
 
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt += 1) {
     try {
+      const timestamp = Math.floor(Date.now() / 1000);
       const signature = buildSignature(webhook.secret, body);
       // ssrf-req-filter returns an https.Agent (or http.Agent) that blocks
       // connections to RFC-1918, loopback, and link-local addresses at the
@@ -91,6 +113,7 @@ async function deliverSingleWebhook(webhook, eventType, payload) {
         headers: {
           "Content-Type": "application/json",
           "X-Webhook-Signature": signature,
+          "X-Webhook-Timestamp": String(timestamp),
         },
         timeout: 10000,
         httpAgent: agent,
@@ -152,6 +175,7 @@ module.exports = {
   MAX_RETRIES,
   BASE_BACKOFF_MS,
   buildSignature,
+  verifyWebhookSignature,
   registerWebhook,
   deliverSingleWebhook,
   deliverEscrowWebhooks,

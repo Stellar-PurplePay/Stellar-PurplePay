@@ -30,6 +30,7 @@ jest.mock("axios", () => ({
 const crypto = require("crypto");
 const {
   buildSignature,
+  verifyWebhookSignature,
   registerWebhook,
   deliverSingleWebhook,
   deliverEscrowWebhooks,
@@ -84,6 +85,59 @@ describe("webhookService", () => {
       expect(buildSignature(SECRET, JSON.stringify({ event: "refund_issued" }))).not.toBe(
         signature,
       );
+    });
+  });
+
+  // =========================================================================
+  // verifyWebhookSignature
+  // =========================================================================
+  describe("verifyWebhookSignature", () => {
+    it("verifies a valid signature with timestamp within tolerance window", () => {
+      const payload = JSON.stringify({ event: "milestone_approved" });
+      const now = Math.floor(Date.now() / 1000);
+      const signature = buildSignature(SECRET, payload, now);
+
+      const isValid = verifyWebhookSignature({
+        secret: SECRET,
+        payload,
+        signature,
+        timestamp: now,
+        toleranceSeconds: 300,
+      });
+
+      expect(isValid).toBe(true);
+    });
+
+    it("rejects signatures with expired or stale timestamps", () => {
+      const payload = JSON.stringify({ event: "milestone_approved" });
+      const staleTimestamp = Math.floor(Date.now() / 1000) - 600; // 10 minutes ago
+      const signature = buildSignature(SECRET, payload, staleTimestamp);
+
+      const isValid = verifyWebhookSignature({
+        secret: SECRET,
+        payload,
+        signature,
+        timestamp: staleTimestamp,
+        toleranceSeconds: 300,
+      });
+
+      expect(isValid).toBe(false);
+    });
+
+    it("rejects tampered signatures or altered payloads", () => {
+      const payload = JSON.stringify({ event: "milestone_approved" });
+      const now = Math.floor(Date.now() / 1000);
+      const signature = buildSignature(SECRET, payload, now);
+
+      const tamperedPayload = JSON.stringify({ event: "milestone_rejected" });
+      const isValid = verifyWebhookSignature({
+        secret: SECRET,
+        payload: tamperedPayload,
+        signature,
+        timestamp: now,
+      });
+
+      expect(isValid).toBe(false);
     });
   });
 
