@@ -21,7 +21,7 @@ const BEARER_TOKEN_PATTERN = /Bearer\s+([A-Za-z0-9\-_.~+/]+=*)/gi;
 const JWT_PATTERN = /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_\-+./=]{10,}\b/g;
 
 // Matches sensitive key names in objects
-const SENSITIVE_KEY_REGEX = /^(?:password|secret|api[_-]?key|access[_-]?token|refresh[_-]?token|auth(?:orization)?|private[_-]?key|seed(?:[_-]?phrase)?|passphrase|client[_-]?secret)$/i;
+const SENSITIVE_KEY_REGEX = /^(?:password|secret|api[_-]?key|access[_-]?token|refresh[_-]?token|auth(?:orization)?|private[_-]?key|seed(?:[_-]?phrase)?|passphrase|client[_-]?secret|token)$/i;
 
 /**
  * Scrub credentials and sensitive tokens from a raw string.
@@ -121,7 +121,8 @@ function maskUrl(urlStr) {
     if (parsed.password) {
       parsed.password = "[REDACTED]";
     }
-    for (const param of parsed.searchParams.keys()) {
+    const paramKeys = Array.from(parsed.searchParams.keys());
+    for (const param of paramKeys) {
       if (SENSITIVE_KEY_REGEX.test(param)) {
         parsed.searchParams.set(param, "[REDACTED]");
       }
