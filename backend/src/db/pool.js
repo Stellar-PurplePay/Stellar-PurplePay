@@ -176,6 +176,14 @@ async function connectWithRetry({
   }
 }
 
+async function drainPool() {
+  try {
+    await pool.end();
+  } catch (err) {
+    console.error("[pg] Error draining database pool:", err.message);
+  }
+}
+
 module.exports = pool;
 // Read/write aliases: this deployment talks to a single Postgres endpoint, so
 // both resolve to the same instrumented pool. Services destructure
@@ -184,3 +192,4 @@ module.exports.readPool = pool;
 module.exports.writePool = pool;
 module.exports.getPoolStats = getPoolStats;
 module.exports.connectWithRetry = connectWithRetry;
+module.exports.drainPool = drainPool;

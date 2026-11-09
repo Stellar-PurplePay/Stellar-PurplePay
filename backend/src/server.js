@@ -854,7 +854,38 @@ app._ws.scopeSessionClients = scopeSessionClients;
 app._ws.broadcastRealtime = broadcastRealtime;
 app._ws.broadcastToUser = (userAddress, event, payload) => broadcastRealtime(event, { ...payload, userAddress });
  
+async function gracefulShutdown(signal) {
+  const shutdownLogger = createServiceLogger("shutdown");
+  shutdownLogger.info({ signal }, "Received termination signal, starting graceful shutdown");
+
+  server.close(() => {
+    shutdownLogger.info("HTTP server closed");
+  });
+
+  for (const client of realtimeClients) {
+    try {
+      client.close(1001, "Server shutting down");
+    } catch { /* ignore */ }
+  }
+
+  try {
+    const { drainPool } = require("./db/pool");
+    await drainPool();
+  } catch (err) {
+    shutdownLogger.error({ err: err.message }, "Error during pool drain");
+  }
+
+  shutdownLogger.info("All resources drained, process exiting cleanly");
+  process.exit(0);
+}
+
+if (process.env.NODE_ENV !== "test") {
+  process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+  process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+}
+
 app.startEscrowTimeoutChecker = () => {};
- 
+app.gracefulShutdown = gracefulShutdown;
+
 module.exports = app;
  
