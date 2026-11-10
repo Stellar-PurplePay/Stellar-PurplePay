@@ -32,6 +32,7 @@ const WORDS_50 = Array.from({ length: 50 }, (_, i) => `word${i}`).join(" ");
 
 describe("ApplicationForm — co-write proposal (#1552)", () => {
   beforeEach(() => {
+    jest.useRealTimers();
     jest.clearAllMocks();
     mockApi.fetchProposalTemplates.mockResolvedValue([]);
     // jsdom has no WebCrypto subtle — the form hashes the bid commitment.

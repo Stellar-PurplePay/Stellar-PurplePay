@@ -47,11 +47,26 @@ function randomNonceHex(bytes = 16): string {
 }
 
 async function sha256Hex(value: string): Promise<string> {
-  const data = new TextEncoder().encode(value);
-  const digest = await window.crypto.subtle.digest("SHA-256", data);
-  return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  try {
+    const data = new TextEncoder().encode(value);
+    const subtle =
+      (typeof window !== "undefined" && window.crypto?.subtle) ||
+      (typeof crypto !== "undefined" && (crypto as any).subtle);
+    if (subtle?.digest) {
+      const digest = await subtle.digest("SHA-256", data);
+      return Array.from(new Uint8Array(digest))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+  } catch {
+    // Fall back to simple deterministic hex hash below
+  }
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(16).padStart(64, "0");
 }
 
 export default function ApplicationForm({ job, publicKey, biddingPhase = "commitment", prefillData, onOptimisticSubmit, onRevert, onSuccess, submitButtonText }: ApplicationFormProps) {

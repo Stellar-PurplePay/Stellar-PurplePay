@@ -135,47 +135,53 @@ describe("ApplicationForm proposal scoring (#1548)", () => {
     expect(api.scoreProposal).not.toHaveBeenCalled();
   });
 
-  it("shows the submitted state while the application request is pending", async () => {
-    (api.submitApplication as jest.Mock).mockReturnValue(new Promise(() => {}));
-
-    render(
-      <ApplicationForm job={JOB} publicKey={USER} onSuccess={jest.fn()} />,
-    );
-    fireEvent.change(screen.getByLabelText("Cover Letter"), {
-      target: { value: LONG_PROPOSAL },
+  describe("submission state transitions", () => {
+    beforeEach(() => {
+      jest.useRealTimers();
     });
-    fireEvent.click(screen.getByRole("button", { name: "Submit Proposal" }));
 
-    expect(await screen.findByRole("button", { name: "Application submitted!" })).toBeDisabled();
-  });
+    it("shows the submitted state while the application request is pending", async () => {
+      (api.submitApplication as jest.Mock).mockReturnValue(new Promise(() => {}));
 
-  it("reverts the submitted state and shows an error when submission fails", async () => {
-    (api.submitApplication as jest.Mock).mockRejectedValue(new Error("request failed"));
+      render(
+        <ApplicationForm job={JOB} publicKey={USER} onSuccess={jest.fn()} />,
+      );
+      fireEvent.change(screen.getByLabelText("Cover Letter"), {
+        target: { value: LONG_PROPOSAL },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Submit Proposal" }));
 
-    render(
-      <ApplicationForm job={JOB} publicKey={USER} onSuccess={jest.fn()} />,
-    );
-    fireEvent.change(screen.getByLabelText("Cover Letter"), {
-      target: { value: LONG_PROPOSAL },
+      expect(await screen.findByRole("button", { name: "Application submitted!" })).toBeDisabled();
     });
-    fireEvent.click(screen.getByRole("button", { name: "Submit Proposal" }));
 
-    expect(await screen.findByRole("button", { name: "Submit Proposal" })).toBeEnabled();
-    expect(mockToastError).toHaveBeenCalledWith("Failed to submit application. Please try again.");
-  });
+    it("reverts the submitted state and shows an error when submission fails", async () => {
+      (api.submitApplication as jest.Mock).mockRejectedValue(new Error("request failed"));
 
-  it("keeps the submitted state after a successful application request", async () => {
-    (api.submitApplication as jest.Mock).mockResolvedValue({ id: "application-1" });
+      render(
+        <ApplicationForm job={JOB} publicKey={USER} onSuccess={jest.fn()} />,
+      );
+      fireEvent.change(screen.getByLabelText("Cover Letter"), {
+        target: { value: LONG_PROPOSAL },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Submit Proposal" }));
 
-    render(
-      <ApplicationForm job={JOB} publicKey={USER} onSuccess={jest.fn()} />,
-    );
-    fireEvent.change(screen.getByLabelText("Cover Letter"), {
-      target: { value: LONG_PROPOSAL },
+      expect(await screen.findByRole("button", { name: "Submit Proposal" })).toBeEnabled();
+      expect(mockToastError).toHaveBeenCalledWith("Failed to submit application. Please try again.");
     });
-    fireEvent.click(screen.getByRole("button", { name: "Submit Proposal" }));
 
-    expect(await screen.findByRole("button", { name: "Application submitted!" })).toBeDisabled();
-    expect(api.submitApplication).toHaveBeenCalledTimes(1);
+    it("keeps the submitted state after a successful application request", async () => {
+      (api.submitApplication as jest.Mock).mockResolvedValue({ id: "application-1" });
+
+      render(
+        <ApplicationForm job={JOB} publicKey={USER} onSuccess={jest.fn()} />,
+      );
+      fireEvent.change(screen.getByLabelText("Cover Letter"), {
+        target: { value: LONG_PROPOSAL },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Submit Proposal" }));
+
+      expect(await screen.findByRole("button", { name: "Application submitted!" })).toBeDisabled();
+      expect(api.submitApplication).toHaveBeenCalledTimes(1);
+    });
   });
 });
