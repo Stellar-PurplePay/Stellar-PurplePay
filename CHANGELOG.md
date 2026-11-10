@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-11-10
+
+### Added
+- **SEP-0001 Machine-Readable Discovery**:
+  - Implemented `frontend/public/.well-known/stellar.toml` with platform metadata, testnet RPC/Horizon endpoints, admin/treasury signing key, XLM and USDC currency declarations, and Soroban escrow contract addresses.
+  - Configured permissive CORS headers (`Access-Control-Allow-Origin: *`) in `next.config.mjs` for seamless ecosystem wallet and bot discovery.
+- **Node 18 & 20 Build Resilience**:
+  - Polyfilled Web Crypto API (`node:crypto`'s `webcrypto`) in `frontend/next.config.mjs` for Node.js 18 build environments.
+  - Added `--experimental-global-webcrypto` flag to `NODE_OPTIONS` in GitHub Actions frontend workflow.
+  - Configured `crypto: false` in webpack browser fallback config.
+- **Docker Compose One-Command Setup**:
+  - Added default dev database environment credentials (`DATABASE_URL`, `JWT_SECRET`, `CSRF_SECRET`, `DATABASE_ENCRYPTION_KEY`) in `docker-compose.yml` for instant zero-configuration local evaluation.
+- **Preflight Transaction Simulator & Resource Footprint Inspection**:
+  - Added Soroban preflight simulation utilities with byte footprint parsing and gas estimation prior to wallet prompt.
+- **Stellar Drips Wave Evaluation Readiness**:
+  - Comprehensive README with architecture diagrams, contract specs, SEP standards deep-dive, and live testnet explorer links.
+
+### Changed
+- **Matrix Strategy Hardening**:
+  - Added `fail-fast: false` across Node 18 and Node 20 matrix jobs in `.github/workflows/ci.yml`.
+- **Accessibility & WCAG 2.1 Compliance**:
+  - Linked all modal inputs to explicit `<label htmlFor="...">` identifiers across onboarding and escrow dialogs.
+  - Added `onKeyDown` handlers and keyboard navigation for milestone timeline steppers.
+  - Resolved non-native interactive element warnings in `ReputationBadge` and `JobCard`.
+
+### Fixed
+- **Next.js Production Build Failure**:
+  - Resolved `crypto is not defined` error during Workbox service worker compilation in Node 18 runners.
+- **Jest Timer Leak in Scoring Tests**:
+  - Isolated fake timers in `ApplicationForm.scoring.test.tsx` and ensured real timers restoration in subsequent test suites.
+- **Backend Horizon Mock Resiliency**:
+  - Hardened `stellarTrustlineService.js` and `contributors.test.js` against varied Horizon constructor mocks.
+- **Live Database Test Guards**:
+  - Wrapped live PostgreSQL integration tests in `referralCredit.test.js` with active connection checks.
+
 ## [1.1.0] - 2026-11-05
 
 ### Security Hardening & Audit Remediation (PP-01 through PP-18)

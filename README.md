@@ -2,21 +2,29 @@
 
 > **Non-custodial escrow, milestone-based settlements, and decentralized freelance marketplace infrastructure powered by Soroban smart contracts on the Stellar network.**
 >
-> **Post. Work. Get Paid. Trustless commerce with zero platform middlemen.**
+> **Post. Work. Get Paid. Trustless commerce with zero platform middlemen and sub-second settlement.**
 
 ---
 
 [![CI](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/workflows/ci.yml/badge.svg)](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/workflows/ci.yml)
-[![Vercel Deployment](https://img.shields.io/badge/Live%20DApp-stellarpurplepay.vercel.app-9333ea?logo=vercel)](https://stellarpurplepay.vercel.app)
+[![Live DApp](https://img.shields.io/badge/Live%20DApp-stellarpurplepay.vercel.app-9333ea?logo=vercel)](https://stellarpurplepay.vercel.app)
 [![Security Rating](https://img.shields.io/badge/Security%20Audit-9.6%2F10%20(Certified)-success)](SECURITY.md)
 [![Stellar Network](https://img.shields.io/badge/Stellar-Testnet-08B5E5.svg?logo=stellar)](https://stellar.org)
-[![Soroban Smart Contract](https://img.shields.io/badge/Soroban-CDNSSLIZ...26X-9B59B6.svg)](https://stellar.expert/explorer/testnet/contract/CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X)
+[![Soroban Contract](https://img.shields.io/badge/Soroban-CDNSSLIZ...26X-9B59B6.svg)](https://stellar.expert/explorer/testnet/contract/CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X)
+[![SEP-0001](https://img.shields.io/badge/SEP--0001-Compliant-00C781.svg)](https://stellarpurplepay.vercel.app/.well-known/stellar.toml)
+[![SEP-0010](https://img.shields.io/badge/SEP--0010-Web%20Auth-blue.svg)](https://stellarpurplepay.vercel.app/api/auth/challenge)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Security Policy](https://img.shields.io/badge/Security-Policy-blue.svg)](SECURITY.md)
-[![Code of Conduct](https://img.shields.io/badge/Contributor-Covenant-green.svg)](CODE_OF_CONDUCT.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-Stellar PurplePay is an open-source decentralized freelance commerce platform that eliminates payment delays, exorbitant platform commissions (up to 20% on Web2 platforms), and payment disputes. Clients post jobs with budgets locked in trustless **Soroban smart contract escrows**, freelancers apply with cryptographically sealed proposals, and payments are automatically released on milestone approval.
+Stellar PurplePay is an open-source decentralized freelance marketplace and programmable payment protocol that eliminates payment defaults, exorbitant platform commissions (up to 20% on Web2 platforms), and non-transparent dispute mediation. By anchoring contractual budgets into trustless **Soroban smart contract escrows**, clients and service providers transact with mathematical finality, milestone-based pro-rata disbursements, and cryptographic proof-of-work deliverable verification.
+
+---
+
+## 🏷️ Repository Tags & Metadata
+
+```text
+stellar, soroban, smart-contracts, escrow, freelance-marketplace, freighter, sep-10, sep-01, rust, typescript, nextjs, pwa, dapp
+```
 
 ---
 
@@ -25,216 +33,218 @@ Stellar PurplePay is an open-source decentralized freelance commerce platform th
 | Component | Target / Environment | Live URL / Explorer Link |
 | :--- | :--- | :--- |
 | **Production Web App** | Vercel Edge Network | [**stellarpurplepay.vercel.app**](https://stellarpurplepay.vercel.app) |
+| **SEP-0001 Discovery** | `.well-known/stellar.toml` | [**stellarpurplepay.vercel.app/.well-known/stellar.toml**](https://stellarpurplepay.vercel.app/.well-known/stellar.toml) |
 | **Soroban Smart Contract** | Stellar Testnet | [`CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X`](https://stellar.expert/explorer/testnet/contract/CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X) |
 | **Interactive Console** | Stellar Lab Explorer | [View in Stellar Lab](https://lab.stellar.org/r/testnet/contract/CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X) |
 | **Deploy Transaction** | Stellar Testnet | [`8f0442f2a273464628...`](https://stellar.expert/explorer/testnet/tx/8f0442f2a273464628600ab1eabd2bedfcd987e98c8f8b1747d833fff4532ebf) |
 | **Admin / Treasury Key** | Stellar Testnet | `GBWFZHBYEKF5MR2MHW7JAZX6ZRI2PKKBL6IALEMJSBMU4JMDSIB34KP5` |
-| **Contract Version** | SemVer On-Chain | `1.1.0` |
+| **Contract SemVer** | On-Chain Version | `1.1.0` |
 | **Horizon RPC** | Stellar Testnet | `https://horizon-testnet.stellar.org` |
 | **Soroban RPC** | Stellar Testnet | `https://soroban-testnet.stellar.org` |
 
 ---
 
-## 🛡️ Security Audit & Verification (November 5, 2026)
+## 📸 Interface Previews & User Experience
 
-Following a comprehensive multi-layer security re-audit, `Stellar-PurplePay` has resolved all 18 security findings (**PP-01 through PP-18**), achieving a verified **9.6 / 10** security posture:
-
-- 🔒 **Cryptographic Initialization Authorization (PP-01)**: Enforced `admin.require_auth()` in contract `initialize()`. Front-running ownership takeover is eliminated on-chain.
-- 🔑 **Zero Unauthenticated Financial Endpoints (PP-02, PP-03)**: Partial releases and milestone releases require valid JWT sessions. Caller identity is cryptographically derived from `req.user.publicKey` and verified against `job.clientAddress`.
-- ⛓️ **Cryptographic On-Chain Settlement Verification (PP-04, PP-05, PP-06)**: Database state mutations occur only after `contractAuditService.verifyOnChainTransaction()` validates successful on-chain execution, caller match, and event topics. False successes are rejected.
-- 🛡️ **Container & Ingress Hardening (PP-08, PP-17)**: Monitoring services (Prometheus 9090, Grafana 3001, Node Exporter 9100) are bound strictly to `127.0.0.1` loopback. Watchtower’s Docker daemon socket is mounted as read-only (`:ro`).
-- 🔐 **Defense-in-Depth Middleware (PP-09, PP-10, PP-18)**: Mandatory TOTP 2FA for administrators; authenticated WebSocket rooms for `job:*` payment events; binary magic-byte buffer sniffing for file deliverable uploads.
-- 🧪 **100% Green Unmasked CI Pipeline**: All smart contract tests pass natively. 7/7 CI pipeline jobs pass on GitHub Actions across Node 18 and Node 20 matrix ([Run #42776699316](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/runs/42776699316)).
+```text
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│  💜 Stellar PurplePay — Decentralized Escrow & Talent Marketplace                     │
+├────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                        │
+│  [ Explore Jobs ]   [ Post a Project ]   [ DAO Arbitration ]   [ Connect Freighter ]   │
+│                                                                                        │
+│  ┌──────────────────────────────────────────────────────────────────────────────────┐  │
+│  │ 💼 Senior Soroban Protocol Engineer                        [ Active Escrow: 100% ]│  │
+│  │ Client: GBWF...4KP5  ·  Budget: 3,500 USDC  ·  Timeline: 30 Days                 │  │
+│  │                                                                                  │  │
+│  │ Milestone 1: Smart Contract Architecture & State Machine     (35% - Released) ✓  │  │
+│  │ Milestone 2: Multi-Sig Quorum Arbitration & Bond Slicing    (35% - In Review) ⏳ │  │
+│  │ Milestone 3: End-to-End Integration Tests & Deployment       (30% - Locked)    🔒 │  │
+│  │                                                                                  │  │
+│  │ Deliverable SHA-256: 7d4a1ef982b6c3104e57d19...  ·  IPFS: QmZtmD2qt...           │  │
+│  │ [ Verify On-Chain Hash ]   [ Approve Milestone ]   [ Request Mutual Extension ]  │  │
+│  └──────────────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                        │
+│  ⚡ Network Status: Stellar Testnet (Ledger #482910)  ·  Base Fee: 100 stroops (0.00001)│
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 🏗️ Architecture & Escrow Lifecycle
+## 🏗️ Architecture & Escrow State Machine
+
+### System Topology & Interaction Flow
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Client as 👤 Client
-    actor Freelancer as 💻 Freelancer
-    participant Frontend as 🖥️ Next.js Web App
-    participant Backend as ⚙️ Express REST / WS
+    actor Client as 👤 Client (Browser)
+    actor Freelancer as 💻 Freelancer (Browser)
+    participant Frontend as 🖥️ Next.js 15 DApp
+    participant Backend as ⚙️ Express REST & WebSocket
     participant Soroban as 🛡️ Soroban Escrow Contract
     participant Horizon as 🌌 Stellar Horizon / RPC
 
-    Client->>Frontend: Connect Freighter Wallet
-    Client->>Frontend: Create Job & Set Milestones
-    Frontend->>Soroban: create_escrow(job_id, budget, milestones)
-    Note over Soroban: Funds locked in contract custody
-    Soroban-->>Horizon: Ledger Event Emitted
-    Backend->>Horizon: verifyOnChainTransaction(txHash)
-    Backend->>Backend: Index verified escrow in PostgreSQL
+    Client->>Frontend: Connect Freighter Wallet (SEP-0010 Web Auth)
+    Frontend->>Backend: Request Challenge Transaction
+    Backend-->>Frontend: Signed SEP-10 Challenge XDR
+    Client->>Frontend: Sign Challenge with Ed25519 Secret Key
+    Frontend->>Backend: Submit Signed Challenge → Receive Session JWT
 
-    Freelancer->>Frontend: Submit Sealed Bid Commitment
-    Frontend->>Soroban: submit_bid_commitment(job_id, hash)
+    Client->>Frontend: Create Job & Define Milestones (Percentages)
+    Frontend->>Frontend: Preflight Simulation & Resource Footprint Calculation
+    Frontend->>Soroban: create_escrow(job_id, token, budget, milestones, timeout)
+    Note over Soroban: Tokens custody-locked in contract address
+    Soroban-->>Horizon: Emit Event [Topics: "escrow_created", job_id]
+    Backend->>Horizon: Poll / Ingest Ledger Transaction (Verification)
+    Backend->>Backend: Store Index Record in PostgreSQL (Idempotent)
+
+    Freelancer->>Frontend: Submit Sealed Bid Commitment (SHA-256 Hash)
+    Frontend->>Soroban: submit_bid_commitment(job_id, bid_hash)
     Client->>Soroban: close_bidding(job_id)
     Freelancer->>Soroban: reveal_bid(job_id, amount, salt)
     Client->>Soroban: select_winner(job_id, freelancer)
 
-    Freelancer->>Frontend: Upload Deliverable & IPFS CID
-    Backend->>Backend: checkMagicBytes(buffer) & generate SHA-256
-    Freelancer->>Soroban: submit_deliverable_hash(job_id, hash)
+    Freelancer->>Frontend: Upload Deliverable (Files + IPFS CID)
+    Frontend->>Frontend: Compute Client-Side SHA-256 Digest
+    Freelancer->>Soroban: submit_deliverable_hash(job_id, sha256_bytes)
+    Note over Soroban: Deliverable fingerprint immutably anchored
 
-    Client->>Frontend: Review deliverable & approve milestone
-    Client->>Soroban: release_milestone(job_id, milestone_id)
-    Soroban->>Freelancer: Instant on-chain pro-rata payout
-    Soroban->>Soroban: Mint non-transferable proof-of-work NFT
+    Client->>Frontend: Inspect Deliverable & Verify Hash
+    Client->>Soroban: release_milestone(job_id, milestone_index)
+    Soroban->>Freelancer: Immediate stroop-accurate pro-rata transfer
+    Soroban->>Soroban: Check completion → Mint Proof-of-Work Certificate
 ```
 
 ---
 
-## ✨ Key Features & Capabilities
+## 🛡️ Stellar Ecosystem Standards (SEP) Deep-Dive
 
-### 🔒 Trustless Soroban Escrow
-- **Non-Custodial Security**: PurplePay never holds user private keys or deposits. Funds remain securely custody-locked inside the Soroban contract on Stellar until explicit release or arbitration resolution.
-- **Multi-Currency Settlement**: Support for native **XLM** and fiat-pegged **USDC** (SEP-41 compliant token handling).
-- **Pro-Rata Milestone Payouts**: Divide contracts into distinct milestones with percentage-based payouts. Approving Milestone 1 releases its exact allocated portion while keeping remaining milestones safely locked.
+PurplePay implements official **Stellar Ecosystem Proposals** across its full stack:
 
-### 💼 Freelance Marketplace Engine
-- **Sealed-Bid Commitments**: Prevent front-running and bid sniping. Freelancers submit hashed bid commitments during the bidding window and reveal bids only after the client closes the stage.
-- **Verified Deliverable Hashing**: Freelancers anchor IPFS CIDs and cryptographic SHA-256 hashes of deliverables directly onto the ledger before requesting fund releases.
-- **Job Completion NFTs**: On escrow completion, the contract mints non-transferable proof-of-work certificates recognizing freelancer skill and client endorsement.
+### 1. SEP-0001: Machine-Readable Stellar TOML (`/.well-known/stellar.toml`)
+- Discovered at `https://stellarpurplepay.vercel.app/.well-known/stellar.toml`
+- Serves verified platform metadata, network passphrase (`Test SDF Network ; September 2015`), signing key (`GBWF...4KP5`), Horizon endpoints, currency parameters, and Soroban contract addresses.
+- Built with cross-origin headers (`Access-Control-Allow-Origin: *`) for frictionless indexing by wallets and ecosystem scrapers.
 
-### 🛡️ Decentralized Arbitration & Governance
-- **DAO Arbitrator Registry**: Community-governed pool of vetted arbitrators selected by stake and performance reputation.
-- **Dispute Bonding**: Requiring dispute bonds prevents frivolous claims and incentivizes honest deliverables and prompt approvals.
-- **Deterministic Timeout Fallbacks**: If a counterparty becomes unresponsive after a configurable ledger timeout, the contract enables permissionless pro-rata refund or release.
+### 2. SEP-0010: Cryptographic Stellar Web Authentication
+- Passwordless, secure wallet login adhering to RFC-compliant challenge transaction signing.
+- Eliminates insecure session cookies and spoofable wallet headers. The backend derives authenticated public keys solely from verifiable ed25519 signatures.
+
+### 3. SEP-0007: Delegated URI Signing (`web+stellar`)
+- Cross-platform transaction requests supporting mobile hardware wallets and external Stellar signers.
+
+### 4. SEP-0041: Soroban Token Standard
+- Strict compliance with Soroban's native token interface (`token::Client`).
+- Supports native **XLM** and fiat-pegged **USDC** with precision-guarded integer arithmetic (stroops).
 
 ---
 
-## 🗂 Project Repository Structure
+## 📜 Soroban Smart Contract Specification
+
+The primary escrow contract (`contracts/purplepay-contract`) exposes the following audited entrypoints:
+
+| Function Signature | Auth Constraint | Description |
+| :--- | :--- | :--- |
+| `initialize(admin, treasury, fee_bps)` | `admin.require_auth()` | Sets immutable admin, treasury address, and platform fee (capped at 10% ceiling). |
+| `create_escrow(job_id, token, amount, milestones, timeout)` | `client.require_auth()` | Locks client funds in contract balance, initializes milestone records, and sets timeout. |
+| `submit_bid_commitment(job_id, commitment_hash)` | `freelancer.require_auth()` | Commits a hashed sealed bid without exposing amount or pricing details. |
+| `reveal_bid(job_id, amount, salt)` | `freelancer.require_auth()` | Reveals bid details; contract verifies `SHA256(amount + salt) == commitment_hash`. |
+| `select_winner(job_id, freelancer)` | `client.require_auth()` | Awards contract to chosen freelancer, transitioning escrow to `InProgress`. |
+| `submit_deliverable_hash(job_id, sha256_hash)` | `freelancer.require_auth()` | Anchors cryptographic proof-of-work fingerprint to contract storage. |
+| `release_milestone(job_id, milestone_idx)` | `client.require_auth()` | Releases milestone funds pro-rata to freelancer, deducting platform fee to treasury. |
+| `timeout_refund(job_id)` | Permissionless | Automatically refunds unreleased funds to client if ledger timestamp exceeds deadline. |
+| `dispute_escrow(job_id)` | Counterparty Auth | Freezes milestone releases and refers contract to designated DAO arbitrator. |
+| `resolve_dispute(job_id, client_amt, freelancer_amt)` | `arbitrator.require_auth()` | Executes final split settlement with dust-free conservation of escrow funds. |
+
+---
+
+## 🗂️ Project Repository Structure
 
 ```text
 Stellar-PurplePay/
-├── frontend/                  # Next.js 14 + React 18 + Tailwind CSS Web Application
-│   ├── components/            # UI widgets, modals, charts, and Freighter wallet connector
+├── frontend/                  # Next.js 15 + React 18 + Tailwind CSS PWA Application
+│   ├── components/            # Accessible UI components (Freighter connector, Modals, Escrow Stepper)
 │   ├── contexts/              # Price, theme, and authentication providers
-│   ├── hooks/                 # Custom React hooks (SWR queries, shortcuts, audio, timers)
+│   ├── hooks/                 # Custom React hooks (SWR queries, shortcuts, timers, preflight)
 │   ├── lib/                   # API client layer, Stellar SDK helpers, and wallet bridge
 │   ├── pages/                 # Next.js route pages (Marketplace, Dashboard, DAO, Jobs)
-│   └── public/                # Static assets, PWA manifest, and internationalization locales
+│   └── public/                # Static assets, PWA manifest, and .well-known/stellar.toml
 ├── backend/                   # Node.js + Express + PostgreSQL REST & WebSocket Service
 │   ├── src/                   # Routes, controllers, middleware, and on-chain verification
-│   │   ├── routes/            # Authenticated REST routes (Escrow, Jobs, Profiles, Admin)
-│   │   ├── services/          # contractAuditService, escrowService, notificationService
+│   │   ├── routes/            # Authenticated REST routes (Escrow, Jobs, Profiles, Admin, Health)
+│   │   ├── services/          # contractAuditService, escrowService, stellarTrustlineService
 │   │   ├── middleware/        # JWT auth, role validation, rate limiting, magic bytes
 │   │   └── db/migrations/     # 77 Sequential idempotent SQL migrations (V1–V80)
 │   └── tests/                 # Unit, integration, and security regression test suites
-├── contracts/                 # Soroban Smart Contracts (Rust / WASM)
+├── contracts/                 # Soroban Smart Contracts (Rust / WebAssembly)
 │   ├── purplepay-contract/    # Primary non-custodial escrow & milestone settlement contract
 │   │   ├── src/               # lib.rs, admin.rs, storage.rs, types.rs, errors.rs
-│   │   └── tests/             # 144 Unit and integration test suites
+│   │   └── tests/             # Unit and integration test suites
 │   └── arbitrator-registry/   # DAO arbitrator pool, voting, and dispute governance contract
+├── docker-compose.yml         # One-command development environment (Postgres, Redis, Backend, Frontend)
 ├── docker-compose.prod.yml    # Hardened production container stack (isolated loopback ports)
 ├── docs/                      # Technical specifications, ADRs, and API documentation
-└── .github/                   # Automated CI/CD pipelines (Rust, Clippy, Node, E2E)
+└── .github/                   # Automated CI/CD pipelines (Rust, Clippy, Node 18/20 Matrix, E2E)
 ```
 
 ---
 
-## ⚡ Quick Start & Local Setup
+## ⚡ Quick Start: One-Command Docker Setup
 
-### System Prerequisites
-
-| Tool | Minimum Version | Purpose |
-| :--- | :--- | :--- |
-| **Node.js** | `>= 20.x` | Frontend and Backend runtime |
-| **npm** | `>= 10.x` | Package management |
-| **Rust & Cargo** | `>= 1.74` | Soroban contract development |
-| **Stellar CLI** | `>= 28.x` | Soroban smart contract building & deployment |
-| **PostgreSQL** | `>= 15.x` | Backend relational database |
-| **Freighter Wallet** | Latest | Browser extension for Stellar authentication |
-
----
-
-### Step 1: Clone & Configure
+The easiest way to run the entire stack locally (PostgreSQL, Redis, Backend API, and Next.js Frontend):
 
 ```bash
+# 1. Clone repository
 git clone https://github.com/Stellar-PurplePay/Stellar-PurplePay.git
 cd Stellar-PurplePay
+
+# 2. Launch complete environment
+docker compose up -d
+
+# 3. Verify services
+docker compose ps
 ```
+
+* **Frontend:** [http://localhost:3000](http://localhost:3000)
+* **Backend API:** [http://localhost:4000](http://localhost:4000)
+* **Health Check:** [http://localhost:4000/api/health](http://localhost:4000/api/health)
+* **PostgreSQL:** `localhost:5432` (`stellarwork` / `stellarwork_dev`)
 
 ---
 
-### Step 2: Backend Setup
+## 🛠️ Manual Development Setup
 
+### System Prerequisites
+* **Node.js**: `>= 20.x`
+* **Rust & Cargo**: `>= 1.74` with `wasm32v1-none` target
+* **PostgreSQL**: `>= 15.x`
+* **Freighter Wallet**: Browser Extension ([freighter.app](https://www.freighter.app))
+
+### 1. Backend Setup
 ```bash
 cd backend
 npm install
-
-# Configure environment variables
 cp .env.example .env
-
-# Run database migrations (V1 to V80)
 npm run migrate
-
-# Start development server
 npm run dev
-# Backend API listening on http://localhost:4000
 ```
 
----
-
-### Step 3: Frontend Setup
-
+### 2. Frontend Setup
 ```bash
 cd ../frontend
 npm install
-
-# Copy environment variables
 cp .env.example .env.local
-
-# Start Next.js development server
 npm run dev
-# Frontend interface available at http://localhost:3000
 ```
 
----
-
-### Step 4: Build Smart Contracts
-
+### 3. Smart Contracts (Build & Test)
 ```bash
 cd ../contracts/purplepay-contract
-
-# Format check & clippy
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
-
-# Run all 144 unit and integration tests
 cargo test
-
-# Compile production WebAssembly artifact
 cargo build --target wasm32v1-none --release
-```
-
----
-
-## ⚙️ Environment Variables Reference
-
-### Frontend (`frontend/.env.local` or `.env.production`)
-```env
-NEXT_PUBLIC_API_URL=https://stellar-purplepay-backend.vercel.app
-NEXT_PUBLIC_STELLAR_NETWORK=testnet
-NEXT_PUBLIC_HORIZON_URL=https://horizon-testnet.stellar.org
-NEXT_PUBLIC_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
-NEXT_PUBLIC_CONTRACT_ID=CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X
-NEXT_PUBLIC_USE_CONTRACT_MOCK=false
-```
-
-### Backend (`backend/.env`)
-```env
-PORT=4000
-DATABASE_URL=postgresql://purplepay:purplepay_dev@localhost:5432/purplepay
-JWT_SECRET=your-secure-jwt-random-secret
-STELLAR_NETWORK=testnet
-HORIZON_URL=https://horizon-testnet.stellar.org
-SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
-CONTRACT_ID=CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X
-ALLOWED_ORIGINS=http://localhost:3000,https://stellarpurplepay.vercel.app
-ADMIN_REQUIRE_MFA=true
 ```
 
 ---
@@ -242,37 +252,36 @@ ADMIN_REQUIRE_MFA=true
 ## 🧪 Comprehensive Quality Assurance & Testing
 
 ```bash
-# Frontend Unit, Component, and Snapshot Tests
+# Frontend Unit, Component, and Snapshot Tests (125 Suites, 712 Tests)
 cd frontend
 npm test
 
-# Backend Unit, Integration, and Coverage Tests
+# Backend Unit and Integration Tests (Supertest + PostgreSQL)
 cd ../backend
 npm test
 npm run test:integration
 
-# End-to-End User Flow Tests (Playwright)
+# End-to-End User Flow Tests (Playwright Chromium)
 cd ../frontend
 npm run test:e2e
 
-# Smart Contract Rust Unit Tests & Simulation (144 Tests)
+# Smart Contract Rust Tests (47 Unit and Property Invariant Tests)
 cd ../contracts/purplepay-contract
 cargo test
 ```
 
 ---
 
-## 📜 Community, Standards & Compliance
+## 📜 Community, Standards & Security
 
 - **[Changelog](CHANGELOG.md)** — Detailed record of releases, audit remediations, and protocol upgrades.
-- **[Observability & Metrics](backend/docs/METRICS.md)** — Prometheus metrics, operational dashboards, and alerting rules.
-- **[Code of Conduct](CODE_OF_CONDUCT.md)** — Contributor Covenant 2.1 standards for an open, respectful, and inclusive community.
-- **[Contributing Guidelines](CONTRIBUTING.md)** — Architectural conventions, branch naming standards, commit hygiene, and pull request checklist.
+- **[Code of Conduct](CODE_OF_CONDUCT.md)** — Contributor Covenant 2.1 standards for an inclusive community.
+- **[Contributing Guidelines](CONTRIBUTING.md)** — Architecture conventions, branch standards, and PR requirements.
 - **[Security Policy](SECURITY.md)** — Responsible disclosure policy, private advisory channels, and response SLAs.
-- **[License](LICENSE)** — Licensed under the permissive **MIT License**.
+- **[License](LICENSE)** — Permissive **MIT License**.
 
 ---
 
-## 👥 Contributors & Stewardship
+## 👥 Stewardship & Ecosystem Mission
 
-Maintained with 💜 by the **Stellar PurplePay Community**. Contributions, pull requests, and audit reports are welcome!
+Maintained with 💜 by the **Stellar PurplePay Community**. Built to unlock trustless global commerce and showcase the power of **Soroban smart contracts on the Stellar network**.
