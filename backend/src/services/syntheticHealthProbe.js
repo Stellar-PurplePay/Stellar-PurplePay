@@ -6,12 +6,14 @@ const DEFAULT_TIMEOUT_MS = 2500;
  * Executes a promise with an enforced timeout.
  */
 function withTimeout(promise, timeoutMs = DEFAULT_TIMEOUT_MS, operationName = "Operation") {
-  return Promise.race([
-    promise,
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error(`${operationName} timed out after ${timeoutMs}ms`)), timeoutMs)
-    ),
-  ]);
+  let timer;
+  const timeoutPromise = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${operationName} timed out after ${timeoutMs}ms`)), timeoutMs);
+    if (timer.unref) timer.unref();
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timer) clearTimeout(timer);
+  });
 }
 
 /**
