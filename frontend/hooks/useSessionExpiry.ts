@@ -70,7 +70,7 @@ export function useSessionExpiry({
       const now = Math.floor(Date.now() / 1000);
       const remaining = Math.max(0, norm - now);
       setRemainingSeconds(remaining);
-      warnedRef.current = remaining <= warningThresholdSeconds && remaining > 0;
+      warnedRef.current = false;
       expiredRef.current = remaining === 0;
     }
   }, [initialExpiresAt, warningThresholdSeconds]);
