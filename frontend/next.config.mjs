@@ -1,4 +1,15 @@
+import { webcrypto } from "node:crypto";
 import withPWAInit from "@ducanh2912/next-pwa";
+
+// Polyfill global Web Crypto API for Node 18 build environments (required by Workbox / next-pwa)
+if (typeof globalThis.crypto === "undefined" && webcrypto) {
+  // @ts-ignore
+  globalThis.crypto = webcrypto;
+}
+if (typeof global.crypto === "undefined" && webcrypto) {
+  // @ts-ignore
+  global.crypto = webcrypto;
+}
 
 const withPWA = withPWAInit({
   dest: "public",
@@ -67,12 +78,12 @@ const nextConfig = {
     ],
   },
   webpack: (config, { isServer }) => {
-    config.resolve.fallback = { ...config.resolve.fallback, fs: false, net: false, tls: false };
+    config.resolve.fallback = { ...config.resolve.fallback, fs: false, net: false, tls: false, crypto: false };
 
     // `module` is a Node builtin used only by lib/sanitize.ts on the server;
     // stub it out for the client so the browser bundle can resolve the import.
     if (!isServer) {
-      config.resolve.fallback = { ...config.resolve.fallback, module: false };
+      config.resolve.fallback = { ...config.resolve.fallback, module: false, crypto: false };
     }
 
     if (process.env.ANALYZE === 'true') {

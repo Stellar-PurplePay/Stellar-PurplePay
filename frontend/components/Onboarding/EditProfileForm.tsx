@@ -64,6 +64,7 @@ export function EditProfileForm({ onSubmit }: { onSubmit?: (file: File) => void 
 
         {preview && !error && (
           <div className="mt-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={preview} alt="Avatar preview" className="w-20 h-20 rounded-full object-cover border" />
           </div>
         )}

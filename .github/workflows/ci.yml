@@ -76,6 +76,7 @@ jobs:
     name: Frontend Application (Node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         node-version: [18, 20]
     defaults:
@@ -88,7 +89,7 @@ jobs:
       NEXT_PUBLIC_STELLAR_NETWORK: testnet
       NEXT_PUBLIC_HORIZON_URL: https://horizon-testnet.stellar.org
       NEXT_PUBLIC_CONTRACT_ID: CMOCKCONTRACTID
-      NODE_OPTIONS: "--max-old-space-size=4096"
+      NODE_OPTIONS: "--max-old-space-size=4096 --experimental-global-webcrypto"
 
     steps:
       - uses: actions/checkout@v7

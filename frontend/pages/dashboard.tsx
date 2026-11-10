@@ -257,6 +257,7 @@ export default function Dashboard({ publicKey, onConnect }: DashboardProps) {
     } finally {
       setBulkLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedJobIds, bulkResult]);
 
   const handleBulkExtend = useCallback(async () => {
@@ -273,6 +274,7 @@ export default function Dashboard({ publicKey, onConnect }: DashboardProps) {
     } finally {
       setBulkLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedJobIds, bulkResult]);
 
   const handleBulkBoost = useCallback(async () => {

@@ -80,17 +80,27 @@ const IS_DEV = process.env.NODE_ENV !== "production";
 /** Generate a UUID v4 using crypto.randomUUID when available, with RFC4122 fallback. */
 function generateRequestId(): string {
   try {
-    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-      return crypto.randomUUID();
+    const gCrypto =
+      (typeof window !== "undefined" ? window.crypto : undefined) ||
+      (typeof globalThis !== "undefined" ? (globalThis as any).crypto : undefined);
+    if (gCrypto && typeof gCrypto.randomUUID === "function") {
+      return gCrypto.randomUUID();
     }
   } catch {
     // fall through to manual generator
   }
   // Fallback for environments without crypto.randomUUID (older browsers / SSR):
   const bytes = new Uint8Array(16);
-  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
-    crypto.getRandomValues(bytes);
-  } else {
+  try {
+    const gCrypto =
+      (typeof window !== "undefined" ? window.crypto : undefined) ||
+      (typeof globalThis !== "undefined" ? (globalThis as any).crypto : undefined);
+    if (gCrypto && typeof gCrypto.getRandomValues === "function") {
+      gCrypto.getRandomValues(bytes);
+    } else {
+      for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+    }
+  } catch {
     for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
   }
   // Per RFC 4122 §4.4

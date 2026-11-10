@@ -36,11 +36,16 @@ interface ApplicationFormProps {
 
 function randomNonceHex(bytes = 16): string {
   const arr = new Uint8Array(bytes);
-  if (typeof window !== "undefined" && window.crypto?.getRandomValues) {
-    window.crypto.getRandomValues(arr);
-  } else if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-    crypto.getRandomValues(arr);
-  } else {
+  try {
+    const gCrypto =
+      (typeof window !== "undefined" ? window.crypto : undefined) ||
+      (typeof globalThis !== "undefined" ? (globalThis as any).crypto : undefined);
+    if (gCrypto?.getRandomValues) {
+      gCrypto.getRandomValues(arr);
+    } else {
+      for (let i = 0; i < arr.length; i += 1) arr[i] = Math.floor(Math.random() * 256);
+    }
+  } catch {
     for (let i = 0; i < arr.length; i += 1) arr[i] = Math.floor(Math.random() * 256);
   }
   return Array.from(arr).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -50,8 +55,8 @@ async function sha256Hex(value: string): Promise<string> {
   try {
     const data = new TextEncoder().encode(value);
     const subtle =
-      (typeof window !== "undefined" && window.crypto?.subtle) ||
-      (typeof crypto !== "undefined" && (crypto as any).subtle);
+      (typeof window !== "undefined" ? window.crypto?.subtle : undefined) ||
+      (typeof globalThis !== "undefined" ? (globalThis as any).crypto?.subtle : undefined);
     if (subtle?.digest) {
       const digest = await subtle.digest("SHA-256", data);
       return Array.from(new Uint8Array(digest))
