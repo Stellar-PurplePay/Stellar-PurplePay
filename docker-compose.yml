@@ -43,6 +43,10 @@ services:
       - HORIZON_URL=https://horizon-testnet.stellar.org
       - ALLOWED_ORIGINS=http://localhost:3000
       - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://stellarwork:stellarwork_dev@postgres:5432/stellarwork
+      - JWT_SECRET=dev-jwt-secret-purplepay-32chars!!
+      - CSRF_SECRET=dev-csrf-secret-purplepay-32chars
+      - DATABASE_ENCRYPTION_KEY=dev-encryption-key-32chars-long!
     volumes:
       - ./backend:/app
       - /app/node_modules

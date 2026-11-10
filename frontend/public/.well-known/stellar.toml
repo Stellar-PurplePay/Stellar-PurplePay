@@ -38,3 +38,4 @@ desc = "Fiat-pegged stablecoin accepted for marketplace milestones on Stellar Te
 name = "PurplePay Escrow Contract"
 contract_id = "CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X"
 description = "Production-grade Soroban milestone escrow, deliverable hash anchoring, and sealed-bid contract on Stellar Testnet."
+
