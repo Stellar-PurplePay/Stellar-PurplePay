@@ -1,0 +1,40 @@
+# Stellar PurplePay - SEP-0001 Configuration
+# Non-custodial escrow, milestone settlements, and decentralized freelance marketplace
+# https://stellarpurplepay.vercel.app
+
+VERSION = "2.0.0"
+NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
+HORIZON_URL = "https://horizon-testnet.stellar.org"
+WEB_AUTH_ENDPOINT = "https://stellarpurplepay.vercel.app/api/auth/challenge"
+SIGNING_KEY = "GBWFZHBYEKF5MR2MHW7JAZX6ZRI2PKKBL6IALEMJSBMU4JMDSIB34KP5"
+
+ACCOUNTS = [
+  "GBWFZHBYEKF5MR2MHW7JAZX6ZRI2PKKBL6IALEMJSBMU4JMDSIB34KP5"
+]
+
+[DOCUMENTATION]
+ORG_NAME = "Stellar PurplePay"
+ORG_DBA = "PurplePay"
+ORG_URL = "https://stellarpurplepay.vercel.app"
+ORG_LOGO = "https://stellarpurplepay.vercel.app/icon-512x512.png"
+ORG_DESCRIPTION = "Non-custodial escrow, milestone-based settlements, and decentralized freelance marketplace infrastructure powered by Soroban smart contracts on the Stellar network."
+ORG_OFFICIAL_EMAIL = "security@purplepay.network"
+ORG_SUPPORT_EMAIL = "support@purplepay.network"
+ORG_GITHUB = "https://github.com/Stellar-PurplePay"
+
+[[CURRENCIES]]
+code = "XLM"
+is_asset_type_native = true
+status = "live"
+desc = "Native asset of the Stellar network, accepted for marketplace job escrows, bids, and settlements."
+
+[[CURRENCIES]]
+code = "USDC"
+issuer = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+status = "test"
+desc = "Fiat-pegged stablecoin accepted for marketplace milestones on Stellar Testnet."
+
+[[CONTRACTS]]
+name = "PurplePay Escrow Contract"
+contract_id = "CDNSSLIZOZOQ6UM6PIFWSSCGZEZ4APW3N4GXMOCVXTB5IX3M4K3NP26X"
+description = "Production-grade Soroban milestone escrow, deliverable hash anchoring, and sealed-bid contract on Stellar Testnet."

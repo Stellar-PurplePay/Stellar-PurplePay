@@ -146,6 +146,15 @@ const nextConfig = {
           { key: 'Service-Worker-Allowed', value: '/' },
         ],
       },
+      // SEP-0001: stellar.toml discovery file with permissive CORS
+      {
+        source: '/.well-known/stellar.toml',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Content-Type', value: 'text/plain; charset=utf-8' },
+          { key: 'Cache-Control', value: 'public, max-age=3600' },
+        ],
+      },
       // API routes should not be cached
       {
         source: '/api/:path*',

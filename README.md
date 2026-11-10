@@ -44,7 +44,7 @@ Following a comprehensive multi-layer security re-audit, `Stellar-PurplePay` has
 - ⛓️ **Cryptographic On-Chain Settlement Verification (PP-04, PP-05, PP-06)**: Database state mutations occur only after `contractAuditService.verifyOnChainTransaction()` validates successful on-chain execution, caller match, and event topics. False successes are rejected.
 - 🛡️ **Container & Ingress Hardening (PP-08, PP-17)**: Monitoring services (Prometheus 9090, Grafana 3001, Node Exporter 9100) are bound strictly to `127.0.0.1` loopback. Watchtower’s Docker daemon socket is mounted as read-only (`:ro`).
 - 🔐 **Defense-in-Depth Middleware (PP-09, PP-10, PP-18)**: Mandatory TOTP 2FA for administrators; authenticated WebSocket rooms for `job:*` payment events; binary magic-byte buffer sniffing for file deliverable uploads.
-- 🧪 **100% Green Unmasked CI Pipeline**: All 144 smart contract tests pass natively. 5/5 CI pipeline jobs pass on GitHub Actions ([Run #42027480702](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/runs/42027480702)).
+- 🧪 **100% Green Unmasked CI Pipeline**: All smart contract tests pass natively. 7/7 CI pipeline jobs pass on GitHub Actions across Node 18 and Node 20 matrix ([Run #42776699316](https://github.com/Stellar-PurplePay/Stellar-PurplePay/actions/runs/42776699316)).
 
 ---
 
