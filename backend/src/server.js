@@ -95,6 +95,7 @@ const { createAuditLogRouter } = require("./routes/auditLogRoutes");
 const { router: governanceRoutes } = require("./routes/governanceRoutes");
 const { createSep10AuthRouter } = require("./routes/sep10AuthRoutes");
 const docRoutes = require("./routes/docRoutes");
+const registryRoutes = require("./routes/registryRoutes");
 const { createHealthRouter: createSyntheticHealthRouter } = require("./routes/healthRoutes");
 const { getMetricsAsText: getSorobanMetricsAsText } = require("./metrics/sorobanMetrics");
 const { createStellarRateLimiter } = require("./middleware/stellarRateLimiter");
@@ -245,6 +246,7 @@ app.use("/health",            createSyntheticHealthRouter());
 app.use("/api/health",        healthRoutes);
 app.use("/api/health",        createSyntheticHealthRouter());
 app.use("/api/docs",          docRoutes);
+app.use("/api/registry",      registryRoutes);
 
 app.get("/metrics/soroban", async (req, res) => {
   try {
