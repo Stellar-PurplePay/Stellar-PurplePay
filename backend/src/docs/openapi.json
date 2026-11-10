@@ -1,0 +1,214 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Stellar PurplePay API",
+    "version": "1.0.0",
+    "description": "Production-grade decentralized freelance escrow platform built on Stellar and Soroban smart contracts.",
+    "contact": {
+      "name": "Stellar PurplePay Engineering Team",
+      "url": "https://github.com/Stellar-PurplePay"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4000",
+      "description": "Local Development Server"
+    },
+    {
+      "url": "https://api.testnet.stellar-purplepay.org",
+      "description": "Stellar Testnet Staging Environment"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "System Health Status",
+        "description": "Returns operational status, database connectivity, and uptime.",
+        "responses": {
+          "200": {
+            "description": "System is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/sep10/challenge": {
+      "get": {
+        "summary": "SEP-0010 WebAuth Challenge",
+        "description": "Generates a cryptographically signed challenge transaction envelope for wallet login.",
+        "parameters": [
+          {
+            "name": "account",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "G-address of the user's Stellar wallet"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SEP-0010 Challenge XDR envelope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sep10ChallengeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid Stellar public key"
+          }
+        }
+      }
+    },
+    "/api/auth/sep10/token": {
+      "post": {
+        "summary": "SEP-0010 Token Exchange",
+        "description": "Submits user-signed challenge envelope to receive a verified JWT session.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Sep10TokenRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Session established successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sep10TokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Signature verification failed"
+          }
+        }
+      }
+    },
+    "/api/governance/proposals": {
+      "get": {
+        "summary": "List DAO Proposals",
+        "description": "Fetches active and finalized Soroban contract upgrade proposals.",
+        "responses": {
+          "200": {
+            "description": "Array of proposals",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Proposal"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/faucet/fund": {
+      "post": {
+        "summary": "Testnet Faucet Funding",
+        "description": "Requests testnet XLM funds for development accounts.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "account": { "type": "string" }
+                },
+                "required": ["account"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Funding transaction submitted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "txHash": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "example": "healthy" },
+          "uptime": { "type": "number", "example": 1234.5 },
+          "database": { "type": "string", "example": "connected" },
+          "version": { "type": "string", "example": "1.0.0" }
+        },
+        "required": ["status"]
+      },
+      "Sep10ChallengeResponse": {
+        "type": "object",
+        "properties": {
+          "transaction": { "type": "string", "description": "Base64 XDR challenge transaction" },
+          "networkPassphrase": { "type": "string" }
+        },
+        "required": ["transaction", "networkPassphrase"]
+      },
+      "Sep10TokenRequest": {
+        "type": "object",
+        "properties": {
+          "transaction": { "type": "string", "description": "Base64 user-signed transaction envelope" }
+        },
+        "required": ["transaction"]
+      },
+      "Sep10TokenResponse": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string", "description": "JWT bearer token" },
+          "publicKey": { "type": "string" },
+          "expiresIn": { "type": "number" }
+        },
+        "required": ["token", "publicKey"]
+      },
+      "Proposal": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": { "type": "string", "enum": ["ACTIVE", "PASSED", "REJECTED", "EXECUTED"] },
+          "newWasmHash": { "type": "string" }
+        },
+        "required": ["id", "title", "status"]
+      }
+    }
+  }
+}
