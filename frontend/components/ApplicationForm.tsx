@@ -177,7 +177,6 @@ export default function ApplicationForm({ job, publicKey, biddingPhase = "commit
       const referredBy = typeof window !== "undefined" ? localStorage.getItem(`referral_${job.id}`) : null;
       const commitmentInput = `${parseFloat(bidAmount).toFixed(7)}:${revealNonce}`;
       const bidCommitment = await sha256Hex(commitmentInput);
-      if (scopeSessionId) { await finalizeScopeSession(scopeSessionId, { content: proposal, payload: { jobId: job.id } }); }
       await submitApplication({
         jobId: job.id,
         freelancerAddress: publicKey,
