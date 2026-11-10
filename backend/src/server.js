@@ -94,6 +94,8 @@ const escrowReconciliationRoutes = require("./routes/escrowReconciliationRoutes"
 const { createAuditLogRouter } = require("./routes/auditLogRoutes");
 const { router: governanceRoutes } = require("./routes/governanceRoutes");
 const { createSep10AuthRouter } = require("./routes/sep10AuthRoutes");
+const { createHealthRouter: createSyntheticHealthRouter } = require("./routes/healthRoutes");
+const { getMetricsAsText: getSorobanMetricsAsText } = require("./metrics/sorobanMetrics");
 const { createStellarRateLimiter } = require("./middleware/stellarRateLimiter");
 const { createSorobanCircuitMiddleware } = require("./middleware/sorobanCircuitBreaker");
  
@@ -238,7 +240,19 @@ app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 150, standardHeaders: true, l
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use("/ping",              pingRoutes);
 app.use("/health",            healthRoutes);
+app.use("/health",            createSyntheticHealthRouter());
 app.use("/api/health",        healthRoutes);
+app.use("/api/health",        createSyntheticHealthRouter());
+
+app.get("/metrics/soroban", async (req, res) => {
+  try {
+    const text = await getSorobanMetricsAsText();
+    res.setHeader("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
+    res.send(text);
+  } catch (err) {
+    res.status(500).send(`# Error collecting Soroban metrics: ${err.message}`);
+  }
+});
 app.use("/api/auth",          authRoutes);
 app.use("/api/admin/2fa",     admin2faRoutes);
 app.use("/api/admin",         adminRoutes);

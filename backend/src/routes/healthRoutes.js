@@ -1,26 +1,38 @@
 "use strict";
 
 const express = require("express");
-const stellarRpcHealthCheck = require("../services/stellarRpcHealthCheck");
+const { runSyntheticHealthCheck } = require("../services/syntheticHealthProbe");
+const { getMetricsAsText } = require("../metrics/sorobanMetrics");
 
-const router = express.Router();
+function createHealthRouter(options = {}) {
+  const router = express.Router();
+  const pool = options.pool;
 
-/**
- * GET /api/health/stellar
- * Returns live status, latency, and ledger sequence of connected Soroban RPC and Horizon nodes.
- */
-router.get("/stellar", async (req, res) => {
-  try {
-    const health = await stellarRpcHealthCheck.getCombinedHealth();
-    const httpStatus = health.status === "unhealthy" ? 503 : 200;
-    return res.status(httpStatus).json(health);
-  } catch (err) {
-    return res.status(500).json({
-      status: "unhealthy",
-      error: err.message,
-      timestamp: new Date().toISOString(),
-    });
-  }
-});
+  /**
+   * GET /health/synthetic
+   * Structured diagnostic status across Database, Horizon, and Soroban RPC
+   */
+  router.get("/synthetic", async (req, res) => {
+    try {
+      const probeResult = await runSyntheticHealthCheck({
+        pool,
+        ...options,
+      });
 
-module.exports = router;
+      const httpStatus = probeResult.status === "unhealthy" ? 503 : 200;
+      res.status(httpStatus).json(probeResult);
+    } catch (err) {
+      res.status(500).json({
+        status: "error",
+        error: err.message,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  });
+
+  return router;
+}
+
+module.exports = {
+  createHealthRouter,
+};
