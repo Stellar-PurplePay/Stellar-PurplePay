@@ -43,10 +43,18 @@ export const EscrowDeliverableModal: React.FC<EscrowDeliverableModalProps> = ({
     try {
       const encoder = new TextEncoder();
       const data = encoder.encode(content);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-      setComputedHash(hashHex);
+      const subtle =
+        typeof window !== "undefined"
+          ? window.crypto?.subtle
+          : typeof globalThis !== "undefined"
+          ? (globalThis as any).crypto?.subtle
+          : null;
+      if (subtle?.digest) {
+        const hashBuffer = await subtle.digest("SHA-256", data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        setComputedHash(hashHex);
+      }
     } catch (err: any) {
       setError("Failed to compute SHA-256 hash: " + err.message);
     }
@@ -59,11 +67,19 @@ export const EscrowDeliverableModal: React.FC<EscrowDeliverableModalProps> = ({
 
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-      setComputedHash(hashHex);
-      setInputText(`File: ${file.name} (${file.size} bytes)`);
+      const subtle =
+        typeof window !== "undefined"
+          ? window.crypto?.subtle
+          : typeof globalThis !== "undefined"
+          ? (globalThis as any).crypto?.subtle
+          : null;
+      if (subtle?.digest) {
+        const hashBuffer = await subtle.digest("SHA-256", arrayBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
+        setComputedHash(hashHex);
+        setInputText(`File: ${file.name} (${file.size} bytes)`);
+      }
     } catch (err: any) {
       setError("Failed to hash file: " + err.message);
     }

@@ -3,7 +3,17 @@ import { buildContentSecurityPolicy } from "./lib/csp";
 
 export function proxy(request: NextRequest) {
   const nonceBytes = new Uint8Array(16);
-  crypto.getRandomValues(nonceBytes);
+  const cryptoObj =
+    typeof globalThis !== "undefined" && globalThis.crypto
+      ? globalThis.crypto
+      : typeof window !== "undefined"
+      ? window.crypto
+      : null;
+  if (cryptoObj?.getRandomValues) {
+    cryptoObj.getRandomValues(nonceBytes);
+  } else {
+    for (let i = 0; i < 16; i += 1) nonceBytes[i] = Math.floor(Math.random() * 256);
+  }
   const nonce = btoa(String.fromCharCode(...nonceBytes));
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
