@@ -4,7 +4,6 @@ const {
   checkContractTtl,
   createContractInstanceLedgerKey,
   buildExtendFootprintTtlOp,
-  DEFAULT_TTL_WARNING_THRESHOLD_LEDGERS,
   SorobanTtlError,
 } = require("./sorobanTtlManager");
 const { StrKey } = require("@stellar/stellar-sdk");

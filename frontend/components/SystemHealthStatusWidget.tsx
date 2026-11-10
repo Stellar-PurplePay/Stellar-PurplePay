@@ -84,7 +84,6 @@ export const SystemHealthStatusWidget: React.FC<SystemHealthStatusWidgetProps> =
 
   return (
     <section
-      role="region"
       aria-label="System Health Status"
       className={`rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm ${className}`}
     >
@@ -175,3 +174,4 @@ export const SystemHealthStatusWidget: React.FC<SystemHealthStatusWidgetProps> =
     </section>
   );
 };
+

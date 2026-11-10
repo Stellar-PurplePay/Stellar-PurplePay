@@ -1,7 +1,5 @@
 "use strict";
 
-const { Asset, StrKey } = require("@stellar/stellar-sdk");
-
 const BASE_RESERVE_XLM = 0.5; // Current Stellar protocol base reserve per subentry
 
 class AssetBalanceError extends Error {
@@ -62,15 +60,10 @@ function parseAccountBalances(account, baseReserve = BASE_RESERVE_XLM) {
     const buyingLiabilities = parseFloat(b.buying_liabilities || "0");
     const limit = b.limit ? parseFloat(b.limit) : null;
 
-    let spendable = 0;
-    if (b.asset_type === "native") {
-      spendable = Math.max(0, rawBalance - minimumReserveXlm - sellingLiabilities);
-    } else {
-      spendable = Math.max(0, rawBalance - sellingLiabilities);
-    }
-
-    // Round spendable to 7 decimal places (Stellar stroop precision)
-    spendable = Math.round(spendable * 1e7) / 1e7;
+    const spendable =
+      b.asset_type === "native"
+        ? Math.round(Math.max(0, rawBalance - minimumReserveXlm - sellingLiabilities) * 1e7) / 1e7
+        : Math.round(Math.max(0, rawBalance - sellingLiabilities) * 1e7) / 1e7;
 
     return {
       assetType: b.asset_type,

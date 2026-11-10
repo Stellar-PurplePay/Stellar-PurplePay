@@ -119,3 +119,4 @@ export const NetworkCongestionIndicator: React.FC<NetworkCongestionIndicatorProp
     </div>
   );
 };
+

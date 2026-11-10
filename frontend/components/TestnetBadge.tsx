@@ -55,3 +55,4 @@ export const TestnetBadge: React.FC<TestnetBadgeProps> = ({
 };
 
 export default TestnetBadge;
+

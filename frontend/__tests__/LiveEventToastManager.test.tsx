@@ -76,3 +76,4 @@ describe("LiveEventToastManager", () => {
     expect(mockDismiss).toHaveBeenCalledWith("toast-1");
   });
 });
+

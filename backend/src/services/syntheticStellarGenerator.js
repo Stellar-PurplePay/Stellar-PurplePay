@@ -103,3 +103,4 @@ class SyntheticStellarGenerator {
 }
 
 module.exports = SyntheticStellarGenerator;
+

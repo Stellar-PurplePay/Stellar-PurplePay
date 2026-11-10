@@ -148,3 +148,4 @@ function createSep10AuthRouter(options = {}) {
 module.exports = {
   createSep10AuthRouter,
 };
+

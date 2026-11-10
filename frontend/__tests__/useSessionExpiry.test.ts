@@ -90,3 +90,4 @@ describe("useSessionExpiry hook", () => {
     expect(result.current.isWarning).toBe(false);
   });
 });
+

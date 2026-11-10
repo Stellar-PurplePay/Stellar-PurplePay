@@ -46,7 +46,6 @@ function AssessmentResults({ publicKey }: AssessmentResultsProps) {
     if (assessmentId && publicKey) {
       fetchResults(assessmentId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assessmentId, publicKey]);
 
   const fetchResults = async (id: string) => {

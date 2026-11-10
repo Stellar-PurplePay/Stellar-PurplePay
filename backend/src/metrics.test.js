@@ -1,10 +1,7 @@
 "use strict";
 
 const {
-  registry,
   recordSorobanRpcCall,
-  sorobanRpcRequestsTotal,
-  sorobanRpcDurationMs,
   renderMetrics,
   sqlOperation,
   normalizeRoutePath,

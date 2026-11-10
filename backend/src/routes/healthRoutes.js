@@ -2,7 +2,6 @@
 
 const express = require("express");
 const { runSyntheticHealthCheck } = require("../services/syntheticHealthProbe");
-const { getMetricsAsText } = require("../metrics/sorobanMetrics");
 
 function createHealthRouter(options = {}) {
   const router = express.Router();

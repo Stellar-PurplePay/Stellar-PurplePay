@@ -262,7 +262,7 @@ export function startWalletDisconnectPolling(
         localStorage.removeItem("smp_jwt_token");
         localStorage.removeItem("smp_wallet_public_key");
         if (typeof window !== "undefined") {
-          window.location.href = "/";
+          window.location.assign(window.location.origin + "/");
         }
         onDisconnect();
         if (intervalId !== null) {

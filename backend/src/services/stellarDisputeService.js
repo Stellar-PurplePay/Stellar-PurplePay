@@ -58,7 +58,7 @@ class StellarDisputeService {
     let hasQuorum = false;
     let winningProposal = null;
 
-    for (const [key, data] of voteMap.entries()) {
+    for (const [, data] of voteMap.entries()) {
       if (data.count >= QUORUM_THRESHOLD) {
         hasQuorum = true;
         winningProposal = {

@@ -98,3 +98,4 @@ describe("EscrowInvariantChecker", () => {
     expect(result.drifts[0].field).toBe("existence");
   });
 });
+

@@ -76,3 +76,4 @@ export const NetworkCongestionBanner: React.FC<NetworkCongestionBannerProps> = (
     </div>
   );
 };
+

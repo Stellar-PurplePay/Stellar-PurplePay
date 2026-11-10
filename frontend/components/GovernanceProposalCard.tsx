@@ -59,7 +59,6 @@ export const GovernanceProposalCard: React.FC<GovernanceProposalCardProps> = ({
 
   return (
     <article
-      role="article"
       aria-labelledby={`prop-title-${id}`}
       className={`rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm ${className}`}
     >
@@ -161,3 +160,4 @@ export const GovernanceProposalCard: React.FC<GovernanceProposalCardProps> = ({
     </article>
   );
 };
+

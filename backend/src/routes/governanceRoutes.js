@@ -2,7 +2,7 @@
 
 const express = require("express");
 const router = express.Router();
-const { GovernanceProposal, PROPOSAL_STATUS } = require("../models/governanceProposal");
+const { GovernanceProposal } = require("../models/governanceProposal");
 
 // In-memory proposals store for fast consensus & state tracking
 const proposalStore = new Map();
@@ -201,3 +201,4 @@ module.exports = {
   _resetStore,
   proposalStore,
 };
+

@@ -98,7 +98,9 @@ function decryptSnapshot(snapshot, secret) {
     plainText = decipher.update(snapshot.ciphertext, "hex", "utf8");
     plainText += decipher.final("utf8");
   } catch (err) {
-    throw new Error(`Decryption failed: integrity authentication check failed (${err.message})`);
+    throw new Error(`Decryption failed: integrity authentication check failed (${err.message})`, {
+      cause: err,
+    });
   }
 
   const computedChecksum = crypto.createHash("sha256").update(plainText).digest("hex");
@@ -142,3 +144,4 @@ module.exports = {
   createEncryptedBackup,
   restoreEncryptedBackup,
 };
+

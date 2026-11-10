@@ -2,9 +2,7 @@
 
 const {
   isBadSequenceError,
-  loadFreshAccount,
   submitWithSequenceRetry,
-  SequenceSyncError,
 } = require("./sequenceManager");
 const { Keypair } = require("@stellar/stellar-sdk");
 

@@ -34,3 +34,4 @@ describe("NetworkSelectorDropdown Component", () => {
     expect(screen.getByText("Live Funds")).toBeInTheDocument();
   });
 });
+

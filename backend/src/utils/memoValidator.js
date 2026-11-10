@@ -1,6 +1,6 @@
 "use strict";
 
-const { Memo, MemoNone, MemoText, MemoId, MemoHash, MemoReturn } = require("@stellar/stellar-sdk");
+const { Memo } = require("@stellar/stellar-sdk");
 
 /**
  * Validates and constructs Stellar Memo objects with strict SEP-compliant byte-length

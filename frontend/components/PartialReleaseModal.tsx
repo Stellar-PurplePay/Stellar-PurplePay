@@ -99,9 +99,9 @@ export const PartialReleaseModal: React.FC<PartialReleaseModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">
+            <span className="block text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">
               Quick Presets (% of Available)
-            </label>
+            </span>
             <div className="mt-2 grid grid-cols-4 gap-2">
               {[25, 50, 75, 100].map((pct) => (
                 <button

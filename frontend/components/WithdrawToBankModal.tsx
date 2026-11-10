@@ -162,7 +162,6 @@ export default function WithdrawToBankModal({
           },
         }).catch((sendErr) => {
           // If the anchor rejects (e.g. unsupported field), fall back to SEP-24.
-          // eslint-disable-next-line no-console
           console.warn("SEP-31 send failed, falling back to SEP-24:", sendErr);
           return null;
         });

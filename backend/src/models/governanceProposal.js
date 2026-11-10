@@ -139,3 +139,4 @@ module.exports = {
   GovernanceProposal,
   PROPOSAL_STATUS,
 };
+

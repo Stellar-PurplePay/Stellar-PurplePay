@@ -66,3 +66,4 @@ describe("ResponsiveEscrowSummaryCard", () => {
     expect(screen.queryByRole("button", { name: "Raise Dispute" })).toBeNull();
   });
 });
+

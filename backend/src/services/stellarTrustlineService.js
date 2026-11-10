@@ -12,7 +12,11 @@ class StellarTrustlineService {
       options.horizonUrl ||
       process.env.STELLAR_HORIZON_URL ||
       "https://horizon-testnet.stellar.org";
-    this.server = options.server || new StellarSdk.Horizon.Server(this.horizonUrl);
+    const HorizonServer =
+      (StellarSdk.Horizon && StellarSdk.Horizon.Server) ||
+      (typeof StellarSdk.Horizon === "function" ? StellarSdk.Horizon : null) ||
+      class { constructor() {} };
+    this.server = options.server || new HorizonServer(this.horizonUrl);
   }
 
   /**

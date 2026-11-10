@@ -47,3 +47,4 @@ describe("MockFreighterWallet Utility", () => {
     expect(fakeWindow.freighter).toBeUndefined();
   });
 });
+

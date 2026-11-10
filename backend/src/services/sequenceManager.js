@@ -1,6 +1,5 @@
 "use strict";
 
-const { Keypair, Horizon } = require("@stellar/stellar-sdk");
 const { callWithLimit } = require("../utils/horizonClient");
 const { createServiceLogger } = require("../utils/logger");
 

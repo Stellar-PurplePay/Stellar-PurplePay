@@ -34,9 +34,20 @@ jest.mock("@stellar/stellar-sdk", () => {
   AssetMock.native = jest.fn(() => ({ isNative: () => true, getCode: () => "XLM" }));
 
   return {
-    Horizon: jest.fn(),
+    Horizon: {
+      Server: jest.fn().mockImplementation(() => ({
+        loadAccount: jest.fn().mockResolvedValue({ balances: [] }),
+      })),
+    },
     Networks: { TESTNET: "Test SDF Network ; September 2015" },
-    Keypair: { fromSecret: jest.fn(), fromPublicKey: jest.fn() },
+    Keypair: {
+      fromSecret: jest.fn(),
+      fromPublicKey: jest.fn(),
+      random: jest.fn(() => ({
+        publicKey: () => "GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        secret: () => "SAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      })),
+    },
     TransactionBuilder: jest.fn(),
     Account: jest.fn(),
     Asset: AssetMock,

@@ -2,7 +2,6 @@
 
 const {
   sep38PriceQuerySchema,
-  sep38QuoteRequestSchema,
   sep38QuoteResponseSchema,
   isQuoteExpired,
 } = require("./sep38Validator");

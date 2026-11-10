@@ -59,3 +59,4 @@ describe("ContractUpgradeNoticeBanner", () => {
     expect(screen.queryByTestId("execute-upgrade-button")).not.toBeInTheDocument();
   });
 });
+

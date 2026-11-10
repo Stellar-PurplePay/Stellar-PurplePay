@@ -1,9 +1,6 @@
 "use strict";
 
 const pool = require("../db/pool");
-const { createServiceLogger } = require("../utils/logger");
-
-const logger = createServiceLogger("txIdempotencyService");
 
 class IdempotencyConflictError extends Error {
   constructor(message, status = 409) {

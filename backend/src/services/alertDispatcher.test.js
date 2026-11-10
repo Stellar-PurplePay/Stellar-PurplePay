@@ -83,3 +83,4 @@ describe("AlertDispatcher", () => {
     expect(res.reason).toBe("WEBHOOK_URL_NOT_CONFIGURED");
   });
 });
+

@@ -2,7 +2,6 @@
 
 const {
   Transaction,
-  FeeBumpTransaction,
   TransactionBuilder,
   Networks,
 } = require("@stellar/stellar-sdk");

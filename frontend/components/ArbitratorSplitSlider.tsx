@@ -175,3 +175,4 @@ export const ArbitratorSplitSlider: React.FC<ArbitratorSplitSliderProps> = ({
     </div>
   );
 };
+

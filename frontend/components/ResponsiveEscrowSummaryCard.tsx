@@ -174,3 +174,4 @@ export const ResponsiveEscrowSummaryCard: React.FC<ResponsiveEscrowSummaryCardPr
     </div>
   );
 };
+

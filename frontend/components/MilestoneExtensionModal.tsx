@@ -77,9 +77,9 @@ export const MilestoneExtensionModal: React.FC<MilestoneExtensionModalProps> = (
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">
+            <span className="block text-xs font-semibold uppercase text-zinc-500 dark:text-zinc-400">
               Extension Presets
-            </label>
+            </span>
             <div className="mt-2 grid grid-cols-4 gap-2">
               {[1, 3, 7, 14].map((days) => (
                 <button

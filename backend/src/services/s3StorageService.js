@@ -99,3 +99,4 @@ module.exports = {
   ALLOWED_MIME_TYPES,
   MAX_FILE_SIZE_BYTES,
 };
+

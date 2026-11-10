@@ -246,7 +246,6 @@ api.interceptors.response.use(
         response.headers?.[REQUEST_ID_HEADER.toLowerCase()] ||
         response.config?.headers?.[REQUEST_ID_HEADER];
       if (serverId) {
-        // eslint-disable-next-line no-console
         console.debug(`[api] ${response.config?.method?.toUpperCase()} ${response.config?.url} → ${response.status} requestId=${serverId}`);
       }
     }
@@ -257,7 +256,6 @@ api.interceptors.response.use(
     if (IS_DEV && typeof console !== "undefined" && axios.isAxiosError(error)) {
       const serverId = error.response?.headers?.[REQUEST_ID_HEADER.toLowerCase()];
       const clientId = error.config?.headers?.[REQUEST_ID_HEADER];
-      // eslint-disable-next-line no-console
       console.warn(
         `[api] ${error.config?.method?.toUpperCase()} ${error.config?.url} → ${error.response?.status || "NETWORK"} ` +
           `requestId=${serverId || clientId || "?"}`,

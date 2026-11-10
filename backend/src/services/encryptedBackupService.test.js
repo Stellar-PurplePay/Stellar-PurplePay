@@ -105,3 +105,4 @@ describe("encryptedBackupService", () => {
     }).toThrow(/Decryption secret or key is required/);
   });
 });
+

@@ -13,7 +13,7 @@ describe("syntheticHealthProbe", () => {
       query: jest.fn().mockResolvedValue({ rows: [{ ping: 1 }] }),
     };
 
-    const mockFetch = jest.fn().mockImplementation((url, opts) => {
+    const mockFetch = jest.fn().mockImplementation((url) => {
       if (url.includes("horizon")) {
         return Promise.resolve({ ok: true, status: 200 });
       }
@@ -96,3 +96,4 @@ describe("syntheticHealthProbe", () => {
     expect(rpcRes.status).toBe("skipped");
   });
 });
+

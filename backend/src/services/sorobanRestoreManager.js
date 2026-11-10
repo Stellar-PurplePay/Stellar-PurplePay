@@ -4,7 +4,6 @@ const {
   Operation,
   TransactionBuilder,
 } = require("@stellar/stellar-sdk");
-const { createContractInstanceLedgerKey } = require("./sorobanTtlManager");
 const { createServiceLogger } = require("../utils/logger");
 
 const logger = createServiceLogger("sorobanRestoreManager");
@@ -60,8 +59,6 @@ async function restoreContractInstance({
   if (!server || !sourceKeypair || !contractId) {
     throw new SorobanRestoreError("server, sourceKeypair, and contractId are required", "MISSING_PARAMS");
   }
-
-  const ledgerKey = createContractInstanceLedgerKey(contractId);
 
   try {
     // 1. Build transaction with restoreFootprint

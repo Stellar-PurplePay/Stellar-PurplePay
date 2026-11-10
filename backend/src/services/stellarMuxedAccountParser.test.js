@@ -1,7 +1,6 @@
 "use strict";
 
 const StellarMuxedAccountParser = require("./stellarMuxedAccountParser");
-const StellarSdk = require("@stellar/stellar-sdk");
 
 describe("StellarMuxedAccountParser", () => {
   const baseAccount = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";

@@ -61,3 +61,4 @@ export const EscrowIntegrityBadge: React.FC<EscrowIntegrityBadgeProps> = ({
     </div>
   );
 };
+

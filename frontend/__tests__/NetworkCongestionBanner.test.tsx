@@ -45,3 +45,4 @@ describe("NetworkCongestionBanner", () => {
     expect(container.firstChild).toBeNull();
   });
 });
+

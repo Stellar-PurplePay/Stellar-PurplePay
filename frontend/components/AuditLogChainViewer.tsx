@@ -78,7 +78,6 @@ export const AuditLogChainViewer: React.FC<AuditLogChainViewerProps> = ({
 
   return (
     <section
-      role="region"
       aria-label="Cryptographic Audit Trail"
       className={`rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm ${className}`}
     >
@@ -187,3 +186,4 @@ export const AuditLogChainViewer: React.FC<AuditLogChainViewerProps> = ({
     </section>
   );
 };
+

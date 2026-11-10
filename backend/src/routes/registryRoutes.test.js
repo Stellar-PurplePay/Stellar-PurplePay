@@ -26,3 +26,4 @@ describe("Registry Routes (/api/registry)", () => {
     expect(res.body.networkPassphrase).toContain("Public Global Stellar Network");
   });
 });
+

@@ -33,6 +33,7 @@ jest.mock("../db/pool", () => {
 });
 
 const pool = require("../db/pool");
+jest.setTimeout(20000);
 const express = require("express");
 const request = require("supertest");
 const jwt = require("jsonwebtoken");

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 const STORAGE_KEY = 'stellar_purplepay_onboarding_checkpoint';
 
@@ -63,12 +64,14 @@ export function OnboardingFlow({ onComplete, onResumeLater }: { onComplete: () =
     }
   };
 
+  const router = useRouter();
+
   const handleResumeLater = () => {
     // Progress is already saved in sessionStorage via useEffect
     if (onResumeLater) {
       onResumeLater();
     } else {
-      window.location.href = '/dashboard';
+      router.push('/dashboard');
     }
   };
 
@@ -87,8 +90,9 @@ export function OnboardingFlow({ onComplete, onResumeLater }: { onComplete: () =
 
       {step === 1 && (
         <div className="space-y-4">
-          <label className="block text-sm font-medium text-gray-700">Full Name</label>
+          <label htmlFor="onboarding-full-name" className="block text-sm font-medium text-gray-700">Full Name</label>
           <input
+            id="onboarding-full-name"
             type="text"
             value={formData.fullName}
             onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
@@ -100,8 +104,9 @@ export function OnboardingFlow({ onComplete, onResumeLater }: { onComplete: () =
 
       {step === 2 && (
         <div className="space-y-4">
-          <label className="block text-sm font-medium text-gray-700">Primary Skills</label>
+          <label htmlFor="onboarding-skills" className="block text-sm font-medium text-gray-700">Primary Skills</label>
           <input
+            id="onboarding-skills"
             type="text"
             value={formData.skills}
             onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
@@ -113,8 +118,9 @@ export function OnboardingFlow({ onComplete, onResumeLater }: { onComplete: () =
 
       {step === 3 && (
         <div className="space-y-4">
-          <label className="block text-sm font-medium text-gray-700">Stellar Payout Address</label>
+          <label htmlFor="onboarding-payout-address" className="block text-sm font-medium text-gray-700">Stellar Payout Address</label>
           <input
+            id="onboarding-payout-address"
             type="text"
             value={formData.payoutAddress}
             onChange={(e) => setFormData({ ...formData, payoutAddress: e.target.value })}

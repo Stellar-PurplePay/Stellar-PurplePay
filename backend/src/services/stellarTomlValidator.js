@@ -101,3 +101,4 @@ class StellarTomlValidator {
 }
 
 module.exports = StellarTomlValidator;
+

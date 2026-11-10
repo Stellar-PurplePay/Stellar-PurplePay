@@ -23,7 +23,7 @@ async function resolveFederatedAddress(federatedAddress, httpClient = axios) {
     throw new Error(`Invalid federated address format: "${trimmed}". Expected username*domain.tld`);
   }
 
-  const [, username, domain] = match;
+  const [, , domain] = match;
 
   // 1. Fetch stellar.toml to discover FEDERATION_SERVER
   const tomlUrl = `https://${domain}/.well-known/stellar.toml`;
@@ -38,7 +38,7 @@ async function resolveFederatedAddress(federatedAddress, httpClient = axios) {
     }
     federationServerUrl = serverMatch[1];
   } catch (err) {
-    throw new Error(`Failed to fetch stellar.toml from ${domain}: ${err.message}`);
+    throw new Error(`Failed to fetch stellar.toml from ${domain}: ${err.message}`, { cause: err });
   }
 
   // 2. Query FEDERATION_SERVER for address resolution
@@ -63,7 +63,7 @@ async function resolveFederatedAddress(federatedAddress, httpClient = axios) {
       memo: data.memo || undefined,
     };
   } catch (err) {
-    throw new Error(`Federation resolution failed for ${trimmed}: ${err.message}`);
+    throw new Error(`Federation resolution failed for ${trimmed}: ${err.message}`, { cause: err });
   }
 }
 
@@ -99,7 +99,9 @@ async function reverseResolveFederatedAddress(accountId, federationServerUrl, ht
       stellar_address: data.stellar_address,
     };
   } catch (err) {
-    throw new Error(`Reverse federation lookup failed for ${accountId}: ${err.message}`);
+    throw new Error(`Reverse federation lookup failed for ${accountId}: ${err.message}`, {
+      cause: err,
+    });
   }
 }
 

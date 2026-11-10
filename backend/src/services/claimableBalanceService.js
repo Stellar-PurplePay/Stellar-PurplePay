@@ -3,7 +3,6 @@
 const {
   Operation,
   Claimant,
-  Asset,
   StrKey,
 } = require("@stellar/stellar-sdk");
 

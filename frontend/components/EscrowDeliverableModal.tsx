@@ -140,10 +140,14 @@ export const EscrowDeliverableModal: React.FC<EscrowDeliverableModalProps> = ({
         )}
 
         <div>
-          <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 block">
+          <label
+            htmlFor="deliverable-file-upload"
+            className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1 block"
+          >
             Upload Deliverable File
           </label>
           <input
+            id="deliverable-file-upload"
             type="file"
             onChange={handleFileUpload}
             aria-label="Deliverable file upload"

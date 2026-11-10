@@ -109,3 +109,4 @@ describe("sep10AuthRoutes", () => {
     expect(tokenRes.body.error).toContain("Missing or invalid client signature");
   });
 });
+

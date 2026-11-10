@@ -1,6 +1,6 @@
 "use strict";
 
-const { Keypair, StrKey, TransactionBuilder, Networks } = require("@stellar/stellar-sdk");
+const { Keypair, StrKey } = require("@stellar/stellar-sdk");
 
 class Sep7ValidationError extends Error {
   constructor(message, code = "SEP7_VALIDATION_ERROR") {
@@ -82,7 +82,7 @@ function verifySep7Uri(uriString, expectedSignerPublicKey) {
   const payload = getSep7SigningPayload(unsignedUri);
 
   const keypair = Keypair.fromPublicKey(expectedSignerPublicKey);
-  let isValid = false;
+  let isValid;
   try {
     const signatureBuffer = Buffer.from(signatureBase64, "base64");
     isValid = keypair.verify(payload, signatureBuffer);

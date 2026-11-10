@@ -33,13 +33,13 @@ export const TransactionFeeSelector: React.FC<TransactionFeeSelectorProps> = ({
 
   return (
     <div className="w-full flex flex-col gap-2 font-sans">
-      <label className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+      <span id="fee-priority-label" className="text-sm font-semibold text-gray-700 dark:text-gray-200">
         Transaction Speed & Priority
-      </label>
+      </span>
 
       <div
         role="radiogroup"
-        aria-label="Transaction fee priority options"
+        aria-labelledby="fee-priority-label"
         className="grid grid-cols-1 sm:grid-cols-3 gap-3"
       >
         {tiers.map((tier) => {

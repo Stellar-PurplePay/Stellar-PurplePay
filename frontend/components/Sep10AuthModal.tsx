@@ -192,3 +192,4 @@ export const Sep10AuthModal: React.FC<Sep10AuthModalProps> = ({
     </div>
   );
 };
+

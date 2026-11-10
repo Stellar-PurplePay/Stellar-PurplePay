@@ -10,7 +10,7 @@ jest.mock("@react-pdf/renderer", () => ({
   View: ({ children }: any) => <div>{children}</div>,
   StyleSheet: { create: (s: any) => s },
   Font: { register: jest.fn() },
-  Image: () => <img />,
+  Image: () => <span data-testid="pdf-image" />,
 }));
 import type { Job, TimeEntry, TimeInvoice } from "@/utils/types";
 

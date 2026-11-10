@@ -1,6 +1,6 @@
 "use strict";
 
-const { classifySorobanPanic, PANIC_DIAGNOSTIC_CATALOG } = require("./sorobanPanicDecoder");
+const { classifySorobanPanic } = require("./sorobanPanicDecoder");
 
 describe("sorobanPanicDecoder", () => {
   it("classifies Storage.MissingValue and flags non-retryable with remediation", () => {

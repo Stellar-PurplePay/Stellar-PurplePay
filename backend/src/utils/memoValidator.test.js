@@ -8,7 +8,6 @@ const {
   parseAndValidateMemo,
   MemoValidationError,
 } = require("./memoValidator");
-const { Memo } = require("@stellar/stellar-sdk");
 
 describe("memoValidator", () => {
   describe("validateMemoText", () => {

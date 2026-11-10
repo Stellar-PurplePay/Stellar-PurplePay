@@ -1,7 +1,6 @@
 "use strict";
 
 const {
-  STROOPS_PER_XLM,
   StroopConversionError,
   xlmToStroops,
   stroopsToXlm,

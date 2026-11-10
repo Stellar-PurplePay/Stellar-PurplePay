@@ -1,6 +1,6 @@
 "use strict";
 
-const { stellarMemoSchema, validateMemo } = require("./stellarMemoSchema");
+const { validateMemo } = require("./stellarMemoSchema");
 
 describe("stellarMemoSchema", () => {
   describe("MEMO_NONE", () => {

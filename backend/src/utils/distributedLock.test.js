@@ -2,8 +2,6 @@
 
 const {
   acquireLock,
-  releaseLock,
-  extendLock,
   withLock,
   _clearMemoryLocksForTest,
 } = require("./distributedLock");

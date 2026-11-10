@@ -60,3 +60,4 @@ describe("GovernanceProposalCard", () => {
     expect(screen.queryByTestId("vote-for-button")).not.toBeInTheDocument();
   });
 });
+

@@ -44,3 +44,4 @@ function createCspMiddleware(options = {}) {
 module.exports = {
   createCspMiddleware,
 };
+

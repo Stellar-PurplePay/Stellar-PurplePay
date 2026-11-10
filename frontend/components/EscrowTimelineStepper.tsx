@@ -62,15 +62,22 @@ export const EscrowTimelineStepper: React.FC<EscrowTimelineStepperProps> = ({
       </div>
 
       {/* Stepper items list */}
-      <ol role="list" className="mt-6 space-y-4">
+      <ol className="mt-6 space-y-4">
         {milestones.map((m, idx) => {
           const isSelected = activeMilestoneId === m.id;
           const numericAmount = typeof m.amount === "string" ? parseFloat(m.amount) : m.amount;
 
           return (
+            // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
             <li
               key={m.id}
               onClick={() => onSelectMilestone && onSelectMilestone(m.id)}
+              onKeyDown={(e) => {
+                if (onSelectMilestone && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault();
+                  onSelectMilestone(m.id);
+                }
+              }}
               className={`flex items-start gap-4 rounded-lg p-3 transition ${
                 onSelectMilestone ? "cursor-pointer" : ""
               } ${
@@ -129,3 +136,4 @@ export const EscrowTimelineStepper: React.FC<EscrowTimelineStepperProps> = ({
     </div>
   );
 };
+

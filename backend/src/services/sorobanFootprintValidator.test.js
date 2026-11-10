@@ -5,7 +5,6 @@ const {
   FootprintValidationError,
   MAX_READ_ONLY_KEYS,
   MAX_READ_WRITE_KEYS,
-  MAX_TOTAL_KEYS,
 } = require("./sorobanFootprintValidator");
 
 describe("sorobanFootprintValidator", () => {

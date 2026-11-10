@@ -88,3 +88,4 @@ export const AccessibleProgressBar: React.FC<AccessibleProgressBarProps> = ({
     </div>
   );
 };
+

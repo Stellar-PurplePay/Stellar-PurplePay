@@ -82,3 +82,4 @@ function createAuditLogRouter(logger = defaultAuditLogger) {
 module.exports = {
   createAuditLogRouter,
 };
+

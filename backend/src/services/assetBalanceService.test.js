@@ -94,4 +94,14 @@ describe("assetBalanceService", () => {
       expect(hasSufficientSpendableBalance(mockAccount, `XYZ:${sampleIssuer}`, 10)).toBe(false);
     });
   });
+
+  describe("getAssetIdentifier", () => {
+    it("returns native for XLM", () => {
+      expect(getAssetIdentifier({ asset_type: "native" })).toBe("native");
+    });
+
+    it("returns code:issuer for issued assets", () => {
+      expect(getAssetIdentifier({ asset_code: "USDC", asset_issuer: sampleIssuer })).toBe(`USDC:${sampleIssuer}`);
+    });
+  });
 });

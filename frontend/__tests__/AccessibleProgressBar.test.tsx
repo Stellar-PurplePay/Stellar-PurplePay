@@ -71,3 +71,4 @@ describe("AccessibleProgressBar", () => {
     expect(screen.getByText("0%")).toBeInTheDocument();
   });
 });
+

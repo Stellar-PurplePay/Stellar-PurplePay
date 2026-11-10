@@ -68,3 +68,4 @@ module.exports = {
   createCorsSecurityMiddleware,
   DEFAULT_ALLOWED_ORIGINS,
 };
+

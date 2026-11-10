@@ -2,7 +2,6 @@
 
 const {
   sep24DepositInteractiveSchema,
-  sep24WithdrawInteractiveSchema,
   sep24InfoResponseSchema,
 } = require("./sep24Validator");
 const { Keypair } = require("@stellar/stellar-sdk");

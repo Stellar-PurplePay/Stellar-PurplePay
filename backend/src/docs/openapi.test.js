@@ -37,3 +37,4 @@ describe("OpenAPI Specification Validator", () => {
     expect(schemas.Proposal).toBeDefined();
   });
 });
+

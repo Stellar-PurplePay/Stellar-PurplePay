@@ -8,6 +8,7 @@
  */
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import type { Job } from "@/utils/types";
 import { formatXLM, timeAgo } from "@/utils/format";
@@ -33,15 +34,17 @@ export default function OfflinePage() {
     };
   }, []);
 
+  const router = useRouter();
+
   // Auto-redirect to /jobs once connectivity is restored
   useEffect(() => {
     if (isOnline) {
       const timer = setTimeout(() => {
-        window.location.href = "/jobs";
+        router.push("/jobs");
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [isOnline]);
+  }, [isOnline, router]);
 
   return (
     <>

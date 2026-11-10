@@ -95,3 +95,4 @@ export const WalletSessionStateBadge: React.FC<WalletSessionStateBadgeProps> = (
     </div>
   );
 };
+

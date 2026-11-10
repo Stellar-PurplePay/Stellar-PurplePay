@@ -61,3 +61,4 @@ describe("TestnetFaucetButton Component", () => {
     expect(screen.getByText(/Cooldown \(45s\)/i)).toBeInTheDocument();
   });
 });
+

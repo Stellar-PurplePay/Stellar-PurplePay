@@ -5,8 +5,6 @@ const {
   recordSorobanResources,
   getMetricsAsText,
   resetMetrics,
-  rpcRequestsCounter,
-  cpuInstructionsCounter,
 } = require("./sorobanMetrics");
 
 describe("sorobanMetrics exporter", () => {
@@ -59,3 +57,4 @@ describe("sorobanMetrics exporter", () => {
     expect(text).not.toContain('method="getEvents"');
   });
 });
+

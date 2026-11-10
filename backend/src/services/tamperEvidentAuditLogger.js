@@ -130,3 +130,4 @@ module.exports = {
   defaultAuditLogger,
   GENESIS_PREVIOUS_HASH,
 };
+

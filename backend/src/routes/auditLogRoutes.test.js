@@ -66,3 +66,4 @@ describe("AuditLogRoutes", () => {
     expect(verifyRes.body.verification.brokenAtIndex).toBe(0);
   });
 });
+

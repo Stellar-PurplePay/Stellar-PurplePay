@@ -27,3 +27,4 @@ describe("Documentation Routes (/api/docs)", () => {
     expect(res.text).toContain("Stellar PurplePay API Documentation");
   });
 });
+

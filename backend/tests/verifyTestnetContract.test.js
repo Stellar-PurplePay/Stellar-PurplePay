@@ -50,3 +50,4 @@ describe("ContractDeploymentVerifier Script", () => {
     expect(result.errors.some((e) => e.includes("PAUSED"))).toBe(true);
   });
 });
+

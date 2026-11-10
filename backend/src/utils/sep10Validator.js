@@ -160,3 +160,4 @@ module.exports = {
   validateSep10Challenge,
   Sep10ValidationError,
 };
+

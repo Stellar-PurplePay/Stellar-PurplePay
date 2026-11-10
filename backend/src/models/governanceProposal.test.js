@@ -102,3 +102,4 @@ describe("GovernanceProposal model", () => {
     expect(() => proposal.queue()).toThrow("Invalid status transition");
   });
 });
+

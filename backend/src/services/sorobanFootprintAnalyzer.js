@@ -1,7 +1,5 @@
 "use strict";
 
-const { xdr } = require("@stellar/stellar-sdk");
-
 class FootprintAnalysisError extends Error {
   constructor(message) {
     super(message);

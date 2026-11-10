@@ -62,3 +62,4 @@ describe("ContractLedgerWatchdog Service", () => {
     expect(res.status).toBe("invalid_metrics");
   });
 });
+

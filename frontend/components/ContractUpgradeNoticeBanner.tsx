@@ -101,3 +101,4 @@ export const ContractUpgradeNoticeBanner: React.FC<ContractUpgradeNoticeBannerPr
     </div>
   );
 };
+

@@ -47,3 +47,4 @@ function createSecureHeadersMiddleware(options = {}) {
 module.exports = {
   createSecureHeadersMiddleware,
 };
+

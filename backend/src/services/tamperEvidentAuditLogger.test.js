@@ -83,3 +83,4 @@ describe("TamperEvidentAuditLogger", () => {
     expect(releaseEntries).toHaveLength(1);
   });
 });
+

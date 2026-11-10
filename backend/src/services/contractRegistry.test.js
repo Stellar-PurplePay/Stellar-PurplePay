@@ -43,3 +43,4 @@ describe("ContractRegistry Singleton & Service", () => {
     expect(status.public.usdcValid).toBe(true);
   });
 });
+

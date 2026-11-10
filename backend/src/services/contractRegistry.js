@@ -1,5 +1,3 @@
-const StellarSdk = require("@stellar/stellar-sdk");
-
 /**
  * ContractRegistry
  * Centralized registry mapping Stellar networks (testnet, public, futurenet)

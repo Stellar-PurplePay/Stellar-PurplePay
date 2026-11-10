@@ -75,3 +75,4 @@ describe("AuditLogChainViewer", () => {
     expect(onVerify).toHaveBeenCalledWith(false);
   });
 });
+

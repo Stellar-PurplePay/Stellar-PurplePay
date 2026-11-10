@@ -58,7 +58,6 @@ export default function NotificationPreferencesPanel() {
   }, []);
 
   // Use useCallback so debounce isn't recreated on every render
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const savePreferences = useMemo(() =>
     debounce(
       async (newPrefs: Record<string, { email: boolean; inapp: boolean }>) => {

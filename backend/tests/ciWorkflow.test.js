@@ -55,3 +55,4 @@ describe("CI Workflow Configuration Validator", () => {
     expect(doc.jobs).toHaveProperty("security");
   });
 });
+

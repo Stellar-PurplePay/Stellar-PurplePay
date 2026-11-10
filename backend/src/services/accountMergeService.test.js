@@ -3,7 +3,6 @@
 const {
   evaluateAccountMergeEligibility,
   buildAccountMergeOperation,
-  AccountMergeError,
 } = require("./accountMergeService");
 const { Keypair } = require("@stellar/stellar-sdk");
 
