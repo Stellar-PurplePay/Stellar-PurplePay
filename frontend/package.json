@@ -71,7 +71,7 @@
     "autoprefixer": "^10.6.2",
     "axe-core": "^4.12.1",
     "eslint": "^9",
-    "eslint-config-next": "16.4.5",
+    "eslint-config-next": "16.4.6",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-sri": "file:./eslint-plugin-sri",
     "fast-check": "^4.8.0",
@@ -82,7 +82,7 @@
     "storybook": "^9.1.20",
     "tailwindcss": "^3.4.17",
     "typescript": "^5",
-    "vite": "^6.4.5"
+    "vite": "^6.4.6"
   },
   "overrides": {
     "dompurify": "^3.4.17",
